@@ -1,0 +1,1 @@
+este comando recorre todos los miembros de la guild y vuelve a generar los tokens de ingreso para la plataforma

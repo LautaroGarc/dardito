@@ -1,0 +1,343 @@
+{
+  "1212237772157624391": {
+    "nickname": "Lucas Kiehslich",
+    "rol": "miembro",
+    "grupo": "Grupo1",
+    "token": "754a361b8842d05d48b70c64148d84f8",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "997983882676809788": {
+    "nickname": "Sebastián Navarro",
+    "rol": "miembro",
+    "grupo": "Grupo4",
+    "token": "3d4bc63611b538e229586b6478323d1b",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "962183938523144192": {
+    "nickname": "Jessica Diaz",
+    "rol": "auditor",
+    "grupo": "Admin",
+    "token": "672822274e3e6dfdd42acf0dd2dc1940",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1359671144151781576": {
+    "nickname": "Sofia Favale",
+    "rol": "scrumMaster",
+    "grupo": "Grupo2",
+    "token": "11a4a35b9606be4d1e5dd3971c66d53e",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "694745915826634792": {
+    "nickname": "Lucas Belen",
+    "rol": "miembro",
+    "grupo": "Grupo2",
+    "token": "250ff0e4446b01453df319056572c43d",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "571329193833660428": {
+    "nickname": "Segundo Enriquez",
+    "rol": "lider",
+    "grupo": "Grupo3",
+    "token": "fa59a940241c5da93ccccdb817add04a",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1382158710897512488": {
+    "nickname": "Sofia Haedo",
+    "rol": "miembro",
+    "grupo": "Grupo2",
+    "token": "a5c4c80b3397bc1d0bcabf0109168784",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1155361443714183208": {
+    "nickname": "Lautaro Andrada",
+    "rol": "miembro",
+    "grupo": "Grupo2",
+    "token": "0839b78c6a10e9b23bfb1cc843771778",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1188336836582580234": {
+    "nickname": "Bautista Giraud",
+    "rol": "auditor",
+    "grupo": "Admin",
+    "token": "dcb2d3807ca86c2732c00e542c01250e",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "707380710364807179": {
+    "nickname": "Gabriel Bracamonte",
+    "rol": "miembro",
+    "grupo": "Grupo2",
+    "token": "7e6c26af34d0a62af2985fe75d6f0568",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "413453518079393799": {
+    "nickname": "Lautaro García",
+    "rol": "auditor",
+    "grupo": "Admin",
+    "token": "5030e5b5d066b30a16fd70c3070bc08d",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1403046333488566453": {
+    "nickname": "Mateo Chazarreta",
+    "rol": "miembro",
+    "grupo": "Grupo1",
+    "token": "a69b224df25a13b94d361d91286495f5",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1120380808008585367": {
+    "nickname": "Jeremías Belen",
+    "rol": "miembro",
+    "grupo": "Grupo3",
+    "token": "a74d3322d07baad64be7339a8bcc9551",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "542835767525900288": {
+    "nickname": "Roman Oberlander",
+    "rol": "scrumMaster",
+    "grupo": "Grupo4",
+    "token": "1b05c8ec5d1e19b5106c50897f269686",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1377782253190643772": {
+    "nickname": "Abigail Barraza",
+    "rol": "lider",
+    "grupo": "Grupo4",
+    "token": "fd9030299f447fad047f2d5912cc245a",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "717819527026573342": {
+    "nickname": "Facundo Balmaceda",
+    "rol": "miembro",
+    "grupo": "Grupo3",
+    "token": "a27a008bfbb74b1a7475af62cee3bcb5",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1247591854065582195": {
+    "nickname": "Carlos Simón",
+    "rol": "miembro",
+    "grupo": "Grupo3",
+    "token": "5163274b5bae226bd4d90fe46ab875c8",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "887348707719262228": {
+    "nickname": "Tomás Bande",
+    "rol": "lider",
+    "grupo": "Grupo1",
+    "token": "128586fef093572b1e0dc9bfa6c981d0",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1169790151506006016": {
+    "nickname": "Melisa Belen",
+    "rol": "miembro",
+    "grupo": "Grupo4",
+    "token": "e6f7a5e620ecc0c69a79ff5c92cf4734",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "765358725686099970": {
+    "nickname": "Ezequiel Ligocki",
+    "rol": "scrumMaster",
+    "grupo": "Grupo3",
+    "token": "28407431080c30db6595949eb968fbe0",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "540206357526085635": {
+    "nickname": "Santino Elihalte",
+    "rol": "miembro",
+    "grupo": "Grupo1",
+    "token": "2c890ae77dde5ddbc2f2b2de6eb5d675",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "692255888911892521": {
+    "nickname": "Demian Medela",
+    "rol": "miembro",
+    "grupo": "Grupo3",
+    "token": "b483169fbd6eb673cd389bd1f1a22e8a",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "997943301082718248": {
+    "nickname": "Santino Llanes",
+    "rol": "miembro",
+    "grupo": "Grupo1",
+    "token": "94ddf7987664e8dcd10dc0f7fb2a70f7",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1389202143075897396": {
+    "nickname": "Ignacio Althabe",
+    "rol": "miembro",
+    "grupo": "Grupo4",
+    "token": "d69ede5463ed8d31e71a47d2b331976e",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "553285165942702090": {
+    "nickname": "Heber Correa",
+    "rol": "scrumMaster",
+    "grupo": "Grupo1",
+    "token": "7cf69920b5d9f01ab95ae23356d8bd55",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "431629552486449152": {
+    "nickname": "Santiago Larreguy",
+    "rol": "auditor",
+    "grupo": "Admin",
+    "token": "3cc4ac32b5df88a4e3975a6da3f16822",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "619140644979474462": {
+    "nickname": "Santiago Ziegler",
+    "rol": "miembro",
+    "grupo": "Grupo3",
+    "token": "b3ddbb3cefc14499d15fccd2aaf9b373",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "690346671728755329": {
+    "nickname": "Ezequiel Mallada",
+    "rol": "miembro",
+    "grupo": "Grupo4",
+    "token": "b2894df3bf086a30c98bff4785d4cf9e",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1283899998106423391": {
+    "nickname": "Natalia Blanco",
+    "rol": "lider",
+    "grupo": "Grupo2",
+    "token": "8c77d3af57ba899cba963a576869378a",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "697854218073014312": {
+    "nickname": "Claudio Sosa",
+    "rol": "miembro",
+    "grupo": "Grupo2",
+    "token": "d8e34ed2cc8435de9a3a39d7648d2f69",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  },
+  "1357827372216488169": {
+    "nickname": "Julieta Pichot",
+    "rol": "auditor",
+    "grupo": "Admin",
+    "token": "1accc995f93ac97eaed3ed1babdee07c",
+    "stats": [
+      0,
+      0,
+      0
+    ]
+  }
+}

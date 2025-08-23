@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Proyecto - Dardito</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .proyecto-config {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-group input {
+            margin-right: 10px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .info-box {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Inicializar Proyectos para <%= equipo %></h1>
+        
+        <div class="info-box">
+            <p>Como líder de tu equipo, debes configurar los proyectos antes de que los miembros puedan acceder al dashboard.</p>
+        </div>
+        
+        <form id="iniciarProyectoForm" action="/iniciar-proyecto" method="POST">
+            <input type="hidden" name="equipo" value="<%= equipo %>">
+            
+            <div class="form-group">
+                <label>¿Cuántos proyectos tendrá tu equipo?</label>
+                <select id="cantidadProyectos" name="cantidadProyectos" required>
+                    <option value="2">2 proyectos (Generación T + Proyecto)</option>
+                    <option value="3">3 proyectos (Generación T + Proyecto + Proyecto 2)</option>
+                </select>
+            </div>
+            
+            <!-- Configuración de Generación T -->
+            <div class="proyecto-config">
+                <h3>Generación T</h3>
+                <div class="form-group">
+                    <label>Duración de los Sprints (en semanas)</label>
+                    <input type="number" name="duracionSprintGenT" min="1" max="4" value="2" required>
+                </div>
+            </div>
+            
+            <!-- Configuración de Proyecto -->
+            <div class="proyecto-config">
+                <h3>Proyecto</h3>
+                <div class="form-group">
+                    <label>Duración de los Sprints (en semanas)</label>
+                    <input type="number" name="duracionSprintProy" min="1" max="4" value="2" required>
+                </div>
+            </div>
+            
+            <!-- Configuración de Proyecto 2 (solo visible si se seleccionan 3 proyectos) -->
+            <div class="proyecto-config" id="proyecto2Config" style="display: none;">
+                <h3>Proyecto 2</h3>
+                <div class="form-group">
+                    <label>Duración de los Sprints (en semanas)</label>
+                    <input type="number" name="duracionSprintProy2" min="1" max="4" value="2">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Inicializar Proyectos</button>
+        </form>
+    </div>
+
+    <script>
+        // Mostrar/ocultar configuración de Proyecto 2 según la selección
+        document.getElementById('cantidadProyectos').addEventListener('change', function() {
+            const proyecto2Config = document.getElementById('proyecto2Config');
+            proyecto2Config.style.display = this.value === '3' ? 'block' : 'none';
+            
+            // Hacer required el campo si se muestra
+            document.querySelector('input[name="duracionSprintProy2"]').required = this.value === '3';
+        });
+    </script>
+</body>
+</html>
