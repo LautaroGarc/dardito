@@ -19,7 +19,7 @@ module.exports = {
         .setDescription('Mensaje a enviar')
         .setRequired(true)
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
   async execute(interaction) {
     // Solo auditores pueden usar este comando
     if (!interaction.member.roles.cache.has(config.rolID.auditor)) {

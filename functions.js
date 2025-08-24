@@ -22,9 +22,9 @@ function loadJSON(path) {
   }
 }
 
-function saveJSON(users, path) {
+function saveJSON(data, path) {
   try {
-    fs.writeFileSync(path, JSON.stringify(users, null, 2));
+    fs.writeFileSync(path, JSON.stringify(data, null, 2));
   } catch (error) {
   }
 }
@@ -71,4 +71,4 @@ function getGroupFromMember(member) {
 
 // FUNCION QUE LEE LOS XLSX 
 
-module.exports = { loadJSON, saveJSON, regenerateToken, getGroupFromMember }
+module.exports = { loadJSON, saveJSON, regenerateToken, generateToken, getGroupFromMember }

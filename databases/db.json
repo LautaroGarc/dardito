@@ -1,36 +1,102 @@
 {
-    "GrupoX": {
-        "started": "y",
-        "GenT": {
-            "sprintActual": "1",
-            "duracionSprint": "2",
-            "productBacklog": [
-                ["id_hu","como","quiero","para","criterio_aceptacion","prioridad","history_points","estado"]
-            ],
-            "sprint1": {
-                "fechaIni": [
-                    22,
-                    8,
-                    2025
-                ],
-                "fechaFin": [
-                    5,
-                    9,
-                    2025
-                ],
-                "scrumBoard": {
-                    "id_hu": ["id_task", "id_task2"]
-                },
-                "tasks": {
-                    "id_task": ["estado", "description", ["personas_asignadas"], "prioridad", "fecha_limite"]
-                }
-            }
-        },
-        "Proy": {},
-        "Proy2": null
+  "Grupo1": {},
+  "Grupo2": {
+    "started": "y",
+    "duracion-sprint-gent": 1,
+    "duracion-sprint-proyecto": 2,
+    "GenT": {
+      "sprintActual": "2",
+      "productBacklog": [],
+      "sprint1": {
+        "fechaIni": [
+          23,
+          8,
+          2025
+        ],
+        "fechaFin": [
+          30,
+          8,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {}
+      },
+      "sprint2": {
+        "fechaIni": [
+          23,
+          8,
+          2025
+        ],
+        "fechaFin": [
+          30,
+          8,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {}
+      }
     },
-    "Grupo1": {},
-    "Grupo2": {},
-    "Grupo3": {},
-    "Grupo4": {}
+    "Proy": {
+      "sprintActual": "1",
+      "productBacklog": [],
+      "sprint1": {
+        "fechaIni": [
+          23,
+          8,
+          2025
+        ],
+        "fechaFin": [
+          6,
+          9,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {}
+      }
+    },
+    "Proy2": null
+  },
+  "Grupo3": {
+    "started": "y",
+    "duracion-sprint-gent": 1,
+    "duracion-sprint-proyecto": 1,
+    "GenT": {
+      "sprintActual": "1",
+      "productBacklog": [],
+      "sprint1": {
+        "fechaIni": [
+          23,
+          8,
+          2025
+        ],
+        "fechaFin": [
+          30,
+          8,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {}
+      }
+    },
+    "Proy": {
+      "sprintActual": "1",
+      "productBacklog": [],
+      "sprint1": {
+        "fechaIni": [
+          23,
+          8,
+          2025
+        ],
+        "fechaFin": [
+          30,
+          8,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {}
+      }
+    },
+    "Proy2": null
+  },
+  "Grupo4": {}
 }

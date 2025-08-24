@@ -4,79 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto No Iniciado - Dardito</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f5f5;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 600px;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        h1 {
-            color: #e74c3c;
-            margin-bottom: 20px;
-        }
-        
-        .icon {
-            font-size: 64px;
-            color: #e74c3c;
-            margin-bottom: 20px;
-        }
-        
-        p {
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-        
-        .contact-info {
-            margin-top: 25px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        
-        .btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <div class="icon">⚠️</div>
-        <h1>Proyecto No Iniciado</h1>
-        <p>Los proyectos para el equipo <strong><%= equipo %></strong> aún no han sido inicializados.</p>
-        <p>Por favor, contacta al líder de tu equipo para que configure los proyectos y puedas acceder al dashboard.</p>
-        
-        <div class="contact-info">
-            <p>Si eres el líder, inicia sesión nuevamente para acceder al panel de configuración.</p>
-            <a href="/login" class="btn">Volver al Login</a>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto px-4">
+        <div class="max-w-md mx-auto">
+            <!-- Caja principal medio fea pero clara -->
+            <div class="bg-gray-800 rounded-lg p-8 border-2 border-gray-600 shadow-2xl text-center">
+                <!-- Emoji grande medio ridículo -->
+                <div class="text-6xl mb-4">⏳</div>
+                
+                <h1 class="text-2xl font-bold text-yellow-400 mb-4">
+                    Proyecto No Iniciado
+                </h1>
+                
+                <!-- Mensaje principal -->
+                <div class="bg-orange-900 border border-orange-700 rounded-lg p-4 mb-6">
+                    <p class="text-lg font-semibold text-orange-200">
+                        <span class="bg-orange-700 px-2 py-1 rounded font-bold"><%= equipo %></span>
+                        <br><br>
+                        Todavía no ha iniciado sus proyectos
+                    </p>
+                </div>
+
+                <!-- Info del usuario -->
+                <div class="bg-blue-900 border border-blue-700 rounded-lg p-3 mb-6">
+                    <p class="text-blue-200">
+                        <span class="font-semibold"><%= user.nickname %></span>
+                        <br>
+                        <span class="bg-blue-700 px-2 py-1 rounded text-sm"><%= user.rol %></span>
+                    </p>
+                </div>
+
+                <!-- Mensaje explicativo medio pelo -->
+                <div class="bg-gray-700 p-4 rounded border-l-4 border-yellow-500 mb-6">
+                    <p class="text-sm text-gray-300">
+                        Debes esperar a que el <strong class="text-yellow-400">líder del equipo</strong> 
+                        inicialice los proyectos para poder acceder al dashboard.
+                    </p>
+                </div>
+
+                <!-- Botones medio feos -->
+                <div class="space-y-3">
+                    
+                    
+                    <button onclick="window.location.href='/logout'" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded border border-red-500 transition-colors">
+                        Cerrar Sesión
+                    </button>
+                </div>
+
+                <!-- Footer medio pelo -->
+                <div class="mt-6 pt-4 border-t border-gray-600">
+                    <p class="text-xs text-gray-400">
+                        Sistema Dardito v1.0 | <%= new Date().getFullYear() %>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Animación medio berreta -->
+            <div class="text-center mt-4">
+                <div class="inline-flex space-x-1">
+                    <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                    <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                    <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Esperando inicialización...</p>
+            </div>
         </div>
     </div>
+
+    <!-- Script para auto-refresh cada 30 segundos (medio molesto pero funcional) -->
+    <script>
+        let countdown = 30;
+        
+        function updateCountdown() {
+            const countdownEl = document.getElementById('countdown');
+            if (countdownEl) {
+                countdownEl.textContent = countdown;
+            }
+            
+            if (countdown <= 0) {
+                window.location.reload();
+            } else {
+                countdown--;
+            }
+        }
+        
+        // Auto refresh cada 30 segundos
+        setTimeout(() => {
+            window.location.reload();
+        }, 30000);
+        
+        // Mostrar countdown (opcional, medio molesto)
+        /*
+        setInterval(updateCountdown, 1000);
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.container').insertAdjacentHTML('beforeend', 
+                '<div class="text-center mt-4"><p class="text-xs text-gray-500">Auto-refresh en: <span id="countdown">30</span>s</p></div>'
+            );
+        });
+        */
+    </script>
 </body>
 </html>

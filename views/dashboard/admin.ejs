@@ -3,539 +3,716 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Administrador</title>
-    <style>
-        /* ... (todo el CSS se mantiene igual) ... */
-    </style>
+    <title>Dashboard Admin - Dardito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <h1>🛡️ Dashboard Administrador</h1>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Header medio feo pero funcional -->
+    <header class="bg-gray-800 border-b-2 border-red-700 p-4">
+        <div class="container mx-auto flex justify-between items-center">
             <div>
-                <span>Bienvenido, <strong><%= user.nickname %></strong></span>
-                <a href="/logout" class="btn btn-danger" style="margin-left: 15px;">Cerrar Sesión</a>
+                <h1 class="text-xl font-bold text-red-400">🛡️ Dashboard Administrador</h1>
+                <p class="text-sm text-gray-300">
+                    👤 <span class="font-semibold"><%= user.nickname %></span> - 
+                    🏷️ <span class="bg-red-700 px-2 py-1 rounded text-xs"><%= user.rol %></span> - 
+                    🌐 <span class="bg-purple-700 px-2 py-1 rounded text-xs">Vista Global</span>
+                </p>
+            </div>
+            <button onclick="window.location.href='/logout'" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm border border-red-500">
+                🚪 Salir
+            </button>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6">
+        <!-- Navegación principal -->
+        <div class="mb-6">
+            <div class="flex gap-2 flex-wrap">
+                <button onclick="cambiarVista('estadisticas')" id="btn-estadisticas" class="bg-yellow-700 hover:bg-yellow-800 px-4 py-2 rounded border border-yellow-600 text-sm font-semibold">
+                    📊 Estadísticas Globales
+                </button>
+                <button onclick="cambiarVista('usuarios')" id="btn-usuarios" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded border border-blue-600 text-sm font-semibold">
+                    👥 Gestión Usuarios
+                </button>
+                <button onclick="cambiarVista('equipos')" id="btn-equipos" class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded border border-purple-600 text-sm font-semibold">
+                    🏆 Equipos
+                </button>
+                <button onclick="cambiarVista('proyectos')" id="btn-proyectos" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded border border-green-600 text-sm font-semibold">
+                    📋 Todos los Proyectos
+                </button>
+            </div>
+        </div>
+
+        <!-- Vista: Estadísticas Globales -->
+        <div id="vista-estadisticas" class="vista-admin">
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+                <h2 class="text-lg font-semibold mb-4 text-yellow-400">📊 Estadísticas Globales del Sistema</h2>
+                
+                <!-- Resumen general -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-blue-900 p-4 rounded border border-blue-700 text-center">
+                        <h3 class="font-semibold text-blue-300">🏢 Equipos</h3>
+                        <p class="text-2xl font-bold" id="total-equipos">-</p>
+                        <p class="text-sm text-blue-200">Activos</p>
+                    </div>
+                    <div class="bg-green-900 p-4 rounded border border-green-700 text-center">
+                        <h3 class="font-semibold text-green-300">👥 Usuarios</h3>
+                        <p class="text-2xl font-bold" id="total-usuarios">-</p>
+                        <p class="text-sm text-green-200">Registrados</p>
+                    </div>
+                    <div class="bg-purple-900 p-4 rounded border border-purple-700 text-center">
+                        <h3 class="font-semibold text-purple-300">📈 Proyectos</h3>
+                        <p class="text-2xl font-bold" id="total-proyectos">-</p>
+                        <p class="text-sm text-purple-200">Iniciados</p>
+                    </div>
+                    <div class="bg-red-900 p-4 rounded border border-red-700 text-center">
+                        <h3 class="font-semibold text-red-300">⚡ Promedio</h3>
+                        <p class="text-2xl font-bold" id="promedio-completado">-%</p>
+                        <p class="text-sm text-red-200">Completado</p>
+                    </div>
+                </div>
+
+                <!-- Estadísticas detalladas por equipo -->
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <h3 class="font-semibold mb-4 text-gray-300">📋 Estado por Equipos</h3>
+                    <div id="estadisticas-equipos" class="space-y-4">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista: Gestión de Usuarios -->
+        <div id="vista-usuarios" class="vista-admin hidden">
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-blue-400">👥 Gestión de Usuarios</h2>
+                    <div class="flex gap-2">
+                        <select id="filtro-grupo" class="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm">
+                            <option value="">Todos los grupos</option>
+                            <option value="Grupo1">Grupo 1</option>
+                            <option value="Grupo2">Grupo 2</option>
+                            <option value="Grupo3">Grupo 3</option>
+                            <option value="Grupo4">Grupo 4</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                        <select id="filtro-rol" class="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm">
+                            <option value="">Todos los roles</option>
+                            <option value="miembro">Miembro</option>
+                            <option value="scrumMaster">Scrum Master</option>
+                            <option value="lider">Líder</option>
+                            <option value="admin">Admin</option>
+                            <option value="auditor">Auditor</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Tabla de usuarios medio pelada -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-4 py-2 text-left">Usuario</th>
+                                <th class="px-4 py-2 text-left">Rol</th>
+                                <th class="px-4 py-2 text-left">Grupo</th>
+                                <th class="px-4 py-2 text-left">Estadísticas</th>
+                                <th class="px-4 py-2 text-left">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-usuarios" class="divide-y divide-gray-700">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista: Equipos -->
+        <div id="vista-equipos" class="vista-admin hidden">
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <h2 class="text-lg font-semibold mb-4 text-purple-400">🏆 Información Completa de Equipos</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-4" id="equipos-izquierda">
+                        <!-- Equipos 1 y 2 -->
+                    </div>
+                    <div class="space-y-4" id="equipos-derecha">
+                        <!-- Equipos 3 y 4 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista: Todos los Proyectos -->
+        <div id="vista-proyectos" class="vista-admin hidden">
+            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-green-400">📋 Vista Global de Proyectos</h2>
+                    <div class="flex gap-2">
+                        <select id="proyecto-selector" class="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm">
+                            <option value="GenT">Generación T</option>
+                            <option value="Proy">Proyecto</option>
+                            <option value="Proy2">Proyecto 2</option>
+                        </select>
+                        <select id="equipo-selector" class="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm">
+                            <option value="">Todos los equipos</option>
+                            <option value="Grupo1">Grupo 1</option>
+                            <option value="Grupo2">Grupo 2</option>
+                            <option value="Grupo3">Grupo 3</option>
+                            <option value="Grupo4">Grupo 4</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="proyectos-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Se llena dinámicamente -->
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="container">
-        <!-- Estadísticas Globales -->
-        <div class="admin-stats">
-            <div class="stat-card">
-                <h3>📊 Equipos Totales</h3>
-                <div class="value"><%= Object.keys(grupos).length %></div>
-                <div class="trend">
-                    <% 
-                    var equiposActivos = 0;
-                    for (var grupo in grupos) {
-                        if (grupos[grupo].started === 'y') equiposActivos++;
-                    }
-                    %>
-                    <%= equiposActivos %> activos
-                </div>
+    <!-- Modal para cambiar grupo de usuario -->
+    <div id="modal-cambiar-grupo" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-600 max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">👥 Cambiar Usuario de Grupo</h3>
+            <div class="mb-4">
+                <p id="usuario-cambio-info" class="text-gray-300 mb-3"></p>
+                <label class="block text-sm font-medium mb-2">Nuevo grupo:</label>
+                <select id="nuevo-grupo" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white">
+                    <option value="Grupo1">Grupo 1</option>
+                    <option value="Grupo2">Grupo 2</option>
+                    <option value="Grupo3">Grupo 3</option>
+                    <option value="Grupo4">Grupo 4</option>
+                    <option value="Admin">Admin</option>
+                </select>
             </div>
-            <div class="stat-card">
-                <h3>✅ Proyectos Completados</h3>
-                <div class="value">12</div>
-                <div class="trend">+3 este mes</div>
-            </div>
-            <div class="stat-card">
-                <h3>⚠️ Impedimentos Activos</h3>
-                <div class="value">8</div>
-                <div class="trend">-2 vs semana anterior</div>
-            </div>
-            <div class="stat-card">
-                <h3>📈 Velocidad Promedio</h3>
-                <div class="value">21.5</div>
-                <div class="trend">story points por sprint</div>
-            </div>
-            <div class="stat-card">
-                <h3>👥 Desarrolladores Activos</h3>
-                <div class="value">45</div>
-                <div class="trend">en <%= Object.keys(grupos).length %> equipos</div>
-            </div>
-            <div class="stat-card">
-                <h3>🎯 Satisfacción Promedio</h3>
-                <div class="value">8.7/10</div>
-                <div class="trend">+0.3 vs mes anterior</div>
-            </div>
-        </div>
-
-        <!-- Alertas Críticas -->
-        <div class="alerts-section">
-            <h3>🚨 Alertas del Sistema</h3>
-            <div class="alert alert-danger">
-                <span>⛔</span>
-                <div>
-                    <strong>Grupo2</strong> - Sprint retrasado 3 días. Impedimento crítico en dependencia externa.
-                    <button class="btn btn-warning" style="margin-left: 10px; padding: 4px 8px; font-size: 0.8em;">Gestionar</button>
-                </div>
-            </div>
-            <div class="alert alert-warning">
-                <span>⚠️</span>
-                <div>
-                    <strong>Grupo4</strong> - Velocidad del equipo 40% por debajo del promedio.
-                    <button class="btn btn-info" style="margin-left: 10px; padding: 4px 8px; font-size: 0.8em;">Revisar</button>
-                </div>
-            </div>
-            <div class="alert alert-info">
-                <span>ℹ️</span>
-                <div>
-                    <strong>Grupo1</strong> - Excelente performance. 120% de la velocidad esperada.
-                </div>
-            </div>
-        </div>
-
-        <!-- Acciones Rápidas -->
-        <div class="quick-actions">
-            <h3>⚡ Acciones Rápidas</h3>
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="openModal('createTeamModal')">
-                    <span>➕</span> Crear Equipo
+            <div class="flex gap-2">
+                <button id="btn-confirmar-cambio" class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                    ✅ Cambiar Grupo
                 </button>
-                <button class="btn btn-success" onclick="exportReport()">
-                    <span>📊</span> Exportar Reporte
-                </button>
-                <button class="btn btn-warning" onclick="openModal('backupModal')">
-                    <span>💾</span> Backup Sistema
-                </button>
-                <button class="btn btn-info" onclick="openModal('settingsModal')">
-                    <span>⚙️</span> Configuración Global
-                </button>
-                <button class="btn btn-danger" onclick="openModal('alertsModal')">
-                    <span>🚨</span> Gestionar Alertas
+                <button onclick="cerrarModal('modal-cambiar-grupo')" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded">
+                    ❌ Cancelar
                 </button>
             </div>
-        </div>
-
-        <!-- Navegación por Pestañas -->
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('teams')">🏢 Equipos</button>
-            <button class="tab" onclick="showTab('projects')">🚀 Proyectos</button>
-            <button class="tab" onclick="showTab('analytics')">📈 Analíticas</button>
-            <button class="tab" onclick="showTab('users')">👥 Usuarios</button>
-        </div>
-
-        <!-- Contenido: Vista de Equipos -->
-        <div id="teams-tab" class="tab-content active">
-            <div class="teams-overview">
-                <% 
-                for (var grupo in grupos) {
-                    var equipo = grupos[grupo];
-                    var estaActivo = equipo.started && equipo.started === 'y';
-                    
-                    var totalHU = 0;
-                    if (equipo.GenT && equipo.GenT.productBacklog) totalHU += equipo.GenT.productBacklog.length;
-                    if (equipo.Proy && equipo.Proy.productBacklog) totalHU += equipo.Proy.productBacklog.length;
-                    if (equipo.Proy2 && equipo.Proy2.productBacklog) totalHU += equipo.Proy2.productBacklog.length;
-                    
-                    var velocidadPromedio = Math.floor(Math.random() * 10) + 15;
-                %>
-                    <div class="team-card">
-                        <div class="team-header">
-                            <h3>🏢 <%= grupo %></h3>
-                            <span class="team-status <%= estaActivo ? 'status-active' : 'status-inactive' %>">
-                                <%= estaActivo ? '🟢 Activo' : '🔴 Inactivo' %>
-                            </span>
-                        </div>
-                        
-                        <% if (estaActivo) { %>
-                            <div class="team-metrics">
-                                <div class="metric">
-                                    <div class="metric-value"><%= velocidadPromedio %></div>
-                                    <div class="metric-label">Velocidad</div>
-                                </div>
-                                <div class="metric">
-                                    <div class="metric-value"><%= equipo.GenT && equipo.GenT.sprintActual ? equipo.GenT.sprintActual : 1 %></div>
-                                    <div class="metric-label">Sprint</div>
-                                </div>
-                                <div class="metric">
-                                    <div class="metric-value"><%= totalHU %></div>
-                                    <div class="metric-label">Total HU</div>
-                                </div>
-                            </div>
-                            
-                            <div class="project-details">
-                                <% if (equipo.GenT) { %>
-                                    <div class="project-card gent">
-                                        <h4>🎯 Generación T</h4>
-                                        <p>Sprint <%= equipo.GenT.sprintActual || 1 %> | <%= equipo['duracion-sprint-gent'] %>sem</p>
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: <%= Math.floor(Math.random() * 60) + 30 %>%"></div>
-                                        </div>
-                                        <p><small>Backlog: <%= equipo.GenT.productBacklog ? equipo.GenT.productBacklog.length : 0 %> items</small></p>
-                                    </div>
-                                <% } %>
-                                
-                                <% if (equipo.Proy) { %>
-                                    <div class="project-card proy">
-                                        <h4>🚀 Proyecto</h4>
-                                        <p>Sprint <%= equipo.Proy.sprintActual || 1 %> | <%= equipo['duracion-sprint-proyecto'] %>sem</p>
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: <%= Math.floor(Math.random() * 60) + 25 %>%"></div>
-                                        </div>
-                                        <p><small>Backlog: <%= equipo.Proy.productBacklog ? equipo.Proy.productBacklog.length : 0 %> items</small></p>
-                                    </div>
-                                <% } %>
-                                
-                                <% if (equipo.Proy2) { %>
-                                    <div class="project-card proy2">
-                                        <h4>⭐ Proyecto 2</h4>
-                                        <p>Sprint <%= equipo.Proy2.sprintActual || 1 %> | <%= equipo['duracion-sprint-proyecto2'] %>sem</p>
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: <%= Math.floor(Math.random() * 50) + 20 %>%"></div>
-                                        </div>
-                                        <p><small>Backlog: <%= equipo.Proy2.productBacklog ? equipo.Proy2.productBacklog.length : 0 %> items</small></p>
-                                    </div>
-                                <% } %>
-                            </div>
-                            
-                            <div style="margin-top: 15px; display: flex; gap: 8px;">
-                                <button class="btn btn-primary" onclick="viewTeamDetails('<%= grupo %>')">👁️ Ver Detalle</button>
-                                <button class="btn btn-info" onclick="openTeamSettings('<%= grupo %>')">⚙️ Configurar</button>
-                                <button class="btn btn-warning" onclick="downloadTeamReport('<%= grupo %>')">📊 Reporte</button>
-                            </div>
-                        <% } else { %>
-                            <p style="color: #666; margin: 15px 0;">El equipo aún no ha iniciado sus proyectos.</p>
-                            <button class="btn btn-success" onclick="initializeTeam('<%= grupo %>')">🚀 Inicializar Equipo</button>
-                        <% } %>
-                    </div>
-                <% } %>
-            </div>
-        </div>
-
-        <!-- Contenido: Vista de Proyectos -->
-        <div id="projects-tab" class="tab-content">
-            <div class="detailed-view">
-                <h3>🚀 Análisis Global de Proyectos</h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
-                    <div class="project-card gent">
-                        <h4>🎯 Generación T (Todos los equipos)</h4>
-                        <div class="metric">
-                            <div class="metric-value">
-                                <%
-                                var countGenT = 0;
-                                for (var g in grupos) {
-                                    if (grupos[g].GenT) countGenT++;
-                                }
-                                %>
-                                <%= countGenT %>
-                            </div>
-                            <div class="metric-label">equipos participando</div>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 68%"></div>
-                        </div>
-                        <p><small>Progreso promedio: 68%</small></p>
-                    </div>
-                    
-                    <div class="project-card proy">
-                        <h4>🚀 Proyectos Principales</h4>
-                        <div class="metric">
-                            <div class="metric-value">
-                                <%
-                                var countProy = 0;
-                                for (var g in grupos) {
-                                    if (grupos[g].Proy) countProy++;
-                                }
-                                %>
-                                <%= countProy %>
-                            </div>
-                            <div class="metric-label">proyectos activos</div>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 45%"></div>
-                        </div>
-                        <p><small>Progreso promedio: 45%</small></p>
-                    </div>
-                    
-                    <div class="project-card proy2">
-                        <h4>⭐ Proyectos Secundarios</h4>
-                        <div class="metric">
-                            <div class="metric-value">
-                                <%
-                                var countProy2 = 0;
-                                for (var g in grupos) {
-                                    if (grupos[g].Proy2) countProy2++;
-                                }
-                                %>
-                                <%= countProy2 %>
-                            </div>
-                            <div class="metric-label">proyectos avanzados</div>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 25%"></div>
-                        </div>
-                        <p><small>Progreso promedio: 25%</small></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contenido: Analytics -->
-        <div id="analytics-tab" class="tab-content">
-            <div class="detailed-view">
-                <h3>📈 Analíticas del Sistema</h3>
-                
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px;">
-                    <div>
-                        <h4>📊 Rendimiento por Equipo</h4>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Equipo</th>
-                                    <th>Velocidad</th>
-                                    <th>Burndown</th>
-                                    <th>Satisfacción</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% 
-                                for (var grupo in grupos) {
-                                    var equipo = grupos[grupo];
-                                    if (equipo.started === 'y') {
-                                %>
-                                    <tr>
-                                        <td><strong><%= grupo %></strong></td>
-                                        <td><%= Math.floor(Math.random() * 10) + 15 %> pts</td>
-                                        <td>
-                                            <div class="progress-bar" style="height: 6px;">
-                                                <% var progressWidth = Math.floor(Math.random() * 60) + 30; %>
-                                                <div class="progress-fill" style="width: <%= progressWidth %>%;"></div>
-                                            </div>
-                                        </td>
-                                        <td><%= (Math.random() * 2 + 8).toFixed(1) %>/10</td>
-                                        <td><span class="status-badge status-active">✅ Activo</span></td>
-                                    </tr>
-                                <% 
-                                    }
-                                }
-                                %>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div>
-                        <h4>🎯 KPIs Clave</h4>
-                        <div style="display: flex; flex-direction: column; gap: 15px;">
-                            <div class="metric" style="text-align: left; padding: 20px;">
-                                <div style="display: flex; justify-content: between;">
-                                    <span>Eficiencia Global</span>
-                                    <strong>89%</strong>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 89%"></div>
-                                </div>
-                            </div>
-                            
-                            <div class="metric" style="text-align: left; padding: 20px;">
-                                <div style="display: flex; justify-content: between;">
-                                    <span>Calidad Promedio</span>
-                                    <strong>94%</strong>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 94%"></div>
-                                </div>
-                            </div>
-                            
-                            <div class="metric" style="text-align: left; padding: 20px;">
-                                <div style="display: flex; justify-content: between;">
-                                    <span>Cumplimiento Sprints</span>
-                                    <strong>76%</strong>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 76%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contenido: Usuarios -->
-        <div id="users-tab" class="tab-content">
-            <div class="detailed-view">
-                <h3>👥 Gestión de Usuarios</h3>
-                <div style="margin: 20px 0;">
-                    <button class="btn btn-primary" onclick="openModal('addUserModal')">➕ Añadir Usuario</button>
-                    <button class="btn btn-info" onclick="exportUsers()">📋 Exportar Usuarios</button>
-                </div>
-                
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Equipo</th>
-                            <th>Rol</th>
-                            <th>Último Acceso</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Sample user data -->
-                        <tr>
-                            <td>Juan Pérez</td>
-                            <td>Grupo1</td>
-                            <td>Desarrollador</td>
-                            <td>Hace 2 horas</td>
-                            <td><span class="status-badge status-active">🟢 Activo</span></td>
-                            <td>
-                                <button class="btn btn-info" style="padding: 4px 8px; font-size: 0.8em;">Editar</button>
-                                <button class="btn btn-warning" style="padding: 4px 8px; font-size: 0.8em;">Suspender</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modales -->
-    <div id="createTeamModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('createTeamModal')">&times;</span>
-            <h2>➕ Crear Nuevo Equipo</h2>
-            <form id="createTeamForm">
-                <div style="margin-bottom: 15px;">
-                    <label>Nombre del Equipo:</label>
-                    <input type="text" id="teamName" required placeholder="GrupoX">
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label>Número de Proyectos:</label>
-                    <select id="projectCount">
-                        <option value="2">2 proyectos (GenT + Proyecto)</option>
-                        <option value="3">3 proyectos (GenT + Proyecto + Proyecto2)</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-success">Crear Equipo</button>
-            </form>
         </div>
     </div>
 
     <script>
-        function showTab(tabName) {
-            // Hide all tab contents
-            var contents = document.querySelectorAll('.tab-content');
-            for (var i = 0; i < contents.length; i++) {
-                contents[i].classList.remove('active');
-            }
+        let vistaActual = 'estadisticas';
+        let datosGlobales = {};
+
+        // Cambiar vista principal
+        function cambiarVista(vista) {
+            vistaActual = vista;
             
-            // Remove active from all tabs
-            var tabs = document.querySelectorAll('.tab');
-            for (var i = 0; i < tabs.length; i++) {
-                tabs[i].classList.remove('active');
-            }
+            // Ocultar todas las vistas
+            document.querySelectorAll('.vista-admin').forEach(v => v.classList.add('hidden'));
             
-            // Show selected tab
-            document.getElementById(tabName + '-tab').classList.add('active');
-            event.target.classList.add('active');
+            // Mostrar vista seleccionada
+            document.getElementById(`vista-${vista}`).classList.remove('hidden');
+            
+            // Actualizar botones
+            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+                btn.classList.remove('bg-yellow-600');
+                btn.classList.add('bg-gray-700');
+            });
+            document.getElementById(`btn-${vista}`).classList.add('bg-yellow-600');
+            
+            // Cargar datos según la vista
+            cargarVista(vista);
         }
 
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
+        // Cargar datos según la vista activa
+        async function cargarVista(vista) {
+            switch(vista) {
+                case 'estadisticas':
+                    await cargarEstadisticasGlobales();
+                    break;
+                case 'usuarios':
+                    await cargarUsuarios();
+                    break;
+                case 'equipos':
+                    await cargarEquipos();
+                    break;
+                case 'proyectos':
+                    await cargarTodosLosProyectos();
+                    break;
+            }
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        function viewTeamDetails(teamName) {
-            alert('Ver detalles del ' + teamName);
-            // Implement detailed view
-        }
-
-        function openTeamSettings(teamName) {
-            alert('Configuración del ' + teamName);
-            // Implement team settings
-        }
-
-        function downloadTeamReport(teamName) {
-            alert('Descargando reporte del ' + teamName);
-            // Implement report download
-        }
-
-        function initializeTeam(teamName) {
-            if (confirm('¿Inicializar proyectos para ' + teamName + '?')) {
-                fetch('/api/initialize-team', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ team: teamName })
-                })
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
+        // Cargar estadísticas globales
+        async function cargarEstadisticasGlobales() {
+            try {
+                const response = await fetch('/api/estadisticas/global');
+                const data = await response.json();
+                datosGlobales = data;
+                
+                // Calcular totales
+                const equipos = Object.keys(data);
+                const equiposIniciados = equipos.filter(eq => data[eq].iniciado).length;
+                
+                document.getElementById('total-equipos').textContent = equiposIniciados;
+                document.getElementById('total-usuarios').textContent = '<%= Object.keys(usuarios || {}).length %>'; // Del servidor
+                
+                let totalProyectos = 0;
+                let promedioGeneral = 0;
+                let contador = 0;
+                
+                equipos.forEach(equipo => {
+                    if (data[equipo].iniciado) {
+                        Object.keys(data[equipo].proyectos).forEach(proyecto => {
+                            totalProyectos++;
+                            promedioGeneral += data[equipo].proyectos[proyecto].porcentajeCompletado;
+                            contador++;
+                        });
                     }
                 });
+                
+                document.getElementById('total-proyectos').textContent = totalProyectos;
+                document.getElementById('promedio-completado').textContent = contador > 0 ? Math.round(promedioGeneral / contador) : 0;
+                
+                // Mostrar estadísticas por equipo
+                const container = document.getElementById('estadisticas-equipos');
+                container.innerHTML = equipos.map(equipo => {
+                    if (!data[equipo].iniciado) {
+                        return `
+                            <div class="bg-gray-600 p-4 rounded border border-gray-500">
+                                <h4 class="font-semibold text-gray-300">${equipo}</h4>
+                                <p class="text-yellow-300">⏳ Proyecto no iniciado</p>
+                            </div>
+                        `;
+                    }
+                    
+                    const proyectos = data[equipo].proyectos;
+                    return `
+                        <div class="bg-gray-600 p-4 rounded border border-gray-500">
+                            <h4 class="font-semibold text-white mb-3">${equipo}</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                ${Object.entries(proyectos).map(([nombreProy, dataProy]) => `
+                                    <div class="bg-gray-700 p-3 rounded">
+                                        <p class="font-medium text-sm">${nombreProy}</p>
+                                        <p class="text-lg font-bold">${dataProy.porcentajeCompletado}%</p>
+                                        <p class="text-xs text-gray-400">Sprint ${dataProy.sprintActual}</p>
+                                        <p class="text-xs text-gray-400">${dataProy.tareasCompletadas}/${dataProy.totalTareas} tareas</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error cargando estadísticas globales:', error);
             }
         }
 
-        function exportReport() {
-            alert('Exportando reporte global...');
-            // Implement global report export
-        }
-
-        function exportUsers() {
-            alert('Exportando lista de usuarios...');
-            // Implement user export
-        }
-
-        // Auto-refresh every 2 minutes
-        setInterval(function() {
-            fetch('/api/admin/status')
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                // Update metrics without full page reload
-                console.log('Status updated');
-            });
-        }, 120000);
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            var modals = document.querySelectorAll('.modal');
-            for (var i = 0; i < modals.length; i++) {
-                if (event.target === modals[i]) {
-                    modals[i].style.display = 'none';
-                }
+        // Cargar usuarios
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('/api/admin/usuarios');
+                const usuarios = await response.json();
+                
+                mostrarUsuarios(usuarios);
+                
+                // Event listeners para filtros
+                document.getElementById('filtro-grupo').addEventListener('change', () => filtrarUsuarios(usuarios));
+                document.getElementById('filtro-rol').addEventListener('change', () => filtrarUsuarios(usuarios));
+                
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                document.getElementById('tabla-usuarios').innerHTML = `
+                    <tr><td colspan="5" class="text-center text-red-400 py-4">❌ Error cargando usuarios</td></tr>
+                `;
             }
         }
 
-        // Form submissions
-        document.getElementById('createTeamForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Mostrar usuarios en tabla
+        function mostrarUsuarios(usuarios) {
+            const tbody = document.getElementById('tabla-usuarios');
             
-            var teamData = {
-                name: document.getElementById('teamName').value,
-                projects: document.getElementById('projectCount').value
+            tbody.innerHTML = usuarios.map(usuario => {
+                const [tiempoLlamada, tareasAsignadas, tareasCompletadas] = usuario.stats;
+                
+                return `
+                    <tr class="hover:bg-gray-700">
+                        <td class="px-4 py-3">
+                            <div>
+                                <p class="font-medium">${usuario.nickname}</p>
+                                <p class="text-xs text-gray-400">${usuario.id}</p>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-xs ${obtenerColorRol(usuario.rol)}">
+                                ${usuario.rol}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-xs bg-blue-700">
+                                ${usuario.grupo}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="text-xs">
+                                <p>⏱️ ${Math.floor(tiempoLlamada / 60)}min</p>
+                                <p>✅ ${tareasCompletadas}/${tareasAsignadas}</p>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <button onclick="abrirCambioGrupo('${usuario.id}', '${usuario.nickname}', '${usuario.grupo}')" 
+                                    class="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs">
+                                🔄 Cambiar Grupo
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Filtrar usuarios
+        function filtrarUsuarios(usuariosOriginales) {
+            const grupoFiltro = document.getElementById('filtro-grupo').value;
+            const rolFiltro = document.getElementById('filtro-rol').value;
+            
+            let usuariosFiltrados = usuariosOriginales;
+            
+            if (grupoFiltro) {
+                usuariosFiltrados = usuariosFiltrados.filter(u => u.grupo === grupoFiltro);
+            }
+            
+            if (rolFiltro) {
+                usuariosFiltrados = usuariosFiltrados.filter(u => u.rol === rolFiltro);
+            }
+            
+            mostrarUsuarios(usuariosFiltrados);
+        }
+
+        // Obtener color para rol
+        function obtenerColorRol(rol) {
+            const colores = {
+                'miembro': 'bg-gray-600',
+                'scrumMaster': 'bg-purple-600',
+                'lider': 'bg-red-600',
+                'admin': 'bg-orange-600',
+                'auditor': 'bg-indigo-600'
             };
+            return colores[rol] || 'bg-gray-600';
+        }
 
-            fetch('/api/admin/create-team', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(teamData)
-            })
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
+        // Cargar equipos
+        async function cargarEquipos() {
+            try {
+                const response = await fetch('/api/admin/equipos');
+                const equipos = await response.json();
+                
+                const gruposIzquierda = ['Grupo1', 'Grupo2'];
+                const gruposDerecha = ['Grupo3', 'Grupo4'];
+                
+                document.getElementById('equipos-izquierda').innerHTML = gruposIzquierda.map(grupo => 
+                    generarTarjetaEquipo(grupo, equipos[grupo] || {})
+                ).join('');
+                
+                document.getElementById('equipos-derecha').innerHTML = gruposDerecha.map(grupo => 
+                    generarTarjetaEquipo(grupo, equipos[grupo] || {})
+                ).join('');
+                
+            } catch (error) {
+                console.error('Error cargando equipos:', error);
+            }
+        }
+
+        // Generar tarjeta de equipo
+        function generarTarjetaEquipo(nombreGrupo, datosGrupo) {
+            if (!datosGrupo.iniciado) {
+                return `
+                    <div class="bg-gray-700 border border-gray-600 rounded-lg p-4">
+                        <h3 class="font-semibold text-lg mb-3">${nombreGrupo}</h3>
+                        <div class="text-center py-6">
+                            <div class="text-4xl mb-2">⏳</div>
+                            <p class="text-yellow-300">Proyecto no iniciado</p>
+                        </div>
+                        <div class="mt-4">
+                            <h4 class="font-medium mb-2">Miembros:</h4>
+                            <div class="space-y-1">
+                                ${(datosGrupo.miembros || []).map(miembro => `
+                                    <div class="text-sm bg-gray-600 p-2 rounded">
+                                        <span class="font-medium">${miembro.nickname}</span>
+                                        <span class="text-gray-400 ml-2">(${miembro.rol})</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="bg-gray-700 border border-gray-600 rounded-lg p-4">
+                    <h3 class="font-semibold text-lg mb-3">${nombreGrupo}</h3>
+                    
+                    <!-- Proyectos del equipo -->
+                    <div class="mb-4">
+                        <h4 class="font-medium mb-2">📊 Proyectos:</h4>
+                        <div class="space-y-2">
+                            ${Object.entries(datosGrupo.proyectos || {}).map(([proyecto, datos]) => `
+                                <div class="bg-gray-600 p-2 rounded text-sm">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium">${proyecto}</span>
+                                        <span class="text-xs bg-blue-600 px-2 py-1 rounded">Sprint ${datos.sprintActual || '?'}</span>
+                                    </div>
+                                    <div class="mt-1">
+                                        <div class="flex justify-between text-xs">
+                                            <span>Historias: ${datos.historiasEnSprint || 0}/${datos.totalHistorias || 0}</span>
+                                            <span>Tareas: ${datos.tareasCompletadas || 0}/${datos.totalTareas || 0}</span>
+                                        </div>
+                                        <div class="w-full bg-gray-500 rounded-full h-1 mt-1">
+                                            <div class="bg-green-500 h-1 rounded-full" style="width: ${datos.porcentajeCompletado || 0}%"></div>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mt-1">${datos.porcentajeCompletado || 0}% completado</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Miembros del equipo -->
+                    <div>
+                        <h4 class="font-medium mb-2">👥 Miembros:</h4>
+                        <div class="space-y-1">
+                            ${(datosGrupo.miembros || []).map(miembro => `
+                                <div class="text-sm bg-gray-600 p-2 rounded flex justify-between items-center">
+                                    <div>
+                                        <span class="font-medium">${miembro.nickname}</span>
+                                        <span class="text-xs px-1 py-0.5 rounded ml-2 ${obtenerColorRol(miembro.rol)}">${miembro.rol}</span>
+                                    </div>
+                                    <button onclick="abrirCambioGrupo('${miembro.id}', '${miembro.nickname}', '${nombreGrupo}')" 
+                                            class="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs">
+                                        🔄
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    ${(datosGrupo.miembros || []).length === 0 ? '<p class="text-gray-400 text-sm mt-2">No hay miembros asignados</p>' : ''}
+                </div>
+            `;
+        }
+
+        // Cargar todos los proyectos
+        async function cargarTodosLosProyectos() {
+            const proyectoSeleccionado = document.getElementById('proyecto-selector').value;
+            const equipoSeleccionado = document.getElementById('equipo-selector').value;
+            
+            try {
+                const response = await fetch('/api/admin/equipos');
+                const equipos = await response.json();
+                
+                const container = document.getElementById('proyectos-grid');
+                let proyectosMostrados = [];
+                
+                Object.entries(equipos).forEach(([nombreEquipo, datosEquipo]) => {
+                    // Filtrar por equipo si está seleccionado
+                    if (equipoSeleccionado && nombreEquipo !== equipoSeleccionado) {
+                        return;
+                    }
+                    
+                    // Solo mostrar equipos iniciados
+                    if (!datosEquipo.iniciado) {
+                        return;
+                    }
+                    
+                    // Buscar el proyecto específico o mostrar todos
+                    const proyectos = datosEquipo.proyectos || {};
+                    Object.entries(proyectos).forEach(([nombreProyecto, datosProyecto]) => {
+                        if (proyectoSeleccionado && nombreProyecto !== proyectoSeleccionado) {
+                            return;
+                        }
+                        
+                        proyectosMostrados.push({
+                            equipo: nombreEquipo,
+                            proyecto: nombreProyecto,
+                            datos: datosProyecto,
+                            miembros: datosEquipo.miembros || []
+                        });
+                    });
+                });
+                
+                if (proyectosMostrados.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-2 text-center py-8 text-gray-500">
+                            <div class="text-4xl mb-2">📭</div>
+                            <p>No hay proyectos que coincidan con los filtros</p>
+                        </div>
+                    `;
+                    return;
                 }
-            });
+                
+                container.innerHTML = proyectosMostrados.map(proyecto => `
+                    <div class="bg-gray-700 border border-gray-600 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-semibold">${proyecto.equipo} - ${proyecto.proyecto}</h3>
+                            <span class="text-xs bg-blue-600 px-2 py-1 rounded">Sprint ${proyecto.datos.sprintActual || '?'}</span>
+                        </div>
+                        
+                        <!-- Progreso visual -->
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Progreso General</span>
+                                <span>${proyecto.datos.porcentajeCompletado || 0}%</span>
+                            </div>
+                            <div class="w-full bg-gray-600 rounded-full h-3">
+                                <div class="bg-green-500 h-3 rounded-full" style="width: ${proyecto.datos.porcentajeCompletado || 0}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Estadísticas -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-gray-600 p-3 rounded text-center">
+                                <p class="text-lg font-bold">${proyecto.datos.historiasEnSprint || 0}</p>
+                                <p class="text-xs text-gray-400">Historias en Sprint</p>
+                            </div>
+                            <div class="bg-gray-600 p-3 rounded text-center">
+                                <p class="text-lg font-bold">${proyecto.datos.tareasCompletadas || 0}/${proyecto.datos.totalTareas || 0}</p>
+                                <p class="text-xs text-gray-400">Tareas Completadas</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Miembros del equipo -->
+                        <div class="text-xs">
+                            <p class="font-medium mb-1">Equipo:</p>
+                            <div class="flex flex-wrap gap-1">
+                                ${proyecto.miembros.map(miembro => `
+                                    <span class="px-2 py-1 rounded text-xs ${obtenerColorRol(miembro.rol)}">
+                                        ${miembro.nickname}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Acciones -->
+                        <div class="mt-3 pt-3 border-t border-gray-600">
+                            <div class="flex gap-2">
+                                <button onclick="verDetalleProyecto('${proyecto.equipo}', '${proyecto.proyecto}')" 
+                                        class="flex-1 bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs">
+                                    👁️ Ver Detalle
+                                </button>
+                                <button onclick="modificarProyecto('${proyecto.equipo}', '${proyecto.proyecto}')" 
+                                        class="flex-1 bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-xs">
+                                    ✏️ Modificar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Event listeners para filtros
+                document.getElementById('proyecto-selector').addEventListener('change', cargarTodosLosProyectos);
+                document.getElementById('equipo-selector').addEventListener('change', cargarTodosLosProyectos);
+                
+            } catch (error) {
+                console.error('Error cargando proyectos:', error);
+                document.getElementById('proyectos-grid').innerHTML = `
+                    <div class="col-span-2 text-center text-red-400 py-8">
+                        ❌ Error cargando proyectos
+                    </div>
+                `;
+            }
+        }
 
-            closeModal('createTeamModal');
+        // Funciones de modales y acciones
+        function abrirCambioGrupo(userId, nickname, grupoActual) {
+            document.getElementById('usuario-cambio-info').textContent = `Usuario: ${nickname} (Grupo actual: ${grupoActual})`;
+            document.getElementById('nuevo-grupo').value = grupoActual;
+            
+            document.getElementById('btn-confirmar-cambio').onclick = () => confirmarCambioGrupo(userId);
+            
+            document.getElementById('modal-cambiar-grupo').classList.remove('hidden');
+            document.getElementById('modal-cambiar-grupo').classList.add('flex');
+        }
+
+        async function confirmarCambioGrupo(userId) {
+            const nuevoGrupo = document.getElementById('nuevo-grupo').value;
+            
+            try {
+                const response = await fetch(`/api/admin/usuarios/${userId}/cambiar-grupo`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nuevoGrupo: nuevoGrupo })
+                });
+                
+                if (response.ok) {
+                    alert('✅ Usuario cambiado de grupo exitosamente');
+                    cerrarModal('modal-cambiar-grupo');
+                    cargarVista(vistaActual); // Recargar vista actual
+                } else {
+                    alert('❌ Error cambiando usuario de grupo');
+                }
+            } catch (error) {
+                alert('❌ Error de conexión');
+            }
+        }
+
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        // Funciones placeholder para futuras implementaciones
+        function verDetalleProyecto(equipo, proyecto) {
+            alert(`🚧 Ver detalle de ${equipo} - ${proyecto}\n\nFuncionalidad en desarrollo.\n\nSe podría mostrar:\n- Historias completas\n- Todas las tareas\n- Timeline del proyecto\n- Estadísticas detalladas`);
+        }
+
+        function modificarProyecto(equipo, proyecto) {
+            alert(`🚧 Modificar ${equipo} - ${proyecto}\n\nFuncionalidad en desarrollo.\n\nSe podría permitir:\n- Editar historias\n- Modificar tareas\n- Cambiar fechas de sprint\n- Reasignar recursos`);
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            // Activar vista inicial
+            cambiarVista('estadisticas');
+            
+            // Auto-refresh cada 30 segundos para mantener datos actualizados
+            setInterval(() => {
+                if (vistaActual === 'estadisticas') {
+                    cargarEstadisticasGlobales();
+                }
+            }, 30000);
+        });
+
+        // Función para exportar datos (placeholder)
+        function exportarDatos() {
+            alert('🚧 Funcionalidad en desarrollo\n\nSe podría exportar:\n- Estadísticas completas\n- Lista de usuarios\n- Estado de todos los proyectos\n- Reportes en PDF/Excel');
+        }
+
+        // Función para generar reportes (placeholder)
+        function generarReporte() {
+            alert('🚧 Funcionalidad en desarrollo\n\nTipos de reportes disponibles:\n- Rendimiento por equipo\n- Progreso de proyectos\n- Estadísticas de usuarios\n- Timeline de sprints');
+        }
+
+        // Atajos de teclado para navegación rápida (medio geek pero útil)
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey) {
+                switch(e.key) {
+                    case '1':
+                        cambiarVista('estadisticas');
+                        break;
+                    case '2':
+                        cambiarVista('usuarios');
+                        break;
+                    case '3':
+                        cambiarVista('equipos');
+                        break;
+                    case '4':
+                        cambiarVista('proyectos');
+                        break;
+                }
+            }
         });
     </script>
+
+    <!-- Footer con info de atajos (medio nerdy) -->
+    <div class="fixed bottom-4 right-4 bg-gray-800 border border-gray-600 rounded-lg p-2 text-xs text-gray-400">
+        <p>💡 Atajos: Alt+1 (Stats) | Alt+2 (Users) | Alt+3 (Teams) | Alt+4 (Projects)</p>
+    </div>
 </body>
 </html>
