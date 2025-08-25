@@ -1,8 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { loadJSON, saveJSON, generateToken } = require('../functions.js');
-const fs = require('fs').promises;
-
-const usersPath = path.join(__dirname, '..', 'databases', 'users.json');
+const path = require('path');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -18,10 +16,12 @@ module.exports = {
         .setDescription('Genera una nueva contraseña')),
   
   async execute(interaction) {
+    const usersPath = path.join(__dirname, '..', 'databases', 'users.json');
+    let users;
+    
     // Cargar base de datos
     try {
-      const data = loadJSON(usersPath);
-      users = JSON.parse(data);
+      users = loadJSON(usersPath);
     } catch (error) {
       await interaction.reply({
         content: '❌ Error al cargar la base de datos',
@@ -33,7 +33,7 @@ module.exports = {
     const userId = interaction.user.id;
     const subCommand = interaction.options.getSubcommand();
     
-    if (!users[userId].token) {
+    if (!users[userId] || !users[userId].token) {
       await interaction.reply({
         content: '❌ No tienes una contraseña asignada. Contacta a un administrador.',
         flags: 64
@@ -43,56 +43,55 @@ module.exports = {
     
     if (subCommand === 'mostrar') {
       await interaction.reply({
-                            embeds: [{
-                                title: "🔐 Contraseña del Dashboard",
-                                description: `Esta contraseña es **solo tuya y privada**`,
-                                color: 0x00ff00,
-                                fields: [
-                                    {
-                                        name: "🔑 Contraseña",
-                                        value: `\`${users[userId].token}\``,
-                                        inline: false
-                                    },
-                                    {
-                                        name: "🌐 Acceso al Dashboard",
-                                        value: `Visita: [Dashboard Login](https://right-mite-infinite.ngrok-free.app/login)`,
-                                        inline: false
-                                    }
-                                ],
-                                footer: {
-                                    text: "⚠️ Esta contraseña se muestra solo una vez. Guárdala de forma segura."
-                                }
-                            }],
-                            flags: 64
-                        });
+        embeds: [{
+          title: "🔐 Contraseña del Dashboard",
+          description: `Esta contraseña es **solo tuya y privada**`,
+          color: 0x00ff00,
+          fields: [
+            {
+              name: "🔑 Contraseña",
+              value: `\`${users[userId].token}\``,
+              inline: false
+            },
+            {
+              name: "🌐 Acceso al Dashboard",
+              value: `Visita: [Dashboard Login](https://right-mite-infinite.ngrok-free.app/login)`,
+              inline: false
+            }
+          ],
+          footer: {
+            text: "⚠️ Esta contraseña se muestra solo una vez. Guárdala de forma segura."
+          }
+        }],
+        flags: 64
+      });
     } else if (subCommand === 'regenerar') {
-        users[userId].token = generateToken();
-        await interaction.reply({
-                            embeds: [{
-                                title: "🔐 Contraseña del Dashboard",
-                                description: `Esta contraseña es **solo tuya y privada**`,
-                                color: 0x00ff00,
-                                fields: [
-                                    {
-                                        name: "🔑 Contraseña",
-                                        value: `\`${users[userId].token}\``,
-                                        inline: false
-                                    },
-                                    {
-                                        name: "🌐 Acceso al Dashboard",
-                                        value: `Visita: [Dashboard Login](https://right-mite-infinite.ngrok-free.app/login)`,
-                                        inline: false
-                                    }
-                                ],
-                                footer: {
-                                    text: "⚠️ Para regenerar la contraseña `\`/contraseña regenerar\``"
-                                }
-                            }],
-                            flags: 64
-                        });
+      users[userId].token = generateToken();
       saveJSON(users, usersPath);
+      
+      await interaction.reply({
+        embeds: [{
+          title: "🔐 Nueva Contraseña del Dashboard",
+          description: `Tu contraseña ha sido regenerada exitosamente`,
+          color: 0x00ff00,
+          fields: [
+            {
+              name: "🔑 Nueva Contraseña",
+              value: `\`${users[userId].token}\``,
+              inline: false
+            },
+            {
+              name: "🌐 Acceso al Dashboard",
+              value: `Visita: [Dashboard Login](https://right-mite-infinite.ngrok-free.app/login)`,
+              inline: false
+            }
+          ],
+          footer: {
+            text: "⚠️ Para regenerar la contraseña usa `/contraseña regenerar`"
+          }
+        }],
+        flags: 64
+      });
     }
-
-    
   }
 };

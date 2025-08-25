@@ -3,325 +3,871 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Miembro - Dardito</title>
+    <title>Dashboard Miembro - DARDITO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-    <!-- Header medio feo pero funcional -->
-    <header class="bg-gray-800 border-b-2 border-gray-700 p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold text-blue-400">Dashboard Miembro</h1>
-                <p class="text-sm text-gray-300">
-                    <span class="font-semibold"><%= user.nickname %></span> - 
-                    <span class="bg-gray-700 px-2 py-1 rounded text-xs"><%= user.rol %></span> - 
-                    <span class="bg-blue-700 px-2 py-1 rounded text-xs"><%= grupo %></span>
-                </p>
+<body class="bg-gray-50">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-gray-900">DARDITO - <%= grupo %></h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Bienvenido, <%= user.nickname %></span>
+                    <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                        Cerrar Sesión
+                    </a>
+                </div>
             </div>
-            <button onclick="window.location.href='/logout'" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm border border-red-500">
-                Salir
+        </div>
+    </nav>
+
+    <!-- Tabs de Navegación -->
+    <div class="bg-white border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mb-px flex space-x-8">
+            <button onclick="cambiarTab('mis-tareas')" id="tab-mis-tareas" 
+                    class="tab-button py-2 px-1 border-b-2 border-blue-500 font-medium text-sm text-blue-600">
+                Mis Tareas
             </button>
-        </div>
-    </header>
+            <% if (datos.GenT) { %>
+            <button onclick="cambiarTab('gent')" id="tab-gent" 
+                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Generación T
+            </button>
+            <% } %>
+            <% if (datos.Proy) { %>
+            <button onclick="cambiarTab('proy')" id="tab-proy" 
+                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Proyecto Principal
+            </button>
+            <% } %>
+            <% if (datos.Proy2) { %>
+            <button onclick="cambiarTab('proy2')" id="tab-proy2" 
+                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Proyecto Secundario
+            </button>
+            <% } %>
+        </nav>
+    </div>
 
-    <div class="container mx-auto px-4 py-6">
-        <!-- Navegación de proyectos medio pelada -->
-        <div class="mb-6">
-            <div class="flex gap-2 flex-wrap">
-                <button onclick="cambiarProyecto('GenT')" id="btn-GenT" class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded border border-purple-600 text-sm font-semibold">
-                    Generación T
-                </button>
-                <button onclick="cambiarProyecto('Proy')" id="btn-Proy" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded border border-blue-600 text-sm font-semibold">
-                    Proyecto
-                </button>
-                <% if (datos.Proy2) { %>
-                <button onclick="cambiarProyecto('Proy2')" id="btn-Proy2" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded border border-green-600 text-sm font-semibold">
-                    Proyecto 2
-                </button>
-                <% } %>
-            </div>
-        </div>
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Tab: Mis Tareas -->
+        <div id="content-mis-tareas" class="tab-content">
+            <!-- Resumen Personal -->
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">T</span>
+                                </div>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Tareas Asignadas</dt>
+                                    <dd class="text-lg font-medium text-gray-900" id="total-tareas-asignadas">0</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Contenedor principal medio desordenado -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Panel de tareas asignadas -->
-            <div class="lg:col-span-2">
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <h2 class="text-lg font-semibold mb-4 text-yellow-400">
-                        Mis Tareas Asignadas
-                        <span id="proyecto-actual" class="text-sm text-gray-400">(GenT)</span>
-                    </h2>
-                    
-                    <div id="mis-tareas" class="space-y-3">
-                        <!-- Las tareas se cargan dinámicamente -->
-                        <div class="text-center py-8 text-gray-500">
-                            <div class="text-4xl mb-2">📝</div>
-                            <p>Cargando tareas...</p>
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-green-600 rounded-md flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">✓</span>
+                                </div>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Completadas</dt>
+                                    <dd class="text-lg font-medium text-gray-900" id="total-tareas-completadas">0</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-yellow-600 rounded-md flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">→</span>
+                                </div>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">En Proceso</dt>
+                                    <dd class="text-lg font-medium text-gray-900" id="total-tareas-proceso">0</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-purple-600 rounded-md flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">%</span>
+                                </div>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Mi Progreso</dt>
+                                    <dd class="text-lg font-medium text-gray-900" id="mi-progreso">0%</dd>
+                                </dl>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel lateral medio pelado -->
-            <div class="space-y-4">
-                
-                <!-- Info del sprint -->
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <h3 class="font-semibold mb-3 text-green-400">Sprint Actual</h3>
-                    <div id="sprint-info" class="text-sm space-y-2">
-                        <p>Sprint: <span id="sprint-numero">-</span></p>
-                        <p>Inicio: <span id="sprint-inicio">-</span></p>
-                        <p>Fin: <span id="sprint-fin">-</span></p>
+            <!-- Mis Tareas Activas -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Kanban Personal -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:px-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Mis Tareas</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Organiza y actualiza el estado de tus tareas.</p>
+                        </div>
+                        <div class="border-t border-gray-200 p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Por Hacer -->
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                                        <span class="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                                        Por Hacer
+                                    </h4>
+                                    <div id="mis-tareas-por-hacer" class="space-y-2 min-h-32">
+                                        <!-- Tareas por hacer -->
+                                    </div>
+                                </div>
+
+                                <!-- En Proceso -->
+                                <div class="bg-blue-50 rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                        En Proceso
+                                    </h4>
+                                    <div id="mis-tareas-en-proceso" class="space-y-2 min-h-32">
+                                        <!-- Tareas en proceso -->
+                                    </div>
+                                </div>
+
+                                <!-- Completadas -->
+                                <div class="bg-green-50 rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                        Completadas
+                                    </h4>
+                                    <div id="mis-tareas-completadas" class="space-y-2 min-h-32">
+                                        <!-- Tareas completadas -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Navegación de sprints -->
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <h3 class="font-semibold mb-3 text-blue-400">Ver Sprints</h3>
-                    <div id="botones-sprints" class="grid grid-cols-2 gap-2">
-                        <!-- Se llenan dinámicamente -->
+                <!-- Panel de Información -->
+                <div class="space-y-6">
+                    <!-- Próximas Tareas -->
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Próximas Entregas</h3>
+                        <div id="proximas-tareas" class="space-y-3">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Mi Rendimiento -->
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Mi Rendimiento</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Eficiencia</span>
+                                    <span id="mi-eficiencia">0%</span>
+                                </div>
+                                <div class="bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                                         style="width: 0%" id="barra-eficiencia"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-2 border-t text-xs text-gray-500">
+                                <div class="flex justify-between mb-1">
+                                    <span>Tareas esta semana:</span>
+                                    <span id="tareas-semana">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Product Backlog -->
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <h3 class="font-semibold mb-3 text-purple-400">Product Backlog</h3>
-                    <div id="product-backlog" class="space-y-2 max-h-48 overflow-y-auto">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-
             </div>
         </div>
+
+        <!-- Tabs de Proyectos -->
+        <% ['GenT', 'Proy', 'Proy2'].forEach(proyecto => { %>
+        <% if (datos[proyecto]) { %>
+        <div id="content-<%= proyecto.toLowerCase() %>" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Product Backlog (Solo Lectura) -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:px-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                Product Backlog - <%= proyecto === 'GenT' ? 'Generación T' : proyecto === 'Proy' ? 'Proyecto Principal' : 'Proyecto Secundario' %>
+                            </h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Historias de usuario del proyecto.</p>
+                        </div>
+                        <div class="border-t border-gray-200">
+                            <ul id="backlog-<%= proyecto.toLowerCase() %>" class="divide-y divide-gray-200">
+                                <!-- Las historias se cargan dinámicamente -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Sprint Actual -->
+                    <div class="bg-white shadow rounded-lg mt-6">
+                        <div class="px-4 py-5 sm:px-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Sprint Actual</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Historias seleccionadas para este sprint.</p>
+                        </div>
+                        <div class="border-t border-gray-200">
+                            <div id="sprint-historias-<%= proyecto.toLowerCase() %>" class="p-4">
+                                <!-- Historias del sprint se cargan dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel de Información del Proyecto -->
+                <div class="space-y-6">
+                    <!-- Información del Sprint -->
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Sprint #<%= datos[proyecto].sprintActual || '1' %></h3>
+                        <% if (datos[proyecto]['sprint' + (datos[proyecto].sprintActual || '1')]) { %>
+                        <% const sprint = datos[proyecto]['sprint' + (datos[proyecto].sprintActual || '1')] %>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Inicio:</span>
+                                <span><%= sprint.fechaIni ? sprint.fechaIni.join('/') : 'N/A' %></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Fin:</span>
+                                <span><%= sprint.fechaFin ? sprint.fechaFin.join('/') : 'N/A' %></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Estado:</span>
+                                <span class="text-green-600">Activo</span>
+                            </div>
+                        </div>
+                        <% } %>
+
+                        <!-- Progreso del Sprint -->
+                        <div class="mt-4 pt-4 border-t">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Progreso del Sprint</span>
+                                <span id="progreso-sprint-<%= proyecto.toLowerCase() %>">0%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                     style="width: 0%" id="barra-progreso-sprint-<%= proyecto.toLowerCase() %>"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mis Tareas en este Proyecto -->
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Mis Tareas Aquí</h3>
+                        <div id="mis-tareas-proyecto-<%= proyecto.toLowerCase() %>" class="space-y-2">
+                            <!-- Se llenan dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas del Proyecto -->
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Estadísticas</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Historias:</span>
+                                <span id="total-historias-<%= proyecto.toLowerCase() %>">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Historias Completadas:</span>
+                                <span id="historias-completadas-<%= proyecto.toLowerCase() %>">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Tareas del Sprint:</span>
+                                <span id="tareas-sprint-<%= proyecto.toLowerCase() %>">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+        <% }) %>
     </div>
 
-    <!-- Modal para cambiar estado de tarea (medio feo) -->
-    <div id="modal-estado" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-600 max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4">Cambiar Estado de Tarea</h3>
-            <div id="modal-content" class="mb-4">
-                <!-- Contenido dinámico -->
-            </div>
-            <div class="flex gap-2">
-                <button id="btn-confirmar" class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
-                    ✅ Confirmar
-                </button>
-                <button onclick="cerrarModal()" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded">
-                    ❌ Cancelar
-                </button>
+    <!-- Modal para Actualizar Tarea -->
+    <div id="modal-tarea" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4" id="modal-tarea-titulo">Actualizar Tarea</h3>
+                <div id="modal-tarea-contenido" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Descripción</label>
+                        <p id="tarea-descripcion" class="mt-1 text-sm text-gray-900"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Estado Actual</label>
+                        <p id="tarea-estado-actual" class="mt-1 text-sm text-gray-600"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nuevo Estado</label>
+                        <select id="nuevo-estado" 
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="EN_PROCESO">En Proceso</option>
+                            <option value="COMPLETADO">Completado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Comentario (opcional)</label>
+                        <textarea id="comentario-tarea" rows="3" 
+                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Añade un comentario sobre el progreso..."></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="cerrarModalTarea()" 
+                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
+                            Cancelar
+                        </button>
+                        <button onclick="actualizarEstadoTarea()" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let proyectoActual = 'GenT';
-        let sprintActual = '1';
+        let tabActual = 'mis-tareas';
+        let tareaActual = null;
+        let misTareasPersonales = [];
 
-        // Cambiar proyecto
-        function cambiarProyecto(proyecto) {
-            proyectoActual = proyecto;
-            document.getElementById('proyecto-actual').textContent = `(${proyecto})`;
-            
-            // Actualizar botones
-            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
-                btn.classList.remove('bg-yellow-600');
-                btn.classList.add('bg-gray-700');
-            });
-            document.getElementById(`btn-${proyecto}`).classList.add('bg-yellow-600');
-            
-            cargarDatos();
-        }
+        // Función para cambiar tabs
+        function cambiarTab(tab) {
+            // Ocultar contenido actual
+            document.getElementById(`content-${tabActual}`).classList.add('hidden');
+            document.getElementById(`tab-${tabActual}`).classList.remove('border-blue-500', 'text-blue-600');
+            document.getElementById(`tab-${tabActual}`).classList.add('border-transparent', 'text-gray-500');
 
-        // Cargar datos del proyecto/sprint
-        async function cargarDatos() {
-            try {
-                await Promise.all([
-                    cargarTareas(),
-                    cargarSprintInfo(),
-                    cargarProductBacklog(),
-                    cargarBotonesSprints()
-                ]);
-            } catch (error) {
-                console.error('Error cargando datos:', error);
+            // Mostrar nuevo contenido
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('border-blue-500', 'text-blue-600');
+            document.getElementById(`tab-${tab}`).classList.remove('border-transparent', 'text-gray-500');
+
+            tabActual = tab;
+
+            // Cargar contenido específico del tab
+            if (tab === 'mis-tareas') {
+                cargarMisTareas();
+            } else if (tab !== 'mis-tareas') {
+                cargarDatosProyecto(tab.toUpperCase());
             }
         }
 
-        // Cargar tareas
-        async function cargarTareas() {
+        // Función para cargar mis tareas personales
+        async function cargarMisTareas() {
             try {
-                const response = await fetch(`/api/tareas/<%= grupo %>/${proyectoActual}/${sprintActual}`);
-                const data = await response.json();
+                misTareasPersonales = [];
+                let totalAsignadas = 0;
+                let totalCompletadas = 0;
+                let totalEnProceso = 0;
+
+                // Cargar tareas de todos los proyectos
+                const proyectos = ['GenT', 'Proy', 'Proy2'].filter(p => 
+                    document.getElementById(`content-${p.toLowerCase()}`) !== null
+                );
+
+                for (const proyecto of proyectos) {
+                    try {
+                        const sprintActual = '1'; // Usar el sprint actual del proyecto
+                        const response = await fetch(`/api/tareas/<%= grupo %>/${proyecto}/${sprintActual}`);
+                        const data = await response.json();
+                        
+                        if (data.tareas) {
+                            Object.entries(data.tareas).forEach(([taskId, tarea]) => {
+                                if (tarea[2] && tarea[2].includes('<%= user.nickname %>')) {
+                                    misTareasPersonales.push({
+                                        id: taskId,
+                                        proyecto: proyecto,
+                                        descripcion: tarea[1],
+                                        estado: tarea[0],
+                                        prioridad: tarea[3],
+                                        fechaLimite: tarea[4],
+                                        estimacionHoras: tarea[6] || 0,
+                                        asignados: tarea[2],
+                                        data: tarea
+                                    });
+
+                                    totalAsignadas++;
+                                    if (tarea[0] === 'COMPLETADO' || tarea[0] === 'VERIFICADO') {
+                                        totalCompletadas++;
+                                    } else if (tarea[0] === 'EN_PROCESO') {
+                                        totalEnProceso++;
+                                    }
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.warn(`Error cargando tareas de ${proyecto}:`, error);
+                    }
+                }
+
+                // Actualizar estadísticas
+                document.getElementById('total-tareas-asignadas').textContent = totalAsignadas;
+                document.getElementById('total-tareas-completadas').textContent = totalCompletadas;
+                document.getElementById('total-tareas-proceso').textContent = totalEnProceso;
+
+                const progreso = totalAsignadas > 0 ? Math.round((totalCompletadas / totalAsignadas) * 100) : 0;
+                document.getElementById('mi-progreso').textContent = `${progreso}%`;
+
+                // Mostrar tareas en kanban personal
+                mostrarMisTareasKanban();
                 
-                const container = document.getElementById('mis-tareas');
+                // Actualizar panel de rendimiento
+                actualizarRendimientoPersonal(totalAsignadas, totalCompletadas);
                 
-                if (Object.keys(data.tareas).length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-8 text-gray-500">
-                            <div class="text-4xl mb-2">😴</div>
-                            <p>No tienes tareas asignadas en este sprint</p>
+                // Mostrar próximas tareas
+                mostrarProximasTareas();
+
+            } catch (error) {
+                console.error('Error cargando mis tareas:', error);
+            }
+        }
+
+        // Función para mostrar tareas en kanban personal
+        function mostrarMisTareasKanban() {
+            const porHacer = document.getElementById('mis-tareas-por-hacer');
+            const enProceso = document.getElementById('mis-tareas-en-proceso');
+            const completadas = document.getElementById('mis-tareas-completadas');
+
+            // Limpiar contenedores
+            porHacer.innerHTML = '';
+            enProceso.innerHTML = '';
+            completadas.innerHTML = '';
+
+            misTareasPersonales.forEach(tarea => {
+                const tarjetaTarea = crearTarjetaTareaPersonal(tarea);
+                
+                switch (tarea.estado) {
+                    case 'POR_HACER':
+                        porHacer.appendChild(tarjetaTarea);
+                        break;
+                    case 'EN_PROCESO':
+                        enProceso.appendChild(tarjetaTarea);
+                        break;
+                    case 'COMPLETADO':
+                    case 'VERIFICADO':
+                        completadas.appendChild(tarjetaTarea);
+                        break;
+                }
+            });
+
+            // Mensaje si no hay tareas
+            if (misTareasPersonales.length === 0) {
+                porHacer.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">No tienes tareas asignadas</div>';
+            }
+        }
+
+        // Función para crear tarjeta de tarea personal
+        function crearTarjetaTareaPersonal(tarea) {
+            const div = document.createElement('div');
+            div.className = 'bg-white p-3 rounded shadow-sm border cursor-pointer hover:shadow-md transition-shadow';
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div class="text-sm font-medium text-gray-900">${tarea.descripcion}</div>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        tarea.prioridad === 'ALTA' ? 'bg-red-100 text-red-800' :
+                        tarea.prioridad === 'MEDIA' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                    }">
+                        ${tarea.prioridad}
+                    </span>
+                </div>
+                <div class="text-xs text-gray-500 mb-2">
+                    Proyecto: ${tarea.proyecto === 'GenT' ? 'Generación T' : tarea.proyecto === 'Proy' ? 'Principal' : 'Secundario'}
+                </div>
+                <div class="flex justify-between items-center">
+                    ${tarea.estimacionHoras ? `<span class="text-xs text-gray-400">${tarea.estimacionHoras}h est.</span>` : '<span></span>'}
+                    ${tarea.estado !== 'COMPLETADO' && tarea.estado !== 'VERIFICADO' ? 
+                        '<button onclick="event.stopPropagation(); abrirModalTarea(\'' + tarea.id + '\')" class="text-xs text-blue-600 hover:text-blue-800">Actualizar</button>' : 
+                        '<span class="text-xs text-green-600">Completada</span>'
+                    }
+                </div>
+            `;
+            
+            div.onclick = () => verDetalleTarea(tarea);
+            return div;
+        }
+
+        // Función para actualizar rendimiento personal
+        function actualizarRendimientoPersonal(totalAsignadas, totalCompletadas) {
+            const eficiencia = totalAsignadas > 0 ? Math.round((totalCompletadas / totalAsignadas) * 100) : 0;
+            document.getElementById('mi-eficiencia').textContent = `${eficiencia}%`;
+            document.getElementById('barra-eficiencia').style.width = `${eficiencia}%`;
+
+            // Calcular tareas de esta semana y horas estimadas
+            const hoy = new Date();
+            const inicioSemana = new Date(hoy.setDate(hoy.getDate() - hoy.getDay()));
+            const tareasEstaSemana = misTareasPersonales.filter(tarea => {
+                // Aquí podrías filtrar por fecha de creación o fecha límite
+                return true; // Por simplicidad, mostramos todas
+            }).length;
+
+            const horasEstimadas = misTareasPersonales
+                .filter(tarea => tarea.estado !== 'COMPLETADO' && tarea.estado !== 'VERIFICADO')
+                .reduce((sum, tarea) => sum + tarea.estimacionHoras, 0);
+
+            document.getElementById('tareas-semana').textContent = tareasEstaSemana;
+            document.getElementById('horas-estimadas').textContent = `${horasEstimadas}h`;
+        }
+
+        // Función para mostrar próximas tareas
+        function mostrarProximasTareas() {
+            const container = document.getElementById('proximas-tareas');
+            container.innerHTML = '';
+
+            // Filtrar tareas pendientes con prioridad alta
+            const tareasPendientes = misTareasPersonales
+                .filter(tarea => tarea.estado !== 'COMPLETADO' && tarea.estado !== 'VERIFICADO')
+                .sort((a, b) => {
+                    const prioridadOrder = { 'ALTA': 3, 'MEDIA': 2, 'BAJA': 1 };
+                    return prioridadOrder[b.prioridad] - prioridadOrder[a.prioridad];
+                })
+                .slice(0, 5);
+
+            if (tareasPendientes.length > 0) {
+                tareasPendientes.forEach(tarea => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center p-2 bg-gray-50 rounded';
+                    div.innerHTML = `
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">${tarea.descripcion}</p>
+                            <p class="text-xs text-gray-500">${tarea.proyecto}</p>
+                        </div>
+                        <div class="text-xs px-2 py-1 rounded ${
+                            tarea.prioridad === 'ALTA' ? 'bg-red-100 text-red-800' :
+                            tarea.prioridad === 'MEDIA' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                        }">
+                            ${tarea.prioridad}
                         </div>
                     `;
-                    return;
-                }
-                
-                container.innerHTML = Object.entries(data.tareas).map(([id, tarea]) => {
-                    const [estado, descripcion, asignados, prioridad, fechaLimite] = tarea;
-                    const estadoColor = {
-                        'POR_HACER': 'bg-gray-600',
-                        'EN_PROCESO': 'bg-yellow-600',
-                        'COMPLETADO': 'bg-green-600',
-                        'VERIFICADO': 'bg-blue-600'
-                    };
-                    
-                    return `
-                        <div class="bg-yellow-900 border-2 border-yellow-600 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-semibold text-yellow-100">${descripcion}</h4>
-                                <span class="${estadoColor[estado] || 'bg-gray-600'} px-2 py-1 rounded text-xs">
-                                    ${estado}
+                    container.appendChild(div);
+                });
+            } else {
+                container.innerHTML = '<div class="text-center text-gray-500 text-sm">No tienes tareas pendientes</div>';
+            }
+        }
+
+        // Función para cargar datos del proyecto
+        async function cargarDatosProyecto(proyecto) {
+            try {
+                // Cargar Product Backlog
+                const backlogResponse = await fetch(`/api/product-backlog/<%= grupo %>/${proyecto}`);
+                const backlogData = await backlogResponse.json();
+                mostrarProductBacklog(proyecto, backlogData.productBacklog || []);
+
+                // Cargar sprint actual
+                const sprintActual = '1'; // Usar el sprint actual del proyecto
+                const sprintResponse = await fetch(`/api/sprint/<%= grupo %>/${proyecto}/${sprintActual}`);
+                const sprintData = await sprintResponse.json();
+                mostrarSprintHistorias(proyecto, sprintData.scrumBoard || [], backlogData.productBacklog || []);
+
+                // Cargar mis tareas en este proyecto
+                const tareasResponse = await fetch(`/api/tareas/<%= grupo %>/${proyecto}/${sprintActual}`);
+                const tareasData = await tareasResponse.json();
+                mostrarMisTareasProyecto(proyecto, tareasData.tareas || {});
+
+                // Actualizar estadísticas del proyecto
+                actualizarEstadisticasProyecto(proyecto, backlogData, sprintData, tareasData);
+
+            } catch (error) {
+                console.error('Error cargando datos del proyecto:', error);
+            }
+        }
+
+        // Función para mostrar Product Backlog
+        function mostrarProductBacklog(proyecto, historias) {
+            const container = document.getElementById(`backlog-${proyecto.toLowerCase()}`);
+            container.innerHTML = '';
+
+            if (historias.length > 0) {
+                historias.forEach(historia => {
+                    const li = document.createElement('li');
+                    li.className = 'px-4 py-4';
+                    li.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        Como ${historia[1]}, quiero ${historia[2]}
+                                    </div>
+                                    <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        historia[5] === 'ALTA' ? 'bg-red-100 text-red-800' :
+                                        historia[5] === 'MEDIA' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-green-100 text-green-800'
+                                    }">
+                                        ${historia[5]}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-500 mt-1">
+                                    Para: ${historia[3]}
+                                </div>
+                                <div class="text-xs text-gray-400 mt-1">
+                                    Story Points: ${historia[6]}
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                historia[7] === 'COMPLETADO' ? 'bg-green-100 text-green-800' :
+                                historia[7] === 'EN_PROCESO' ? 'bg-blue-100 text-blue-800' :
+                                historia[7] === 'EN_SPRINT' ? 'bg-purple-100 text-purple-800' :
+                                'bg-gray-100 text-gray-800'
+                            }">
+                                ${historia[7].replace('_', ' ')}
+                            </span>
+                        </div>
+                    `;
+                    container.appendChild(li);
+                });
+            } else {
+                container.innerHTML = '<li class="px-4 py-4 text-center text-gray-500">No hay historias de usuario</li>';
+            }
+        }
+
+        // Función para mostrar historias del sprint
+        function mostrarSprintHistorias(proyecto, scrumBoard, historias) {
+            const container = document.getElementById(`sprint-historias-${proyecto.toLowerCase()}`);
+            container.innerHTML = '';
+
+            if (scrumBoard.length > 0) {
+                const historiasEnSprint = scrumBoard.map(historyId => 
+                    historias.find(h => h[0] === historyId)
+                ).filter(h => h);
+
+                if (historiasEnSprint.length > 0) {
+                    historiasEnSprint.forEach(historia => {
+                        const div = document.createElement('div');
+                        div.className = 'border-l-4 border-blue-400 bg-blue-50 p-4 mb-3';
+                        div.innerHTML = `
+                            <div class="text-sm font-medium text-blue-900">
+                                Como ${historia[1]}, quiero ${historia[2]}
+                            </div>
+                            <div class="text-sm text-blue-700 mt-1">
+                                Para: ${historia[3]}
+                            </div>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-blue-600">${historia[6]} Story Points</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    historia[7] === 'COMPLETADO' ? 'bg-green-100 text-green-800' :
+                                    historia[7] === 'EN_PROCESO' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-gray-100 text-gray-800'
+                                }">
+                                    ${historia[7].replace('_', ' ')}
                                 </span>
                             </div>
-                            <p class="text-sm text-yellow-200 mb-3">
-                                ${asignados.join(', ')} | 
-                                ${prioridad} | 
-                                ${fechaLimite}
-                            </p>
-                            ${estado === 'POR_HACER' || estado === 'EN_PROCESO' ? `
-                                <div class="flex gap-2">
-                                    ${estado === 'POR_HACER' ? `
-                                        <button onclick="cambiarEstadoTarea('${id}', 'EN_PROCESO')" 
-                                                class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded text-sm">
-                                            ▶️ Iniciar
-                                        </button>
-                                    ` : ''}
-                                    ${estado === 'EN_PROCESO' ? `
-                                        <button onclick="cambiarEstadoTarea('${id}', 'COMPLETADO')" 
-                                                class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm">
-                                            ✅ Completar
-                                        </button>
-                                    ` : ''}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }).join('');
-                
-            } catch (error) {
-                document.getElementById('mis-tareas').innerHTML = `
-                    <div class="text-red-400 p-4 bg-red-900 rounded">
-                        ❌ Error cargando tareas
-                    </div>
-                `;
-            }
-        }
-
-        // Cargar info del sprint
-        async function cargarSprintInfo() {
-            try {
-                const response = await fetch(`/api/sprint/<%= grupo %>/${proyectoActual}/${sprintActual}`);
-                const data = await response.json();
-                
-                document.getElementById('sprint-numero').textContent = sprintActual;
-                document.getElementById('sprint-inicio').textContent = data.fechaIni.join('/');
-                document.getElementById('sprint-fin').textContent = data.fechaFin.join('/');
-                
-            } catch (error) {
-                console.error('Error cargando sprint info:', error);
-            }
-        }
-
-        // Cargar product backlog
-        async function cargarProductBacklog() {
-            try {
-                const response = await fetch(`/api/product-backlog/<%= grupo %>/${proyectoActual}`);
-                const data = await response.json();
-                
-                const container = document.getElementById('product-backlog');
-                
-                if (!data.productBacklog || data.productBacklog.length === 0) {
-                    container.innerHTML = '<p class="text-gray-500 text-sm">No hay historias</p>';
-                    return;
-                }
-                
-                container.innerHTML = data.productBacklog.map(historia => {
-                    const [id, como, quiero, para, criterio, prioridad, points, estado] = historia;
-                    return `
-                        <div class="bg-gray-700 p-2 rounded text-sm">
-                            <p class="font-semibold">${quiero}</p>
-                            <p class="text-xs text-gray-400">🎯 ${points} pts | ${estado}</p>
-                        </div>
-                    `;
-                }).join('');
-                
-            } catch (error) {
-                document.getElementById('product-backlog').innerHTML = `
-                    <p class="text-red-400 text-sm">❌ Error cargando</p>
-                `;
-            }
-        }
-
-        // Cargar botones de sprints
-        async function cargarBotonesSprints() {
-            // Por ahora solo mostrar el sprint actual, después se puede mejorar
-            document.getElementById('botones-sprints').innerHTML = `
-                <button onclick="cambiarSprint('1')" 
-                        class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-sm ${sprintActual === '1' ? 'ring-2 ring-yellow-500' : ''}">
-                    Sprint 1
-                </button>
-            `;
-        }
-
-        // Cambiar estado de tarea
-        function cambiarEstadoTarea(tareaId, nuevoEstado) {
-            const modal = document.getElementById('modal-estado');
-            const content = document.getElementById('modal-content');
-            
-            content.innerHTML = `
-                <p class="mb-4">¿Cambiar estado a <strong>${nuevoEstado}</strong>?</p>
-            `;
-            
-            document.getElementById('btn-confirmar').onclick = () => confirmarCambioEstado(tareaId, nuevoEstado);
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        // Confirmar cambio de estado
-        async function confirmarCambioEstado(tareaId, nuevoEstado) {
-            try {
-                const response = await fetch(`/api/tareas/<%= grupo %>/${proyectoActual}/${tareaId}/estado`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ estado: nuevoEstado })
-                });
-                
-                if (response.ok) {
-                    cerrarModal();
-                    cargarTareas(); // Recargar tareas
+                        `;
+                        container.appendChild(div);
+                    });
                 } else {
-                    alert('❌ Error cambiando estado');
+                    container.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">No hay historias en el sprint actual</div>';
                 }
-            } catch (error) {
-                alert('❌ Error de conexión');
+            } else {
+                container.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">Sprint aún no planificado</div>';
             }
         }
 
-        // Cerrar modal
-        function cerrarModal() {
-            document.getElementById('modal-estado').classList.add('hidden');
-            document.getElementById('modal-estado').classList.remove('flex');
+        // Función para mostrar mis tareas en el proyecto
+        function mostrarMisTareasProyecto(proyecto, tareas) {
+            const container = document.getElementById(`mis-tareas-proyecto-${proyecto.toLowerCase()}`);
+            container.innerHTML = '';
+
+            const misTareasProyecto = Object.entries(tareas).filter(([taskId, tarea]) => 
+                tarea[2] && tarea[2].includes('<%= user.nickname %>')
+            );
+
+            if (misTareasProyecto.length > 0) {
+                misTareasProyecto.forEach(([taskId, tarea]) => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-50 p-3 rounded border cursor-pointer hover:bg-gray-100';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="text-sm font-medium text-gray-900 flex-1">${tarea[1]}</div>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                tarea[0] === 'COMPLETADO' ? 'bg-green-100 text-green-800' :
+                                tarea[0] === 'EN_PROCESO' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
+                            }">
+                                ${tarea[0].replace('_', ' ')}
+                            </span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Prioridad: ${tarea[3]} ${tarea[6] ? `• ${tarea[6]}h estimadas` : ''}
+                        </div>
+                    `;
+                    div.onclick = () => abrirModalTarea(taskId, proyecto);
+                    container.appendChild(div);
+                });
+            } else {
+                container.innerHTML = '<div class="text-center text-gray-500 text-sm py-2">No tienes tareas en este proyecto</div>';
+            }
         }
 
-        // Cambiar sprint (función básica)
-        function cambiarSprint(sprint) {
-            sprintActual = sprint;
-            cargarDatos();
+        // Función para actualizar estadísticas del proyecto
+        function actualizarEstadisticasProyecto(proyecto, backlogData, sprintData, tareasData) {
+            const historias = backlogData.productBacklog || [];
+            const tareas = Object.values(tareasData.tareas || {});
+            
+            // Total de historias
+            document.getElementById(`total-historias-${proyecto.toLowerCase()}`).textContent = historias.length;
+            
+            // Historias completadas
+            const historiasCompletadas = historias.filter(h => h[7] === 'COMPLETADO').length;
+            document.getElementById(`historias-completadas-${proyecto.toLowerCase()}`).textContent = historiasCompletadas;
+            
+            // Tareas del sprint
+            document.getElementById(`tareas-sprint-${proyecto.toLowerCase()}`).textContent = tareas.length;
+            
+            // Progreso del sprint
+            if (tareas.length > 0) {
+                const tareasCompletadas = tareas.filter(t => t[0] === 'COMPLETADO' || t[0] === 'VERIFICADO').length;
+                const progreso = Math.round((tareasCompletadas / tareas.length) * 100);
+                document.getElementById(`progreso-sprint-${proyecto.toLowerCase()}`).textContent = `${progreso}%`;
+                document.getElementById(`barra-progreso-sprint-${proyecto.toLowerCase()}`).style.width = `${progreso}%`;
+            }
         }
 
-        // Cargar datos inicial
+        // Función para abrir modal de tarea
+        function abrirModalTarea(taskId, proyectoOpcional = null) {
+            // Buscar la tarea
+            let tarea = null;
+            let proyecto = proyectoOpcional;
+
+            if (proyectoOpcional) {
+                // Buscar en el proyecto específico
+                // Aquí necesitarías hacer una llamada a la API para obtener la tarea específica
+                tarea = { id: taskId, descripcion: 'Descripción de la tarea', estado: 'POR_HACER' };
+            } else {
+                // Buscar en mis tareas personales
+                tarea = misTareasPersonales.find(t => t.id === taskId);
+            }
+
+            if (!tarea) {
+                alert('Tarea no encontrada');
+                return;
+            }
+
+            tareaActual = tarea;
+
+            // Llenar modal
+            document.getElementById('tarea-descripcion').textContent = tarea.descripcion;
+            document.getElementById('tarea-estado-actual').textContent = tarea.estado.replace('_', ' ');
+            
+            // Configurar opciones del select según el estado actual
+            const selectEstado = document.getElementById('nuevo-estado');
+            selectEstado.innerHTML = '';
+            
+            if (tarea.estado === 'POR_HACER') {
+                selectEstado.innerHTML = '<option value="EN_PROCESO">En Proceso</option>';
+            } else if (tarea.estado === 'EN_PROCESO') {
+                selectEstado.innerHTML = '<option value="COMPLETADO">Completado</option>';
+            }
+
+            document.getElementById('modal-tarea').classList.remove('hidden');
+        }
+
+        // Función para cerrar modal de tarea
+        function cerrarModalTarea() {
+            document.getElementById('modal-tarea').classList.add('hidden');
+            document.getElementById('comentario-tarea').value = '';
+            tareaActual = null;
+        }
+
+        // Función para actualizar estado de tarea
+        async function actualizarEstadoTarea() {
+            if (!tareaActual) return;
+
+            const nuevoEstado = document.getElementById('nuevo-estado').value;
+            const comentario = document.getElementById('comentario-tarea').value;
+
+            try {
+                const response = await fetch(`/api/tareas/<%= grupo %>/${tareaActual.proyecto}/${tareaActual.id}/estado`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        estado: nuevoEstado,
+                        comentario: comentario
+                    })
+                });
+
+                if (response.ok) {
+                    cerrarModalTarea();
+                    // Recargar datos
+                    if (tabActual === 'mis-tareas') {
+                        cargarMisTareas();
+                    } else {
+                        cargarDatosProyecto(tabActual.toUpperCase());
+                    }
+                    alert('Tarea actualizada correctamente');
+                } else {
+                    throw new Error('Error al actualizar tarea');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar la tarea');
+            }
+        }
+
+        // Función para ver detalle de tarea
+        function verDetalleTarea(tarea) {
+            alert(`Tarea: ${tarea.descripcion}\nProyecto: ${tarea.proyecto}\nEstado: ${tarea.estado}\nPrioridad: ${tarea.prioridad}`);
+        }
+
+        // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
-            cargarDatos();
+            // Cargar mis tareas al inicio
+            cargarMisTareas();
+
+            // Actualizar datos cada 30 segundos
+            setInterval(() => {
+                if (tabActual === 'mis-tareas') {
+                    cargarMisTareas();
+                }
+            }, 30000);
         });
+
+        // Función para mostrar notificaciones de nuevas tareas
+        function mostrarNotificacionNuevaTarea() {
+            // Implementar sistema de notificaciones si es necesario
+            // Por ejemplo, usando Notification API del navegador
+        }
     </script>
 </body>
 </html>

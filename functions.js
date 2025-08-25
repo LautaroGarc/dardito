@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const fs = require('fs');
 
 // TOKENS
 
@@ -15,9 +16,10 @@ function regenerateToken(users, userId){
 
 function loadJSON(path) {
   try {
-    const data = fs.readFile(path, 'utf8');
+    const data = fs.readFileSync(path, 'utf8'); // Cambié readFile por readFileSync
     return JSON.parse(data);
   } catch (error) {
+    console.error('Error al cargar JSON:', error);
     return {};
   }
 }
@@ -26,6 +28,7 @@ function saveJSON(data, path) {
   try {
     fs.writeFileSync(path, JSON.stringify(data, null, 2));
   } catch (error) {
+    console.error('Error al guardar JSON:', error);
   }
 }
 

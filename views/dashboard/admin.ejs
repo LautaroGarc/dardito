@@ -3,716 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Dardito</title>
+    <title>Dashboard Admin - DARDITO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-    <!-- Header medio feo pero funcional -->
-    <header class="bg-gray-800 border-b-2 border-red-700 p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold text-red-400">🛡️ Dashboard Administrador</h1>
-                <p class="text-sm text-gray-300">
-                    👤 <span class="font-semibold"><%= user.nickname %></span> - 
-                    🏷️ <span class="bg-red-700 px-2 py-1 rounded text-xs"><%= user.rol %></span> - 
-                    🌐 <span class="bg-purple-700 px-2 py-1 rounded text-xs">Vista Global</span>
-                </p>
-            </div>
-            <button onclick="window.location.href='/logout'" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm border border-red-500">
-                🚪 Salir
-            </button>
-        </div>
-    </header>
-
-    <div class="container mx-auto px-4 py-6">
-        <!-- Navegación principal -->
-        <div class="mb-6">
-            <div class="flex gap-2 flex-wrap">
-                <button onclick="cambiarVista('estadisticas')" id="btn-estadisticas" class="bg-yellow-700 hover:bg-yellow-800 px-4 py-2 rounded border border-yellow-600 text-sm font-semibold">
-                    📊 Estadísticas Globales
-                </button>
-                <button onclick="cambiarVista('usuarios')" id="btn-usuarios" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded border border-blue-600 text-sm font-semibold">
-                    👥 Gestión Usuarios
-                </button>
-                <button onclick="cambiarVista('equipos')" id="btn-equipos" class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded border border-purple-600 text-sm font-semibold">
-                    🏆 Equipos
-                </button>
-                <button onclick="cambiarVista('proyectos')" id="btn-proyectos" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded border border-green-600 text-sm font-semibold">
-                    📋 Todos los Proyectos
-                </button>
-            </div>
-        </div>
-
-        <!-- Vista: Estadísticas Globales -->
-        <div id="vista-estadisticas" class="vista-admin">
-            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-                <h2 class="text-lg font-semibold mb-4 text-yellow-400">📊 Estadísticas Globales del Sistema</h2>
-                
-                <!-- Resumen general -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-blue-900 p-4 rounded border border-blue-700 text-center">
-                        <h3 class="font-semibold text-blue-300">🏢 Equipos</h3>
-                        <p class="text-2xl font-bold" id="total-equipos">-</p>
-                        <p class="text-sm text-blue-200">Activos</p>
-                    </div>
-                    <div class="bg-green-900 p-4 rounded border border-green-700 text-center">
-                        <h3 class="font-semibold text-green-300">👥 Usuarios</h3>
-                        <p class="text-2xl font-bold" id="total-usuarios">-</p>
-                        <p class="text-sm text-green-200">Registrados</p>
-                    </div>
-                    <div class="bg-purple-900 p-4 rounded border border-purple-700 text-center">
-                        <h3 class="font-semibold text-purple-300">📈 Proyectos</h3>
-                        <p class="text-2xl font-bold" id="total-proyectos">-</p>
-                        <p class="text-sm text-purple-200">Iniciados</p>
-                    </div>
-                    <div class="bg-red-900 p-4 rounded border border-red-700 text-center">
-                        <h3 class="font-semibold text-red-300">⚡ Promedio</h3>
-                        <p class="text-2xl font-bold" id="promedio-completado">-%</p>
-                        <p class="text-sm text-red-200">Completado</p>
-                    </div>
+<body class="bg-gray-50">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-gray-900">DARDITO - Administrador</h1>
                 </div>
-
-                <!-- Estadísticas detalladas por equipo -->
-                <div class="bg-gray-700 rounded-lg p-4">
-                    <h3 class="font-semibold mb-4 text-gray-300">📋 Estado por Equipos</h3>
-                    <div id="estadisticas-equipos" class="space-y-4">
-                        <!-- Se llena dinámicamente -->
-                    </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Bienvenido, <%= user.nickname %></span>
+                    <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                        Cerrar Sesión
+                    </a>
                 </div>
             </div>
         </div>
+    </nav>
 
-        <!-- Vista: Gestión de Usuarios -->
-        <div id="vista-usuarios" class="vista-admin hidden">
-            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-blue-400">👥 Gestión de Usuarios</h2>
-                    <div class="flex gap-2">
-                        <select id="filtro-grupo" class="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm">
-                            <option value="">Todos los grupos</option>
-                            <option value="Grupo1">Grupo 1</option>
-                            <option value="Grupo2">Grupo 2</option>
-                            <option value="Grupo3">Grupo 3</option>
-                            <option value="Grupo4">Grupo 4</option>
-                            <option value="Admin">Admin</option>
-                        </select>
-                        <select id="filtro-rol" class="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm">
-                            <option value="">Todos los roles</option>
-                            <option value="miembro">Miembro</option>
-                            <option value="scrumMaster">Scrum Master</option>
-                            <option value="lider">Líder</option>
-                            <option value="admin">Admin</option>
-                            <option value="auditor">Auditor</option>
-                        </select>
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Estadísticas Globales -->
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
+                                <span class="text-white font-semibold">E</span>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Equipos</dt>
+                                <dd class="text-lg font-medium text-gray-900"><%= estadisticasGlobales.totalEquipos %></dd>
+                            </dl>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Tabla de usuarios medio pelada -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-700">
-                            <tr>
-                                <th class="px-4 py-2 text-left">Usuario</th>
-                                <th class="px-4 py-2 text-left">Rol</th>
-                                <th class="px-4 py-2 text-left">Grupo</th>
-                                <th class="px-4 py-2 text-left">Estadísticas</th>
-                                <th class="px-4 py-2 text-left">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-usuarios" class="divide-y divide-gray-700">
-                            <!-- Se llena dinámicamente -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
-        </div>
 
-        <!-- Vista: Equipos -->
-        <div id="vista-equipos" class="vista-admin hidden">
-            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <h2 class="text-lg font-semibold mb-4 text-purple-400">🏆 Información Completa de Equipos</h2>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="space-y-4" id="equipos-izquierda">
-                        <!-- Equipos 1 y 2 -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-green-600 rounded-md flex items-center justify-center">
+                                <span class="text-white font-semibold">A</span>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Equipos Activos</dt>
+                                <dd class="text-lg font-medium text-gray-900"><%= estadisticasGlobales.equiposActivos %></dd>
+                            </dl>
+                        </div>
                     </div>
-                    <div class="space-y-4" id="equipos-derecha">
-                        <!-- Equipos 3 y 4 -->
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-yellow-600 rounded-md flex items-center justify-center">
+                                <span class="text-white font-semibold">U</span>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Usuarios</dt>
+                                <dd class="text-lg font-medium text-gray-900"><%= estadisticasGlobales.totalUsuarios %></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-purple-600 rounded-md flex items-center justify-center">
+                                <span class="text-white font-semibold">P</span>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Proyectos</dt>
+                                <dd class="text-lg font-medium text-gray-900"><%= estadisticasGlobales.totalProyectos %></dd>
+                            </dl>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Vista: Todos los Proyectos -->
-        <div id="vista-proyectos" class="vista-admin hidden">
-            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-green-400">📋 Vista Global de Proyectos</h2>
-                    <div class="flex gap-2">
-                        <select id="proyecto-selector" class="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm">
-                            <option value="GenT">Generación T</option>
-                            <option value="Proy">Proyecto</option>
-                            <option value="Proy2">Proyecto 2</option>
-                        </select>
-                        <select id="equipo-selector" class="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm">
-                            <option value="">Todos los equipos</option>
-                            <option value="Grupo1">Grupo 1</option>
-                            <option value="Grupo2">Grupo 2</option>
-                            <option value="Grupo3">Grupo 3</option>
-                            <option value="Grupo4">Grupo 4</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div id="proyectos-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Se llena dinámicamente -->
+        <!-- Gráfico de Composición de Equipos -->
+        <div class="bg-white shadow rounded-lg mb-8">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Composición de Equipos</h3>
+                <div class="w-full h-80">
+                    <canvas id="equiposChart"></canvas>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal para cambiar grupo de usuario -->
-    <div id="modal-cambiar-grupo" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-600 max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4">👥 Cambiar Usuario de Grupo</h3>
-            <div class="mb-4">
-                <p id="usuario-cambio-info" class="text-gray-300 mb-3"></p>
-                <label class="block text-sm font-medium mb-2">Nuevo grupo:</label>
-                <select id="nuevo-grupo" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white">
-                    <option value="Grupo1">Grupo 1</option>
-                    <option value="Grupo2">Grupo 2</option>
-                    <option value="Grupo3">Grupo 3</option>
-                    <option value="Grupo4">Grupo 4</option>
-                    <option value="Admin">Admin</option>
-                </select>
+        <!-- Lista de Equipos -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Equipos Registrados</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Información detallada de todos los equipos.</p>
             </div>
-            <div class="flex gap-2">
-                <button id="btn-confirmar-cambio" class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
-                    ✅ Cambiar Grupo
-                </button>
-                <button onclick="cerrarModal('modal-cambiar-grupo')" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded">
-                    ❌ Cancelar
-                </button>
-            </div>
+            <ul class="divide-y divide-gray-200">
+                <% Object.keys(grupos).forEach(nombreGrupo => { %>
+                <li class="px-4 py-4 sm:px-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-700"><%= nombreGrupo.slice(-1) %></span>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900"><%= nombreGrupo %></div>
+                                <div class="text-sm text-gray-500">
+                                    Estado: 
+                                    <% if (grupos[nombreGrupo].started === 'y') { %>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            Activo
+                                        </span>
+                                    <% } else { %>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            Inactivo
+                                        </span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <% 
+                            const miembrosGrupo = Object.values(usuarios).filter(user => user.grupo === nombreGrupo);
+                            const rolesGrupo = {};
+                            miembrosGrupo.forEach(user => {
+                                rolesGrupo[user.rol] = (rolesGrupo[user.rol] || 0) + 1;
+                            });
+                            %>
+                            <span class="text-sm text-gray-500">
+                                <%= miembrosGrupo.length %> miembros
+                            </span>
+                            <button onclick="mostrarDetallesEquipo('<%= nombreGrupo %>')" 
+                                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Miembros del equipo (colapsable) -->
+                    <div id="detalles-<%= nombreGrupo %>" class="hidden mt-4 pl-14">
+                        <div class="border-t border-gray-200 pt-4">
+                            <h4 class="text-sm font-medium text-gray-900 mb-2">Miembros del Equipo</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <% miembrosGrupo.forEach(miembro => { %>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-600 text-xs font-medium text-white">
+                                                <%= miembro.nickname.charAt(0).toUpperCase() %>
+                                            </span>
+                                        </div>
+                                        <div class="ml-2 min-w-0 flex-1">
+                                            <p class="text-sm font-medium text-gray-900 truncate"><%= miembro.nickname %></p>
+                                            <p class="text-xs text-gray-500 capitalize"><%= miembro.rol %></p>
+                                            <% if (miembro.stats && miembro.stats[0] > 0) { %>
+                                            <p class="text-xs text-blue-600">
+                                                Tiempo en llamadas: <%= (miembro.stats[0] / 3600).toFixed(1) %>h
+                                            </p>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <% }) %>
+            </ul>
         </div>
     </div>
 
     <script>
-        let vistaActual = 'estadisticas';
-        let datosGlobales = {};
+        // Configurar gráfico de composición de equipos
+        const ctx = document.getElementById('equiposChart').getContext('2d');
+        const equiposData = {
+            labels: [<% Object.keys(composicionEquipos).forEach((grupo, index) => { %>'<%= grupo %>'<%= index < Object.keys(composicionEquipos).length - 1 ? ',' : '' %><% }) %>],
+            datasets: [{
+                label: 'Líder',
+                data: [<% Object.keys(composicionEquipos).forEach((grupo, index) => { %><%= composicionEquipos[grupo].roles.lider || 0 %><%= index < Object.keys(composicionEquipos).length - 1 ? ',' : '' %><% }) %>],
+                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+            }, {
+                label: 'Scrum Master',
+                data: [<% Object.keys(composicionEquipos).forEach((grupo, index) => { %><%= composicionEquipos[grupo].roles.scrumMaster || 0 %><%= index < Object.keys(composicionEquipos).length - 1 ? ',' : '' %><% }) %>],
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+            }, {
+                label: 'Miembros',
+                data: [<% Object.keys(composicionEquipos).forEach((grupo, index) => { %><%= composicionEquipos[grupo].roles.miembro || 0 %><%= index < Object.keys(composicionEquipos).length - 1 ? ',' : '' %><% }) %>],
+                backgroundColor: 'rgba(245, 158, 11, 0.8)',
+            }]
+        };
 
-        // Cambiar vista principal
-        function cambiarVista(vista) {
-            vistaActual = vista;
-            
-            // Ocultar todas las vistas
-            document.querySelectorAll('.vista-admin').forEach(v => v.classList.add('hidden'));
-            
-            // Mostrar vista seleccionada
-            document.getElementById(`vista-${vista}`).classList.remove('hidden');
-            
-            // Actualizar botones
-            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
-                btn.classList.remove('bg-yellow-600');
-                btn.classList.add('bg-gray-700');
-            });
-            document.getElementById(`btn-${vista}`).classList.add('bg-yellow-600');
-            
-            // Cargar datos según la vista
-            cargarVista(vista);
-        }
-
-        // Cargar datos según la vista activa
-        async function cargarVista(vista) {
-            switch(vista) {
-                case 'estadisticas':
-                    await cargarEstadisticasGlobales();
-                    break;
-                case 'usuarios':
-                    await cargarUsuarios();
-                    break;
-                case 'equipos':
-                    await cargarEquipos();
-                    break;
-                case 'proyectos':
-                    await cargarTodosLosProyectos();
-                    break;
+        new Chart(ctx, {
+            type: 'bar',
+            data: equiposData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribución de Roles por Equipo'
+                    }
+                }
             }
+        });
+
+        // Función para mostrar/ocultar detalles del equipo
+        function mostrarDetallesEquipo(nombreGrupo) {
+            const detalles = document.getElementById(`detalles-${nombreGrupo}`);
+            detalles.classList.toggle('hidden');
         }
 
-        // Cargar estadísticas globales
-        async function cargarEstadisticasGlobales() {
+        // Cargar estadísticas adicionales cada 30 segundos
+        setInterval(async () => {
             try {
                 const response = await fetch('/api/estadisticas/global');
                 const data = await response.json();
-                datosGlobales = data;
-                
-                // Calcular totales
-                const equipos = Object.keys(data);
-                const equiposIniciados = equipos.filter(eq => data[eq].iniciado).length;
-                
-                document.getElementById('total-equipos').textContent = equiposIniciados;
-                document.getElementById('total-usuarios').textContent = '<%= Object.keys(usuarios || {}).length %>'; // Del servidor
-                
-                let totalProyectos = 0;
-                let promedioGeneral = 0;
-                let contador = 0;
-                
-                equipos.forEach(equipo => {
-                    if (data[equipo].iniciado) {
-                        Object.keys(data[equipo].proyectos).forEach(proyecto => {
-                            totalProyectos++;
-                            promedioGeneral += data[equipo].proyectos[proyecto].porcentajeCompletado;
-                            contador++;
-                        });
-                    }
-                });
-                
-                document.getElementById('total-proyectos').textContent = totalProyectos;
-                document.getElementById('promedio-completado').textContent = contador > 0 ? Math.round(promedioGeneral / contador) : 0;
-                
-                // Mostrar estadísticas por equipo
-                const container = document.getElementById('estadisticas-equipos');
-                container.innerHTML = equipos.map(equipo => {
-                    if (!data[equipo].iniciado) {
-                        return `
-                            <div class="bg-gray-600 p-4 rounded border border-gray-500">
-                                <h4 class="font-semibold text-gray-300">${equipo}</h4>
-                                <p class="text-yellow-300">⏳ Proyecto no iniciado</p>
-                            </div>
-                        `;
-                    }
-                    
-                    const proyectos = data[equipo].proyectos;
-                    return `
-                        <div class="bg-gray-600 p-4 rounded border border-gray-500">
-                            <h4 class="font-semibold text-white mb-3">${equipo}</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                ${Object.entries(proyectos).map(([nombreProy, dataProy]) => `
-                                    <div class="bg-gray-700 p-3 rounded">
-                                        <p class="font-medium text-sm">${nombreProy}</p>
-                                        <p class="text-lg font-bold">${dataProy.porcentajeCompletado}%</p>
-                                        <p class="text-xs text-gray-400">Sprint ${dataProy.sprintActual}</p>
-                                        <p class="text-xs text-gray-400">${dataProy.tareasCompletadas}/${dataProy.totalTareas} tareas</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
+                // Actualizar elementos del DOM con nuevos datos si es necesario
+                console.log('Estadísticas actualizadas:', data);
             } catch (error) {
-                console.error('Error cargando estadísticas globales:', error);
+                console.warn('Error actualizando estadísticas:', error);
             }
-        }
-
-        // Cargar usuarios
-        async function cargarUsuarios() {
-            try {
-                const response = await fetch('/api/admin/usuarios');
-                const usuarios = await response.json();
-                
-                mostrarUsuarios(usuarios);
-                
-                // Event listeners para filtros
-                document.getElementById('filtro-grupo').addEventListener('change', () => filtrarUsuarios(usuarios));
-                document.getElementById('filtro-rol').addEventListener('change', () => filtrarUsuarios(usuarios));
-                
-            } catch (error) {
-                console.error('Error cargando usuarios:', error);
-                document.getElementById('tabla-usuarios').innerHTML = `
-                    <tr><td colspan="5" class="text-center text-red-400 py-4">❌ Error cargando usuarios</td></tr>
-                `;
-            }
-        }
-
-        // Mostrar usuarios en tabla
-        function mostrarUsuarios(usuarios) {
-            const tbody = document.getElementById('tabla-usuarios');
-            
-            tbody.innerHTML = usuarios.map(usuario => {
-                const [tiempoLlamada, tareasAsignadas, tareasCompletadas] = usuario.stats;
-                
-                return `
-                    <tr class="hover:bg-gray-700">
-                        <td class="px-4 py-3">
-                            <div>
-                                <p class="font-medium">${usuario.nickname}</p>
-                                <p class="text-xs text-gray-400">${usuario.id}</p>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3">
-                            <span class="px-2 py-1 rounded text-xs ${obtenerColorRol(usuario.rol)}">
-                                ${usuario.rol}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <span class="px-2 py-1 rounded text-xs bg-blue-700">
-                                ${usuario.grupo}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="text-xs">
-                                <p>⏱️ ${Math.floor(tiempoLlamada / 60)}min</p>
-                                <p>✅ ${tareasCompletadas}/${tareasAsignadas}</p>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3">
-                            <button onclick="abrirCambioGrupo('${usuario.id}', '${usuario.nickname}', '${usuario.grupo}')" 
-                                    class="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs">
-                                🔄 Cambiar Grupo
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Filtrar usuarios
-        function filtrarUsuarios(usuariosOriginales) {
-            const grupoFiltro = document.getElementById('filtro-grupo').value;
-            const rolFiltro = document.getElementById('filtro-rol').value;
-            
-            let usuariosFiltrados = usuariosOriginales;
-            
-            if (grupoFiltro) {
-                usuariosFiltrados = usuariosFiltrados.filter(u => u.grupo === grupoFiltro);
-            }
-            
-            if (rolFiltro) {
-                usuariosFiltrados = usuariosFiltrados.filter(u => u.rol === rolFiltro);
-            }
-            
-            mostrarUsuarios(usuariosFiltrados);
-        }
-
-        // Obtener color para rol
-        function obtenerColorRol(rol) {
-            const colores = {
-                'miembro': 'bg-gray-600',
-                'scrumMaster': 'bg-purple-600',
-                'lider': 'bg-red-600',
-                'admin': 'bg-orange-600',
-                'auditor': 'bg-indigo-600'
-            };
-            return colores[rol] || 'bg-gray-600';
-        }
-
-        // Cargar equipos
-        async function cargarEquipos() {
-            try {
-                const response = await fetch('/api/admin/equipos');
-                const equipos = await response.json();
-                
-                const gruposIzquierda = ['Grupo1', 'Grupo2'];
-                const gruposDerecha = ['Grupo3', 'Grupo4'];
-                
-                document.getElementById('equipos-izquierda').innerHTML = gruposIzquierda.map(grupo => 
-                    generarTarjetaEquipo(grupo, equipos[grupo] || {})
-                ).join('');
-                
-                document.getElementById('equipos-derecha').innerHTML = gruposDerecha.map(grupo => 
-                    generarTarjetaEquipo(grupo, equipos[grupo] || {})
-                ).join('');
-                
-            } catch (error) {
-                console.error('Error cargando equipos:', error);
-            }
-        }
-
-        // Generar tarjeta de equipo
-        function generarTarjetaEquipo(nombreGrupo, datosGrupo) {
-            if (!datosGrupo.iniciado) {
-                return `
-                    <div class="bg-gray-700 border border-gray-600 rounded-lg p-4">
-                        <h3 class="font-semibold text-lg mb-3">${nombreGrupo}</h3>
-                        <div class="text-center py-6">
-                            <div class="text-4xl mb-2">⏳</div>
-                            <p class="text-yellow-300">Proyecto no iniciado</p>
-                        </div>
-                        <div class="mt-4">
-                            <h4 class="font-medium mb-2">Miembros:</h4>
-                            <div class="space-y-1">
-                                ${(datosGrupo.miembros || []).map(miembro => `
-                                    <div class="text-sm bg-gray-600 p-2 rounded">
-                                        <span class="font-medium">${miembro.nickname}</span>
-                                        <span class="text-gray-400 ml-2">(${miembro.rol})</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="bg-gray-700 border border-gray-600 rounded-lg p-4">
-                    <h3 class="font-semibold text-lg mb-3">${nombreGrupo}</h3>
-                    
-                    <!-- Proyectos del equipo -->
-                    <div class="mb-4">
-                        <h4 class="font-medium mb-2">📊 Proyectos:</h4>
-                        <div class="space-y-2">
-                            ${Object.entries(datosGrupo.proyectos || {}).map(([proyecto, datos]) => `
-                                <div class="bg-gray-600 p-2 rounded text-sm">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-medium">${proyecto}</span>
-                                        <span class="text-xs bg-blue-600 px-2 py-1 rounded">Sprint ${datos.sprintActual || '?'}</span>
-                                    </div>
-                                    <div class="mt-1">
-                                        <div class="flex justify-between text-xs">
-                                            <span>Historias: ${datos.historiasEnSprint || 0}/${datos.totalHistorias || 0}</span>
-                                            <span>Tareas: ${datos.tareasCompletadas || 0}/${datos.totalTareas || 0}</span>
-                                        </div>
-                                        <div class="w-full bg-gray-500 rounded-full h-1 mt-1">
-                                            <div class="bg-green-500 h-1 rounded-full" style="width: ${datos.porcentajeCompletado || 0}%"></div>
-                                        </div>
-                                        <p class="text-xs text-gray-400 mt-1">${datos.porcentajeCompletado || 0}% completado</p>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    
-                    <!-- Miembros del equipo -->
-                    <div>
-                        <h4 class="font-medium mb-2">👥 Miembros:</h4>
-                        <div class="space-y-1">
-                            ${(datosGrupo.miembros || []).map(miembro => `
-                                <div class="text-sm bg-gray-600 p-2 rounded flex justify-between items-center">
-                                    <div>
-                                        <span class="font-medium">${miembro.nickname}</span>
-                                        <span class="text-xs px-1 py-0.5 rounded ml-2 ${obtenerColorRol(miembro.rol)}">${miembro.rol}</span>
-                                    </div>
-                                    <button onclick="abrirCambioGrupo('${miembro.id}', '${miembro.nickname}', '${nombreGrupo}')" 
-                                            class="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs">
-                                        🔄
-                                    </button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    
-                    ${(datosGrupo.miembros || []).length === 0 ? '<p class="text-gray-400 text-sm mt-2">No hay miembros asignados</p>' : ''}
-                </div>
-            `;
-        }
-
-        // Cargar todos los proyectos
-        async function cargarTodosLosProyectos() {
-            const proyectoSeleccionado = document.getElementById('proyecto-selector').value;
-            const equipoSeleccionado = document.getElementById('equipo-selector').value;
-            
-            try {
-                const response = await fetch('/api/admin/equipos');
-                const equipos = await response.json();
-                
-                const container = document.getElementById('proyectos-grid');
-                let proyectosMostrados = [];
-                
-                Object.entries(equipos).forEach(([nombreEquipo, datosEquipo]) => {
-                    // Filtrar por equipo si está seleccionado
-                    if (equipoSeleccionado && nombreEquipo !== equipoSeleccionado) {
-                        return;
-                    }
-                    
-                    // Solo mostrar equipos iniciados
-                    if (!datosEquipo.iniciado) {
-                        return;
-                    }
-                    
-                    // Buscar el proyecto específico o mostrar todos
-                    const proyectos = datosEquipo.proyectos || {};
-                    Object.entries(proyectos).forEach(([nombreProyecto, datosProyecto]) => {
-                        if (proyectoSeleccionado && nombreProyecto !== proyectoSeleccionado) {
-                            return;
-                        }
-                        
-                        proyectosMostrados.push({
-                            equipo: nombreEquipo,
-                            proyecto: nombreProyecto,
-                            datos: datosProyecto,
-                            miembros: datosEquipo.miembros || []
-                        });
-                    });
-                });
-                
-                if (proyectosMostrados.length === 0) {
-                    container.innerHTML = `
-                        <div class="col-span-2 text-center py-8 text-gray-500">
-                            <div class="text-4xl mb-2">📭</div>
-                            <p>No hay proyectos que coincidan con los filtros</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                container.innerHTML = proyectosMostrados.map(proyecto => `
-                    <div class="bg-gray-700 border border-gray-600 rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-semibold">${proyecto.equipo} - ${proyecto.proyecto}</h3>
-                            <span class="text-xs bg-blue-600 px-2 py-1 rounded">Sprint ${proyecto.datos.sprintActual || '?'}</span>
-                        </div>
-                        
-                        <!-- Progreso visual -->
-                        <div class="mb-4">
-                            <div class="flex justify-between text-sm mb-1">
-                                <span>Progreso General</span>
-                                <span>${proyecto.datos.porcentajeCompletado || 0}%</span>
-                            </div>
-                            <div class="w-full bg-gray-600 rounded-full h-3">
-                                <div class="bg-green-500 h-3 rounded-full" style="width: ${proyecto.datos.porcentajeCompletado || 0}%"></div>
-                            </div>
-                        </div>
-                        
-                        <!-- Estadísticas -->
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="bg-gray-600 p-3 rounded text-center">
-                                <p class="text-lg font-bold">${proyecto.datos.historiasEnSprint || 0}</p>
-                                <p class="text-xs text-gray-400">Historias en Sprint</p>
-                            </div>
-                            <div class="bg-gray-600 p-3 rounded text-center">
-                                <p class="text-lg font-bold">${proyecto.datos.tareasCompletadas || 0}/${proyecto.datos.totalTareas || 0}</p>
-                                <p class="text-xs text-gray-400">Tareas Completadas</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Miembros del equipo -->
-                        <div class="text-xs">
-                            <p class="font-medium mb-1">Equipo:</p>
-                            <div class="flex flex-wrap gap-1">
-                                ${proyecto.miembros.map(miembro => `
-                                    <span class="px-2 py-1 rounded text-xs ${obtenerColorRol(miembro.rol)}">
-                                        ${miembro.nickname}
-                                    </span>
-                                `).join('')}
-                            </div>
-                        </div>
-                        
-                        <!-- Acciones -->
-                        <div class="mt-3 pt-3 border-t border-gray-600">
-                            <div class="flex gap-2">
-                                <button onclick="verDetalleProyecto('${proyecto.equipo}', '${proyecto.proyecto}')" 
-                                        class="flex-1 bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs">
-                                    👁️ Ver Detalle
-                                </button>
-                                <button onclick="modificarProyecto('${proyecto.equipo}', '${proyecto.proyecto}')" 
-                                        class="flex-1 bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-xs">
-                                    ✏️ Modificar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-                
-                // Event listeners para filtros
-                document.getElementById('proyecto-selector').addEventListener('change', cargarTodosLosProyectos);
-                document.getElementById('equipo-selector').addEventListener('change', cargarTodosLosProyectos);
-                
-            } catch (error) {
-                console.error('Error cargando proyectos:', error);
-                document.getElementById('proyectos-grid').innerHTML = `
-                    <div class="col-span-2 text-center text-red-400 py-8">
-                        ❌ Error cargando proyectos
-                    </div>
-                `;
-            }
-        }
-
-        // Funciones de modales y acciones
-        function abrirCambioGrupo(userId, nickname, grupoActual) {
-            document.getElementById('usuario-cambio-info').textContent = `Usuario: ${nickname} (Grupo actual: ${grupoActual})`;
-            document.getElementById('nuevo-grupo').value = grupoActual;
-            
-            document.getElementById('btn-confirmar-cambio').onclick = () => confirmarCambioGrupo(userId);
-            
-            document.getElementById('modal-cambiar-grupo').classList.remove('hidden');
-            document.getElementById('modal-cambiar-grupo').classList.add('flex');
-        }
-
-        async function confirmarCambioGrupo(userId) {
-            const nuevoGrupo = document.getElementById('nuevo-grupo').value;
-            
-            try {
-                const response = await fetch(`/api/admin/usuarios/${userId}/cambiar-grupo`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nuevoGrupo: nuevoGrupo })
-                });
-                
-                if (response.ok) {
-                    alert('✅ Usuario cambiado de grupo exitosamente');
-                    cerrarModal('modal-cambiar-grupo');
-                    cargarVista(vistaActual); // Recargar vista actual
-                } else {
-                    alert('❌ Error cambiando usuario de grupo');
-                }
-            } catch (error) {
-                alert('❌ Error de conexión');
-            }
-        }
-
-        function cerrarModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            document.getElementById(modalId).classList.remove('flex');
-        }
-
-        // Funciones placeholder para futuras implementaciones
-        function verDetalleProyecto(equipo, proyecto) {
-            alert(`🚧 Ver detalle de ${equipo} - ${proyecto}\n\nFuncionalidad en desarrollo.\n\nSe podría mostrar:\n- Historias completas\n- Todas las tareas\n- Timeline del proyecto\n- Estadísticas detalladas`);
-        }
-
-        function modificarProyecto(equipo, proyecto) {
-            alert(`🚧 Modificar ${equipo} - ${proyecto}\n\nFuncionalidad en desarrollo.\n\nSe podría permitir:\n- Editar historias\n- Modificar tareas\n- Cambiar fechas de sprint\n- Reasignar recursos`);
-        }
-
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', () => {
-            // Activar vista inicial
-            cambiarVista('estadisticas');
-            
-            // Auto-refresh cada 30 segundos para mantener datos actualizados
-            setInterval(() => {
-                if (vistaActual === 'estadisticas') {
-                    cargarEstadisticasGlobales();
-                }
-            }, 30000);
-        });
-
-        // Función para exportar datos (placeholder)
-        function exportarDatos() {
-            alert('🚧 Funcionalidad en desarrollo\n\nSe podría exportar:\n- Estadísticas completas\n- Lista de usuarios\n- Estado de todos los proyectos\n- Reportes en PDF/Excel');
-        }
-
-        // Función para generar reportes (placeholder)
-        function generarReporte() {
-            alert('🚧 Funcionalidad en desarrollo\n\nTipos de reportes disponibles:\n- Rendimiento por equipo\n- Progreso de proyectos\n- Estadísticas de usuarios\n- Timeline de sprints');
-        }
-
-        // Atajos de teclado para navegación rápida (medio geek pero útil)
-        document.addEventListener('keydown', function(e) {
-            if (e.altKey) {
-                switch(e.key) {
-                    case '1':
-                        cambiarVista('estadisticas');
-                        break;
-                    case '2':
-                        cambiarVista('usuarios');
-                        break;
-                    case '3':
-                        cambiarVista('equipos');
-                        break;
-                    case '4':
-                        cambiarVista('proyectos');
-                        break;
-                }
-            }
-        });
+        }, 30000);
     </script>
-
-    <!-- Footer con info de atajos (medio nerdy) -->
-    <div class="fixed bottom-4 right-4 bg-gray-800 border border-gray-600 rounded-lg p-2 text-xs text-gray-400">
-        <p>💡 Atajos: Alt+1 (Stats) | Alt+2 (Users) | Alt+3 (Teams) | Alt+4 (Projects)</p>
-    </div>
 </body>
 </html>

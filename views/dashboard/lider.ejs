@@ -3,171 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Líder - Dardito</title>
+    <title>Dashboard Líder - DARDITO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-    <!-- Header medio feo pero funcional -->
-    <header class="bg-gray-800 border-b-2 border-gray-700 p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold text-red-400">👑 Dashboard Líder</h1>
-                <p class="text-sm text-gray-300">
-                    👤 <span class="font-semibold"><%= user.nickname %></span> - 
-                    🏷️ <span class="bg-red-700 px-2 py-1 rounded text-xs"><%= user.rol %></span> - 
-                    👥 <span class="bg-blue-700 px-2 py-1 rounded text-xs"><%= grupo %></span>
-                </p>
+<body class="bg-gray-50">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-gray-900">DARDITO - Líder de <%= grupo %></h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Bienvenido, <%= user.nickname %></span>
+                    <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                        Cerrar Sesión
+                    </a>
+                </div>
             </div>
-            <button onclick="window.location.href='/logout'" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm border border-red-500">
-                🚪 Salir
+        </div>
+    </nav>
+
+    <!-- Tabs de Navegación -->
+    <div class="bg-white border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mb-px flex space-x-8">
+            <button onclick="cambiarTab('resumen')" id="tab-resumen" 
+                    class="tab-button py-2 px-1 border-b-2 border-blue-500 font-medium text-sm text-blue-600">
+                Resumen General
             </button>
-        </div>
-    </header>
+            <% if (datos.GenT) { %>
+            <button onclick="cambiarTab('gent')" id="tab-gent" 
+                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Generación T
+            </button>
+            <% } %>
+            <% if (datos.Proy) { %>
+            <button onclick="cambiarTab('proy')" id="tab-proy" 
+                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Proyecto Principal
+            </button>
+            <% } %>
+            <% if (datos.Proy2) { %>
+            <button onclick="cambiarTab('proy2')" id="tab-proy2" 
+                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Proyecto Secundario
+            </button>
+            <% } %>
+            <button onclick="cambiarTab('equipo')" id="tab-equipo" 
+                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Gestión de Equipo
+            </button>
+        </nav>
+    </div>
 
-    <div class="container mx-auto px-4 py-6">
-        <!-- Navegación y controles -->
-        <div class="mb-6">
-            <div class="flex gap-2 flex-wrap items-center">
-                <!-- Proyectos -->
-                <button onclick="cambiarProyecto('GenT')" id="btn-GenT" class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded border border-purple-600 text-sm font-semibold">
-                    🎓 Generación T
-                </button>
-                <button onclick="cambiarProyecto('Proy')" id="btn-Proy" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded border border-blue-600 text-sm font-semibold">
-                    💼 Proyecto
-                </button>
-                <% if (datos.Proy2) { %>
-                <button onclick="cambiarProyecto('Proy2')" id="btn-Proy2" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded border border-green-600 text-sm font-semibold">
-                    📋 Proyecto 2
-                </button>
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Tab: Resumen General -->
+        <div id="content-resumen" class="tab-content">
+            <!-- Estadísticas Generales -->
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">H</span>
+                                </div>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Historias</dt>
+                                    <dd class="text-lg font-medium text-gray-900"><%= estadisticas.resumenGeneral.totalHistorias || 0 %></dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-green-600 rounded-md flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">SP</span>
+                                </div>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Story Points</dt>
+                                    <dd class="text-lg font-medium text-gray-900"><%= estadisticas.resumenGeneral.totalStoryPoints || 0 %></dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-yellow-600 rounded-md flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">T</span>
+                                </div>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Tareas</dt>
+                                    <dd class="text-lg font-medium text-gray-900"><%= estadisticas.resumenGeneral.totalTareas || 0 %></dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-purple-600 rounded-md flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">%</span>
+                                </div>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Completación</dt>
+                                    <dd class="text-lg font-medium text-gray-900"><%= estadisticas.resumenGeneral.porcentajeCompletacion || 0 %>%</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progreso por Proyecto -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <% ['GenT', 'Proy', 'Proy2'].forEach(proyecto => { %>
+                <% if (datos[proyecto]) { %>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        <%= proyecto === 'GenT' ? 'Generación T' : proyecto === 'Proy' ? 'Proyecto Principal' : 'Proyecto Secundario' %>
+                    </h3>
+                    <% if (estadisticas.proyectos && estadisticas.proyectos[proyecto]) { %>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm font-medium">
+                                <span>Historias Completadas</span>
+                                <span><%= estadisticas.proyectos[proyecto].historiasCompletadas || 0 %>/<%= estadisticas.proyectos[proyecto].totalHistorias || 0 %></span>
+                            </div>
+                            <div class="mt-1 bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full" 
+                                     style="width: <%= estadisticas.proyectos[proyecto].porcentajeHistorias || 0 %>%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm font-medium">
+                                <span>Tareas del Sprint</span>
+                                <span><%= estadisticas.proyectos[proyecto].tareasCompletadas || 0 %>/<%= estadisticas.proyectos[proyecto].totalTareas || 0 %></span>
+                            </div>
+                            <div class="mt-1 bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" 
+                                     style="width: <%= estadisticas.proyectos[proyecto].porcentajeTareas || 0 %>%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
                 <% } %>
-                
-                <div class="w-px h-8 bg-gray-600 mx-2"></div>
-                
-                <!-- Funciones de líder -->
-                <button onclick="toggleEstadisticas()" id="btn-stats" class="bg-yellow-700 hover:bg-yellow-800 px-4 py-2 rounded border border-yellow-600 text-sm font-semibold">
-                    📊 Estadísticas
-                </button>
-                <button onclick="abrirModalHistoria()" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded border border-green-600 text-sm font-semibold">
-                    ➕ Nueva Historia
-                </button>
-                <button onclick="abrirModalTarea()" class="bg-orange-700 hover:bg-orange-800 px-4 py-2 rounded border border-orange-600 text-sm font-semibold">
-                    📝 Nueva Tarea
-                </button>
+                <% }) %>
             </div>
-        </div>
 
-        <!-- Panel de estadísticas -->
-        <div id="panel-estadisticas" class="hidden mb-6">
-            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <h2 class="text-lg font-semibold mb-4 text-yellow-400">📊 Estadísticas Completas</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div id="stats-proyecto" class="space-y-4">
-                        <!-- Stats del proyecto -->
+            <!-- Alertas y Recomendaciones -->
+            <% if (estadisticas.alertas && estadisticas.alertas.length > 0) { %>
+            <div class="bg-white shadow rounded-lg p-6 mb-8">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Alertas del Sistema</h3>
+                <div class="space-y-3">
+                    <% estadisticas.alertas.forEach(alerta => { %>
+                    <div class="flex p-4 rounded-md <%= alerta.tipo === 'warning' ? 'bg-yellow-50' : alerta.tipo === 'success' ? 'bg-green-50' : 'bg-blue-50' %>">
+                        <div class="flex-shrink-0">
+                            <% if (alerta.tipo === 'warning') { %>
+                            <div class="h-5 w-5 text-yellow-400">⚠</div>
+                            <% } else if (alerta.tipo === 'success') { %>
+                            <div class="h-5 w-5 text-green-400">✓</div>
+                            <% } else { %>
+                            <div class="h-5 w-5 text-blue-400">ⓘ</div>
+                            <% } %>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium <%= alerta.tipo === 'warning' ? 'text-yellow-800' : alerta.tipo === 'success' ? 'text-green-800' : 'text-blue-800' %>">
+                                <%= alerta.mensaje %>
+                            </p>
+                            <p class="mt-1 text-sm <%= alerta.tipo === 'warning' ? 'text-yellow-700' : alerta.tipo === 'success' ? 'text-green-700' : 'text-blue-700' %>">
+                                <%= alerta.accionRecomendada %>
+                            </p>
+                        </div>
                     </div>
-                    <div id="stats-equipo" class="col-span-1 md:col-span-1 lg:col-span-3">
-                        <!-- Stats del equipo -->
-                    </div>
+                    <% }) %>
                 </div>
             </div>
+            <% } %>
         </div>
 
-        <!-- Contenedor principal -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
-            <!-- Panel principal -->
-            <div class="lg:col-span-3">
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700 mb-6">
-                    <h2 class="text-lg font-semibold mb-4 text-yellow-400 flex items-center justify-between">
-                        ⭐ Gestión de Tareas
-                        <span id="proyecto-actual" class="text-sm text-gray-400">(GenT)</span>
-                    </h2>
-                    
-                    <!-- Mis tareas -->
-                    <div class="mb-6">
-                        <h3 class="text-md font-semibold mb-3 text-blue-400">🎯 Mis Tareas Asignadas</h3>
-                        <div id="mis-tareas" class="space-y-3">
-                            <!-- Se cargan dinámicamente -->
+        <!-- Tabs de Proyectos (GenT, Proy, Proy2) -->
+        <% ['GenT', 'Proy', 'Proy2'].forEach(proyecto => { %>
+        <% if (datos[proyecto]) { %>
+        <div id="content-<%= proyecto.toLowerCase() %>" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Product Backlog -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Product Backlog</h3>
+                            <button onclick="crearHistoria('<%= proyecto %>')" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                Nueva Historia
+                            </button>
                         </div>
-                    </div>
-
-                    <!-- Todas las tareas del equipo -->
-                    <div class="border-t border-gray-600 pt-4">
-                        <h3 class="text-md font-semibold mb-3 text-green-400">👥 Todas las Tareas del Sprint</h3>
-                        <div id="todas-tareas" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <!-- Se llenan dinámicamente -->
-                        </div>
-                    </div>
-
-                    <!-- Sección para verificar tareas completadas -->
-                    <div class="border-t border-gray-600 pt-4 mt-6">
-                        <h3 class="text-md font-semibold mb-3 text-purple-400">✅ Tareas Para Verificar</h3>
-                        <div id="tareas-verificar" class="space-y-2">
-                            <!-- Se llenan dinámicamente -->
+                        <div class="border-t border-gray-200">
+                            <ul id="backlog-<%= proyecto.toLowerCase() %>" class="divide-y divide-gray-200">
+                                <!-- Las historias se cargan dinámicamente -->
+                            </ul>
                         </div>
                     </div>
                 </div>
 
-                <!-- Panel de Product Backlog expandido -->
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-purple-400">📚 Product Backlog</h2>
-                        <div class="flex gap-2">
-                            <button onclick="seleccionarHistorias()" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">
-                                🎯 Seleccionar para Sprint
+                <!-- Panel de Gestión -->
+                <div class="space-y-6">
+                    <!-- Información del Sprint Actual -->
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Sprint Actual</h3>
+                        <div class="space-y-2">
+                            <p class="text-sm text-gray-600">Sprint #<%= datos[proyecto].sprintActual || '1' %></p>
+                            <% if (datos[proyecto]['sprint' + (datos[proyecto].sprintActual || '1')]) { %>
+                            <% const sprint = datos[proyecto]['sprint' + (datos[proyecto].sprintActual || '1')] %>
+                            <p class="text-sm text-gray-600">
+                                Inicio: <%= sprint.fechaIni ? sprint.fechaIni.join('/') : 'N/A' %>
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                Fin: <%= sprint.fechaFin ? sprint.fechaFin.join('/') : 'N/A' %>
+                            </p>
+                            <% } %>
+                        </div>
+                        <div class="mt-4">
+                            <button onclick="gestionarSprint('<%= proyecto %>')" 
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                Gestionar Sprint
                             </button>
                         </div>
                     </div>
-                    <div id="product-backlog-completo" class="space-y-2 max-h-96 overflow-y-auto">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-            </div>
 
-            <!-- Panel lateral -->
-            <div class="space-y-4">
-                
-                <!-- Info del sprint -->
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <h3 class="font-semibold mb-3 text-green-400">📅 Sprint Actual</h3>
-                    <div id="sprint-info" class="text-sm space-y-2">
-                        <p>🚀 Sprint: <span id="sprint-numero">-</span></p>
-                        <p>📅 Inicio: <span id="sprint-inicio">-</span></p>
-                        <p>🏁 Fin: <span id="sprint-fin">-</span></p>
-                        <div class="mt-3 p-2 bg-gray-700 rounded">
-                            <p class="text-xs">Progreso:</p>
-                            <div class="w-full bg-gray-600 rounded-full h-2 mt-1">
-                                <div id="progreso-bar" class="bg-green-500 h-2 rounded-full" style="width: 0%"></div>
-                            </div>
-                            <p class="text-xs mt-1"><span id="progreso-text">0%</span></p>
+                    <!-- Acciones Rápidas -->
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Acciones Rápidas</h3>
+                        <div class="space-y-3">
+                            <button onclick="verTareas('<%= proyecto %>')" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                Ver Tareas
+                            </button>
+                            <button onclick="crearTarea('<%= proyecto %>')" 
+                                    class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                Nueva Tarea
+                            </button>
+                            <button onclick="verEstadisticas('<%= proyecto %>')" 
+                                    class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                Estadísticas
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <% } %>
+        <% }) %>
 
-                <!-- Navegación de sprints -->
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <h3 class="font-semibold mb-3 text-blue-400">🔄 Ver Sprints</h3>
-                    <div id="botones-sprints" class="grid grid-cols-1 gap-2">
-                        <!-- Se llenan dinámicamente -->
+        <!-- Tab: Gestión de Equipo -->
+        <div id="content-equipo" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Lista de Miembros -->
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-4 py-5 sm:px-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Miembros del Equipo</h3>
+                    </div>
+                    <div class="border-t border-gray-200">
+                        <ul class="divide-y divide-gray-200">
+                            <% miembrosEquipo.forEach(miembro => { %>
+                            <li class="px-4 py-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10">
+                                            <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                <span class="text-sm font-medium text-gray-700">
+                                                    <%= miembro.nickname.charAt(0).toUpperCase() %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900"><%= miembro.nickname %></div>
+                                            <div class="text-sm text-gray-500 capitalize"><%= miembro.rol %></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <% if (miembro.stats && miembro.stats[0] > 0) { %>
+                                        <div class="text-sm text-gray-900">
+                                            <%= (miembro.stats[0] / 3600).toFixed(1) %>h en llamadas
+                                        </div>
+                                        <% } %>
+                                        <div class="text-sm text-gray-500">
+                                            Tareas: <%= miembro.stats && miembro.stats[1] ? miembro.stats[1] : 0 %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <% }) %>
+                        </ul>
                     </div>
                 </div>
 
-                <!-- Scrum Board -->
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <h3 class="font-semibold mb-3 text-red-400">🎯 Historias en Sprint</h3>
-                    <div id="scrum-board" class="space-y-2 text-sm max-h-48 overflow-y-auto">
-                        <!-- Se llena dinámicamente -->
+                <!-- Estadísticas del Equipo -->
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Rendimiento del Equipo</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700">Productividad Promedio</span>
+                            <span class="text-sm text-gray-900">
+                                <% 
+                                let totalTareas = 0;
+                                let totalCompletadas = 0;
+                                miembrosEquipo.forEach(m => {
+                                    totalTareas += m.stats && m.stats[1] ? m.stats[1] : 0;
+                                    totalCompletadas += m.stats && m.stats[2] ? m.stats[2] : 0;
+                                });
+                                const productividad = totalTareas > 0 ? Math.round((totalCompletadas / totalTareas) * 100) : 0;
+                                %>
+                                <%= productividad %>%
+                            </span>
+                        </div>
+                        <div class="bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-600 h-2 rounded-full" style="width: <%= productividad %>%"></div>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Herramientas rápidas -->
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <h3 class="font-semibold mb-3 text-orange-400">🛠️ Herramientas</h3>
-                    <div class="space-y-2">
-                        <button onclick="abrirCargaMasiva()" class="w-full bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm">
-                            📄 Carga Masiva Excel
-                        </button>
-                        <button onclick="exportarDatos()" class="w-full bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded text-sm">
-                            💾 Exportar Datos
+                    
+                    <div class="mt-6">
+                        <button onclick="generarReporteEquipo()" 
+                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Generar Reporte
                         </button>
                     </div>
                 </div>
@@ -175,708 +353,255 @@
         </div>
     </div>
 
-    <!-- Modal para nueva historia -->
-    <div id="modal-historia" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-600 max-w-lg w-full mx-4 max-h-screen overflow-y-auto">
-            <h3 class="text-lg font-semibold mb-4">➕ Nueva Historia de Usuario</h3>
-            <form id="form-historia" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Como:</label>
-                    <input type="text" name="como" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Quiero:</label>
-                    <input type="text" name="quiero" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Para:</label>
-                    <input type="text" name="para" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Criterio de Aceptación:</label>
-                    <textarea name="criterio_aceptacion" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white h-24" required></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
+    <!-- Modales -->
+    <!-- Modal para crear Historia de Usuario -->
+    <div id="modal-historia" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Nueva Historia de Usuario</h3>
+                <form id="form-historia" class="space-y-4">
+                    <input type="hidden" id="historia-proyecto" value="">
                     <div>
-                        <label class="block text-sm font-medium mb-1">Prioridad:</label>
-                        <select name="prioridad" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
-                            <option value="MUY_BAJA">Muy Baja</option>
-                            <option value="BAJA">Baja</option>
-                            <option value="MEDIA" selected>Media</option>
-                            <option value="ALTA">Alta</option>
-                            <option value="MUY_ALTA">Muy Alta</option>
-                            <option value="URGENTE">Urgente</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700">Como</label>
+                        <input type="text" id="historia-como" required 
+                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Story Points:</label>
-                        <input type="number" name="history_points" min="1" max="13" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
-                    </div>
-                </div>
-                <div class="flex gap-2 pt-4">
-                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
-                        ✅ Crear Historia
-                    </button>
-                    <button type="button" onclick="cerrarModal('modal-historia')" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded">
-                        ❌ Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para nueva tarea -->
-    <div id="modal-tarea" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-600 max-w-lg w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4">📝 Nueva Tarea Técnica</h3>
-            <form id="form-tarea" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Descripción:</label>
-                    <textarea name="description" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white h-24" required></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Asignar a (separar con comas):</label>
-                    <input type="text" name="personas_asignadas" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" 
-                           placeholder="Juan Pérez, María García">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Prioridad:</label>
-                        <select name="prioridad" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
-                            <option value="MUY_BAJA">Muy Baja</option>
-                            <option value="BAJA">Baja</option>
-                            <option value="MEDIA" selected>Media</option>
-                            <option value="ALTA">Alta</option>
-                            <option value="MUY_ALTA">Muy Alta</option>
-                            <option value="URGENTE">Urgente</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700">Quiero</label>
+                        <input type="text" id="historia-quiero" required 
+                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Fecha Límite:</label>
-                        <input type="date" name="fecha_limite" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
+                        <label class="block text-sm font-medium text-gray-700">Para</label>
+                        <input type="text" id="historia-para" required 
+                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                </div>
-                <div class="flex gap-2 pt-4">
-                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
-                        ✅ Crear Tarea
-                    </button>
-                    <button type="button" onclick="cerrarModal('modal-tarea')" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded">
-                        ❌ Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal genérico para confirmaciones -->
-    <div id="modal-confirmacion" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-600 max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4" id="titulo-confirmacion">Confirmar</h3>
-            <div id="contenido-confirmacion" class="mb-4">
-                <!-- Contenido dinámico -->
-            </div>
-            <div class="flex gap-2">
-                <button id="btn-confirmar-accion" class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
-                    ✅ Confirmar
-                </button>
-                <button onclick="cerrarModal('modal-confirmacion')" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded">
-                    ❌ Cancelar
-                </button>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Criterios de Aceptación</label>
+                        <textarea id="historia-criterios" rows="3" 
+                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Prioridad</label>
+                            <select id="historia-prioridad" 
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <option value="ALTA">Alta</option>
+                                <option value="MEDIA">Media</option>
+                                <option value="BAJA">Baja</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Story Points</label>
+                            <input type="number" id="historia-points" min="1" max="21" value="3" 
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="cerrarModal('modal-historia')" 
+                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Crear Historia
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
-        let proyectoActual = 'GenT';
-        let sprintActual = '1';
-        let mostrandoEstadisticas = false;
+        let tabActual = 'resumen';
 
-        // Cambiar proyecto
-        function cambiarProyecto(proyecto) {
-            proyectoActual = proyecto;
-            document.getElementById('proyecto-actual').textContent = `(${proyecto})`;
-            
-            // Actualizar botones
-            document.querySelectorAll('[id^="btn-"]:not(#btn-stats)').forEach(btn => {
-                btn.classList.remove('bg-yellow-600');
-                if (btn.id.includes('GenT') || btn.id.includes('Proy')) {
-                    btn.classList.add('bg-gray-700');
-                }
-            });
-            document.getElementById(`btn-${proyecto}`).classList.add('bg-yellow-600');
-            
-            cargarDatos();
-        }
+        // Función para cambiar tabs
+        function cambiarTab(tab) {
+            // Ocultar contenido actual
+            document.getElementById(`content-${tabActual}`).classList.add('hidden');
+            document.getElementById(`tab-${tabActual}`).classList.remove('border-blue-500', 'text-blue-600');
+            document.getElementById(`tab-${tabActual}`).classList.add('border-transparent', 'text-gray-500');
 
-        // Toggle estadísticas
-        function toggleEstadisticas() {
-            const panel = document.getElementById('panel-estadisticas');
-            mostrandoEstadisticas = !mostrandoEstadisticas;
-            
-            if (mostrandoEstadisticas) {
-                panel.classList.remove('hidden');
-                cargarEstadisticasCompletas();
-            } else {
-                panel.classList.add('hidden');
+            // Mostrar nuevo contenido
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('border-blue-500', 'text-blue-600');
+            document.getElementById(`tab-${tab}`).classList.remove('border-transparent', 'text-gray-500');
+
+            tabActual = tab;
+
+            // Cargar contenido específico del tab
+            if (tab !== 'resumen' && tab !== 'equipo') {
+                cargarProductBacklog(tab.toUpperCase());
             }
         }
 
-        // Cargar estadísticas completas (proyecto + equipo)
-        async function cargarEstadisticasCompletas() {
+        // Función para cargar Product Backlog
+        async function cargarProductBacklog(proyecto) {
             try {
-                // Estadísticas del proyecto
-                const responseProyecto = await fetch(`/api/estadisticas/<%= grupo %>/${proyectoActual}`);
-                const dataProyecto = await responseProyecto.json();
+                const response = await fetch(`/api/product-backlog/<%= grupo %>/${proyecto}`);
+                const data = await response.json();
                 
-                document.getElementById('stats-proyecto').innerHTML = `
-                    <div class="bg-blue-900 p-4 rounded border border-blue-700">
-                        <h4 class="font-semibold text-blue-300">📊 Progreso</h4>
-                        <p class="text-2xl font-bold">${dataProyecto.proyecto.porcentajeCompletado}%</p>
-                        <p class="text-sm text-blue-200">Completado</p>
-                    </div>
-                    <div class="bg-green-900 p-4 rounded border border-green-700">
-                        <h4 class="font-semibold text-green-300">✅ Tareas</h4>
-                        <p class="text-2xl font-bold">${dataProyecto.proyecto.tareasCompletadas}/${dataProyecto.proyecto.totalTareas}</p>
-                        <p class="text-sm text-green-200">Finalizadas</p>
-                    </div>
-                `;
-                
-                // Estadísticas del equipo
-                const responseEquipo = await fetch(`/api/estadisticas/equipo/<%= grupo %>`);
-                const dataEquipo = await responseEquipo.json();
-                
-                document.getElementById('stats-equipo').innerHTML = `
-                    <div class="bg-gray-700 p-4 rounded">
-                        <h4 class="font-semibold text-gray-300 mb-3">👥 Rendimiento del Equipo</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            ${dataEquipo.miembros.map(miembro => `
-                                <div class="bg-gray-600 p-3 rounded">
-                                    <p class="font-medium text-white">${miembro.nickname}</p>
-                                    <p class="text-sm text-gray-300">${miembro.rol}</p>
-                                    <div class="mt-2">
-                                        <div class="flex justify-between text-xs">
-                                            <span>Tareas:</span>
-                                            <span>${miembro.tareasCompletadas}/${miembro.tareasAsignadas}</span>
+                const container = document.getElementById(`backlog-${proyecto.toLowerCase()}`);
+                container.innerHTML = '';
+
+                if (data.productBacklog && data.productBacklog.length > 0) {
+                    data.productBacklog.forEach(historia => {
+                        const li = document.createElement('li');
+                        li.className = 'px-4 py-4';
+                        li.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            ${historia[1]} - ${historia[2]}
                                         </div>
-                                        <div class="w-full bg-gray-500 rounded-full h-1 mt-1">
-                                            <div class="bg-green-500 h-1 rounded-full" style="width: ${miembro.porcentajeCompletado}%"></div>
-                                        </div>
-                                        <p class="text-xs text-gray-400 mt-1">⏱️ ${Math.floor(miembro.tiempoLlamada / 60)}min en llamada</p>
+                                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                            historia[5] === 'ALTA' ? 'bg-red-100 text-red-800' :
+                                            historia[5] === 'MEDIA' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-green-100 text-green-800'
+                                        }">
+                                            ${historia[5]}
+                                        </span>
+                                        <span class="ml-2 text-xs text-gray-500">
+                                            ${historia[6]} SP
+                                        </span>
+                                    </div>
+                                    <div class="text-sm text-gray-500 mt-1">
+                                        Para: ${historia[3]}
                                     </div>
                                 </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        historia[7] === 'COMPLETADO' ? 'bg-green-100 text-green-800' :
+                                        historia[7] === 'EN_PROCESO' ? 'bg-blue-100 text-blue-800' :
+                                        historia[7] === 'EN_SPRINT' ? 'bg-purple-100 text-purple-800' :
+                                        'bg-gray-100 text-gray-800'
+                                    }">
+                                        ${historia[7].replace('_', ' ')}
+                                    </span>
+                                    <button onclick="editarHistoria('${proyecto}', '${historia[0]}')" 
+                                            class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+                                        Editar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(li);
+                    });
+                } else {
+                    container.innerHTML = '<li class="px-4 py-4 text-center text-gray-500">No hay historias de usuario</li>';
+                }
+            } catch (error) {
+                console.error('Error cargando backlog:', error);
+            }
+        }
+
+        // Función para crear nueva historia
+        function crearHistoria(proyecto) {
+            document.getElementById('historia-proyecto').value = proyecto;
+            document.getElementById('modal-historia').classList.remove('hidden');
+        }
+
+        // Función para cerrar modal
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Función para gestionar sprint
+        function gestionarSprint(proyecto) {
+            window.location.href = `/proyecto/${proyecto}`;
+        }
+
+        // Función para ver tareas
+        async function verTareas(proyecto) {
+            try {
+                const sprintActual = '<%= datos.GenT ? datos.GenT.sprintActual : "1" %>';
+                const response = await fetch(`/api/tareas/<%= grupo %>/${proyecto}/${sprintActual}`);
+                const data = await response.json();
                 
+                // Mostrar tareas en modal o nueva página
+                console.log('Tareas:', data);
+                // Implementar vista de tareas
+            } catch (error) {
+                console.error('Error cargando tareas:', error);
+            }
+        }
+
+        // Función para crear nueva tarea
+        function crearTarea(proyecto) {
+            // Implementar modal de creación de tareas
+            alert(`Crear nueva tarea para ${proyecto}`);
+        }
+
+        // Función para ver estadísticas
+        async function verEstadisticas(proyecto) {
+            try {
+                const response = await fetch(`/api/estadisticas/<%= grupo %>/${proyecto}`);
+                const data = await response.json();
+                
+                // Mostrar estadísticas detalladas
+                console.log('Estadísticas:', data);
+                // Implementar vista de estadísticas
             } catch (error) {
                 console.error('Error cargando estadísticas:', error);
             }
         }
 
-        // Cargar datos principales
-        async function cargarDatos() {
+        // Función para generar reporte del equipo
+        async function generarReporteEquipo() {
             try {
-                await Promise.all([
-                    cargarTareas(),
-                    cargarTodasLasTareas(),
-                    cargarTareasParaVerificar(),
-                    cargarSprintInfo(),
-                    cargarProductBacklog(),
-                    cargarBotonesSprints(),
-                    cargarScrumBoard()
-                ]);
-            } catch (error) {
-                console.error('Error cargando datos:', error);
-            }
-        }
-
-        // Cargar mis tareas
-        async function cargarTareas() {
-            try {
-                const response = await fetch(`/api/tareas/<%= grupo %>/${proyectoActual}/${sprintActual}`);
+                const response = await fetch(`/api/reportes/productividad/<%= grupo %>`);
                 const data = await response.json();
                 
-                const container = document.getElementById('mis-tareas');
-                
-                // Filtrar solo las tareas asignadas al usuario actual
-                const misTareas = Object.entries(data.tareas || {}).filter(([id, tarea]) => {
-                    const [, , asignados] = tarea;
-                    return asignados && asignados.includes('<%= user.nickname %>');
-                });
-                
-                if (misTareas.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-4 text-gray-500">
-                            <div class="text-2xl mb-1">😴</div>
-                            <p class="text-sm">No tienes tareas asignadas</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                container.innerHTML = misTareas.map(([id, tarea]) => {
-                    const [estado, descripcion, asignados, prioridad, fechaLimite] = tarea;
-                    const estadoColor = {
-                        'POR_HACER': 'bg-gray-600',
-                        'EN_PROCESO': 'bg-yellow-600',
-                        'COMPLETADO': 'bg-green-600',
-                        'VERIFICADO': 'bg-blue-600'
-                    };
-                    
-                    return `
-                        <div class="bg-yellow-900 border border-yellow-600 rounded p-3">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-semibold text-yellow-100 text-sm">${descripcion}</h4>
-                                <span class="${estadoColor[estado] || 'bg-gray-600'} px-2 py-1 rounded text-xs">
-                                    ${estado}
-                                </span>
-                            </div>
-                            <p class="text-xs text-yellow-200 mb-2">
-                                🚨 ${prioridad} | 📅 ${fechaLimite}
-                            </p>
-                            ${estado === 'POR_HACER' || estado === 'EN_PROCESO' ? `
-                                <div class="flex gap-2">
-                                    ${estado === 'POR_HACER' ? `
-                                        <button onclick="cambiarEstadoTarea('${id}', 'EN_PROCESO')" 
-                                                class="bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded text-xs">
-                                            ▶️ Iniciar
-                                        </button>
-                                    ` : ''}
-                                    ${estado === 'EN_PROCESO' ? `
-                                        <button onclick="cambiarEstadoTarea('${id}', 'COMPLETADO')" 
-                                                class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs">
-                                            ✅ Completar
-                                        </button>
-                                    ` : ''}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }).join('');
-                
+                // Mostrar o descargar reporte
+                console.log('Reporte:', data);
+                alert('Reporte generado correctamente');
             } catch (error) {
-                document.getElementById('mis-tareas').innerHTML = `
-                    <div class="text-red-400 p-4 bg-red-900 rounded">
-                        ❌ Error cargando mis tareas
-                    </div>
-                `;
+                console.error('Error generando reporte:', error);
             }
         }
 
-        // Cargar todas las tareas del equipo (organizado por estado)
-        async function cargarTodasLasTareas() {
-            try {
-                const response = await fetch(`/api/tareas/<%= grupo %>/${proyectoActual}/${sprintActual}`);
-                const data = await response.json();
-                
-                const container = document.getElementById('todas-tareas');
-                
-                if (!data.tareas || Object.keys(data.tareas).length === 0) {
-                    container.innerHTML = `
-                        <div class="col-span-3 text-center py-6 text-gray-500">
-                            <p>No hay tareas en este sprint</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // Agrupar por estado
-                const estados = ['POR_HACER', 'EN_PROCESO', 'COMPLETADO'];
-                
-                container.innerHTML = estados.map(estado => {
-                    const tareasEstado = Object.entries(data.tareas).filter(([id, tarea]) => tarea[0] === estado);
-                    const estadoColors = {
-                        'POR_HACER': 'bg-gray-700 border-gray-600',
-                        'EN_PROCESO': 'bg-yellow-800 border-yellow-700',
-                        'COMPLETADO': 'bg-green-800 border-green-700'
-                    };
-                    
-                    return `
-                        <div class="${estadoColors[estado]} border rounded-lg p-3">
-                            <h4 class="font-semibold mb-3 text-sm">${estado} (${tareasEstado.length})</h4>
-                            <div class="space-y-2 max-h-60 overflow-y-auto">
-                                ${tareasEstado.map(([id, tarea]) => {
-                                    const [, descripcion, asignados, prioridad] = tarea;
-                                    return `
-                                        <div class="bg-gray-800 p-2 rounded text-xs border border-gray-600">
-                                            <p class="font-medium mb-1">${descripcion.substring(0, 50)}${descripcion.length > 50 ? '...' : ''}</p>
-                                            <p class="text-gray-400">👥 ${asignados.join(', ')}</p>
-                                            <p class="text-gray-400">🚨 ${prioridad}</p>
-                                            <div class="mt-2 flex gap-1">
-                                                <button onclick="editarTarea('${id}')" class="bg-blue-600 hover:bg-blue-700 px-1 py-1 rounded text-xs">
-                                                    ✏️
-                                                </button>
-                                                <button onclick="reasignarTarea('${id}')" class="bg-purple-600 hover:bg-purple-700 px-1 py-1 rounded text-xs">
-                                                    👥
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-            } catch (error) {
-                document.getElementById('todas-tareas').innerHTML = `
-                    <div class="col-span-3 text-red-400 p-4 bg-red-900 rounded">
-                        ❌ Error cargando tareas del equipo
-                    </div>
-                `;
-            }
-        }
-
-        // Cargar tareas para verificar
-        async function cargarTareasParaVerificar() {
-            try {
-                const response = await fetch(`/api/tareas/<%= grupo %>/${proyectoActual}/${sprintActual}`);
-                const data = await response.json();
-                
-                const container = document.getElementById('tareas-verificar');
-                
-                const tareasCompletadas = Object.entries(data.tareas || {}).filter(([id, tarea]) => tarea[0] === 'COMPLETADO');
-                
-                if (tareasCompletadas.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-4 text-gray-500">
-                            <p class="text-sm">No hay tareas pendientes de verificación</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                container.innerHTML = tareasCompletadas.map(([id, tarea]) => {
-                    const [estado, descripcion, asignados, prioridad, fechaLimite] = tarea;
-                    return `
-                        <div class="bg-green-900 border border-green-600 rounded p-3">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h4 class="font-semibold text-green-100 text-sm">${descripcion}</h4>
-                                    <p class="text-xs text-green-200">👥 ${asignados.join(', ')} | 🚨 ${prioridad}</p>
-                                </div>
-                                <button onclick="verificarTarea('${id}')" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs">
-                                    ✅ Verificar
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-            } catch (error) {
-                document.getElementById('tareas-verificar').innerHTML = `
-                    <div class="text-red-400 p-4 bg-red-900 rounded">
-                        ❌ Error cargando tareas para verificar
-                    </div>
-                `;
-            }
-        }
-
-        // Cargar product backlog completo
-        async function cargarProductBacklog() {
-            try {
-                const response = await fetch(`/api/product-backlog/<%= grupo %>/${proyectoActual}`);
-                const data = await response.json();
-                
-                const container = document.getElementById('product-backlog-completo');
-                
-                if (!data.productBacklog || data.productBacklog.length === 0) {
-                    container.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">No hay historias en el Product Backlog</p>';
-                    return;
-                }
-                
-                container.innerHTML = data.productBacklog.map(historia => {
-                    const [id, como, quiero, para, criterio, prioridad, points, estado] = historia;
-                    const estadoColor = {
-                        'POR_HACER': 'border-gray-600 bg-gray-700',
-                        'EN_SPRINT': 'border-yellow-600 bg-yellow-900',
-                        'COMPLETADO': 'border-green-600 bg-green-900'
-                    };
-                    
-                    return `
-                        <div class="border ${estadoColor[estado] || 'border-gray-600 bg-gray-700'} rounded p-3">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h4 class="font-semibold text-sm">${quiero}</h4>
-                                    <p class="text-xs text-gray-400">Como ${como}</p>
-                                    <p class="text-xs text-gray-400">Para ${para}</p>
-                                </div>
-                                <div class="text-right">
-                                    <span class="block text-xs font-bold">${points} pts</span>
-                                    <span class="block text-xs">${prioridad}</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-xs px-2 py-1 rounded bg-gray-600">${estado}</span>
-                                <div class="flex gap-1">
-                                    ${estado === 'POR_HACER' ? `
-                                        <button onclick="seleccionarParaSprint('${id}')" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs">
-                                            🎯 Al Sprint
-                                        </button>
-                                    ` : ''}
-                                    <button onclick="editarHistoria('${id}')" class="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs">
-                                        ✏️ Editar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-            } catch (error) {
-                document.getElementById('product-backlog-completo').innerHTML = `
-                    <div class="text-red-400 p-4 bg-red-900 rounded">
-                        ❌ Error cargando product backlog
-                    </div>
-                `;
-            }
-        }
-
-        // Funciones auxiliares (similares a scrum master)
-        async function cargarSprintInfo() {
-            try {
-                const response = await fetch(`/api/sprint/<%= grupo %>/${proyectoActual}/${sprintActual}`);
-                const data = await response.json();
-                
-                document.getElementById('sprint-numero').textContent = sprintActual;
-                document.getElementById('sprint-inicio').textContent = data.fechaIni.join('/');
-                document.getElementById('sprint-fin').textContent = data.fechaFin.join('/');
-                
-            } catch (error) {
-                console.error('Error cargando sprint info:', error);
-            }
-        }
-
-        async function cargarBotonesSprints() {
-            document.getElementById('botones-sprints').innerHTML = `
-                <button onclick="cambiarSprint('1')" 
-                        class="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-sm ${sprintActual === '1' ? 'ring-2 ring-yellow-500' : ''}">
-                    🚀 Sprint 1
-                </button>
-            `;
-        }
-
-        async function cargarScrumBoard() {
-            try {
-                const response = await fetch(`/api/sprint/<%= grupo %>/${proyectoActual}/${sprintActual}`);
-                const data = await response.json();
-                
-                const container = document.getElementById('scrum-board');
-                
-                if (!data.scrumBoard || data.scrumBoard.length === 0) {
-                    container.innerHTML = '<p class="text-gray-500 text-sm">No hay historias seleccionadas para este sprint</p>';
-                    return;
-                }
-                
-                container.innerHTML = data.scrumBoard.map(historiaId => `
-                    <div class="bg-gray-700 p-2 rounded border border-gray-600">
-                        <p class="text-xs font-medium">${historiaId}</p>
-                        <p class="text-xs text-gray-400">Historia en sprint</p>
-                        <button onclick="removerDelSprint('${historiaId}')" class="mt-1 bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs">
-                            ❌ Remover
-                        </button>
-                    </div>
-                `).join('');
-                
-            } catch (error) {
-                document.getElementById('scrum-board').innerHTML = `
-                    <p class="text-red-400 text-sm">❌ Error cargando sprint board</p>
-                `;
-            }
-        }
-
-        // Funciones de modales
-        function abrirModalHistoria() {
-            document.getElementById('modal-historia').classList.remove('hidden');
-            document.getElementById('modal-historia').classList.add('flex');
-        }
-
-        function abrirModalTarea() {
-            document.getElementById('modal-tarea').classList.remove('hidden');
-            document.getElementById('modal-tarea').classList.add('flex');
-        }
-
-        function cerrarModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            document.getElementById(modalId).classList.remove('flex');
-        }
-
-        // Manejar formulario de nueva historia
-        document.getElementById('form-historia').addEventListener('submit', async function(e) {
+        // Manejador del formulario de historia
+        document.getElementById('form-historia').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            
+            const proyecto = document.getElementById('historia-proyecto').value;
+            const data = {
+                como: document.getElementById('historia-como').value,
+                quiero: document.getElementById('historia-quiero').value,
+                para: document.getElementById('historia-para').value,
+                criterio_aceptacion: document.getElementById('historia-criterios').value,
+                prioridad: document.getElementById('historia-prioridad').value,
+                history_points: parseInt(document.getElementById('historia-points').value)
+            };
+
             try {
-                const response = await fetch(`/api/product-backlog/<%= grupo %>/${proyectoActual}/historia`, {
+                const response = await fetch(`/api/product-backlog/<%= grupo %>/${proyecto}/historia`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(data)
                 });
-                
+
                 if (response.ok) {
                     cerrarModal('modal-historia');
-                    e.target.reset();
-                    cargarProductBacklog();
-                    alert('✅ Historia creada exitosamente');
+                    document.getElementById('form-historia').reset();
+                    // Recargar backlog
+                    cargarProductBacklog(proyecto);
+                    alert('Historia creada correctamente');
                 } else {
-                    alert('❌ Error creando historia');
+                    throw new Error('Error al crear historia');
                 }
             } catch (error) {
-                alert('❌ Error de conexión');
+                console.error('Error:', error);
+                alert('Error al crear la historia');
             }
         });
 
-        // Manejar formulario de nueva tarea
-        document.getElementById('form-tarea').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            
-            // Convertir personas asignadas a array
-            data.personas_asignadas = data.personas_asignadas.split(',').map(s => s.trim()).filter(s => s);
-            
-            try {
-                const response = await fetch(`/api/tareas/<%= grupo %>/${proyectoActual}/crear`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                if (response.ok) {
-                    cerrarModal('modal-tarea');
-                    e.target.reset();
-                    cargarDatos();
-                    alert('✅ Tarea creada exitosamente');
-                } else {
-                    alert('❌ Error creando tarea');
-                }
-            } catch (error) {
-                alert('❌ Error de conexión');
-            }
-        });
-
-        // Funciones específicas del líder
-        async function verificarTarea(tareaId) {
-            mostrarConfirmacion(
-                'Verificar Tarea',
-                '¿Confirmar que esta tarea está completada correctamente?',
-                () => cambiarEstadoTarea(tareaId, 'VERIFICADO')
-            );
-        }
-
-        async function seleccionarParaSprint(historiaId) {
-            try {
-                const response = await fetch(`/api/sprint/<%= grupo %>/${proyectoActual}/seleccionar-historias`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ historias_ids: [historiaId] })
-                });
-                
-                if (response.ok) {
-                    cargarDatos();
-                    alert('✅ Historia agregada al sprint');
-                } else {
-                    alert('❌ Error agregando historia al sprint');
-                }
-            } catch (error) {
-                alert('❌ Error de conexión');
-            }
-        }
-
-        function seleccionarHistorias() {
-            alert('🚧 Funcionalidad en desarrollo - Selección múltiple de historias');
-        }
-
-        function reasignarTarea(tareaId) {
-            const nuevasPersonas = prompt('Ingresa las personas asignadas (separadas por comas):');
-            if (nuevasPersonas !== null) {
-                const personas = nuevasPersonas.split(',').map(s => s.trim()).filter(s => s);
-                reasignarTareaAjax(tareaId, personas);
-            }
-        }
-
-        async function reasignarTareaAjax(tareaId, personas) {
-            try {
-                const response = await fetch(`/api/tareas/<%= grupo %>/${proyectoActual}/${tareaId}/asignar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ personas_asignadas: personas })
-                });
-                
-                if (response.ok) {
-                    cargarDatos();
-                    alert('✅ Tarea reasignada exitosamente');
-                } else {
-                    alert('❌ Error reasignando tarea');
-                }
-            } catch (error) {
-                alert('❌ Error de conexión');
-            }
-        }
-
-        // Funciones básicas reutilizadas
-        async function cambiarEstadoTarea(tareaId, nuevoEstado) {
-            try {
-                const response = await fetch(`/api/tareas/<%= grupo %>/${proyectoActual}/${tareaId}/estado`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ estado: nuevoEstado })
-                });
-                
-                if (response.ok) {
-                    cargarDatos();
-                    cerrarModal('modal-confirmacion');
-                } else {
-                    alert('❌ Error cambiando estado');
-                }
-            } catch (error) {
-                alert('❌ Error de conexión');
-            }
-        }
-
-        function cambiarSprint(sprint) {
-            sprintActual = sprint;
-            cargarDatos();
-        }
-
-        // Función para mostrar confirmaciones
-        function mostrarConfirmacion(titulo, mensaje, callback) {
-            document.getElementById('titulo-confirmacion').textContent = titulo;
-            document.getElementById('contenido-confirmacion').innerHTML = `<p>${mensaje}</p>`;
-            document.getElementById('btn-confirmar-accion').onclick = callback;
-            
-            document.getElementById('modal-confirmacion').classList.remove('hidden');
-            document.getElementById('modal-confirmacion').classList.add('flex');
-        }
-
-        // Funciones placeholder para desarrollo futuro
-        function editarTarea(tareaId) {
-            alert('🚧 Funcionalidad en desarrollo - Editar tarea');
-        }
-
-        function editarHistoria(historiaId) {
-            alert('🚧 Funcionalidad en desarrollo - Editar historia');
-        }
-
-        function removerDelSprint(historiaId) {
-            alert('🚧 Funcionalidad en desarrollo - Remover historia del sprint');
-        }
-
-        function abrirCargaMasiva() {
-            alert('🚧 Funcionalidad en desarrollo - Carga masiva desde Excel');
-        }
-
-        function exportarDatos() {
-            alert('🚧 Funcionalidad en desarrollo - Exportar datos del proyecto');
-        }
-
-        // Cargar datos inicial
+        // Cargar contenido inicial
         document.addEventListener('DOMContentLoaded', () => {
-            cargarDatos();
+            // Cargar datos iniciales si es necesario
         });
     </script>
 </body>
