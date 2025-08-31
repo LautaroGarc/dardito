@@ -5,19 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#1e40af',
-                        accent: '#06b6d4'
-                    }
-                }
-            }
-        }
-    </script>
+    <%- include('partials/header') %>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
     <div class="min-h-screen flex items-center justify-center p-4">
@@ -35,11 +23,11 @@
 
             <!-- Formulario de login -->
             <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                <form method="POST" action="/auth" class="space-y-6" id="loginForm">
+                <form method="POST" action="/auth" class="space-y-6" id="loginForm" enctype="application/x-www-form-urlencoded">
                     <div>
                         <label for="token" class="block text-sm font-medium text-gray-700 mb-2">
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2h-5m4 0V9a2 2 0 00-2-2M9 7v10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 002 2m0 0v10"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2h-5m4 0V9a2 2 0 00-2-2M9 7v10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10"></path>
                             </svg>
                             Token de acceso
                         </label>
@@ -49,7 +37,7 @@
                                 id="token" 
                                 name="token" 
                                 required 
-                                placeholder="Ej: 7d55e3dda13b5c0b9da7b98fceaae50b"
+                                placeholder="7d55e3dda13b5c0b9da7b98fceaae50b"
                                 autocomplete="off"
                                 spellcheck="false"
                                 class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white font-mono text-sm"
@@ -60,12 +48,12 @@
                                 </svg>
                             </div>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">Ingresa el token de 32 caracteres proporcionado por tu instructor</p>
+                        <p class="mt-1 text-xs text-gray-500">Token de 32 caracteres hexadecimales</p>
                     </div>
 
                     <!-- Mostrar error si existe -->
                     <% if (typeof error !== 'undefined' && error) { %>
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 animate-pulse">
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-red-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -75,6 +63,18 @@
                         </div>
                     <% } %>
 
+                    <!-- Botón de login rápido para admin (SOLO DESARROLLO) -->
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-600 mb-2">Quick login (desarrollo):</p>
+                        <button 
+                            type="button" 
+                            onclick="document.getElementById('token').value='7d55e3dda13b5c0b9da7b98fceaae50b'"
+                            class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 px-2 py-1 rounded transition-colors"
+                        >
+                            Admin Token
+                        </button>
+                    </div>
+
                     <button 
                         type="submit" 
                         id="submitBtn"
@@ -83,51 +83,10 @@
                         <span id="btnText">Iniciar Sesión</span>
                     </button>
                 </form>
-
-                <!-- Información adicional -->
-                <div class="mt-6 space-y-4">
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500">
-                            ¿No tienes un token? Contacta a tu administrador del sistema.
-                        </p>
-                    </div>
-                    
-                    <!-- Roles del sistema -->
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Roles disponibles:</h3>
-                        <div class="grid grid-cols-2 gap-2 text-xs">
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
-                                <span class="text-gray-600">Auditor (Admin)</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
-                                <span class="text-gray-600">Líder</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                <span class="text-gray-600">Scrum Master</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 bg-yellow-400 rounded-full mr-2"></div>
-                                <span class="text-gray-600">Miembro</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Debug info (solo en desarrollo) -->
-            <div class="mt-6 bg-gray-800 text-white rounded-lg p-4 text-xs font-mono">
-                <div class="text-gray-300 mb-2">Debug Info:</div>
-                <div>Token Admin: <span class="text-green-400">7d55e3dda13b5c0b9da7b98fceaae50b</span></div>
-                <div>Método: <span class="text-blue-400">POST /auth</span></div>
-                <div>Campo: <span class="text-yellow-400">name="token"</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Script mejorado -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('loginForm');
@@ -135,20 +94,13 @@
             const submitButton = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             
-            // Auto-completar token admin para testing (REMOVER EN PRODUCCIÓN)
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('debug') === 'admin') {
-                tokenInput.value = '7d55e3dda13b5c0b9da7b98fceaae50b';
-            }
-            
-            // Limpiar espacios y validar formato
+            // Validación en tiempo real
             tokenInput.addEventListener('input', function() {
-                let value = this.value.replace(/\s/g, ''); // Quitar todos los espacios
+                let value = this.value.replace(/\s/g, '');
                 this.value = value;
                 
-                // Validación visual
                 if (value.length === 32) {
-                    this.classList.remove('border-gray-300');
+                    this.classList.remove('border-gray-300', 'border-red-300');
                     this.classList.add('border-green-400', 'bg-green-50');
                 } else if (value.length > 0) {
                     this.classList.remove('border-gray-300', 'border-green-400', 'bg-green-50');
@@ -159,49 +111,25 @@
                 }
             });
             
-            // Manejar envío del formulario
             form.addEventListener('submit', function(e) {
                 const token = tokenInput.value.trim();
+                console.log('Enviando token:', token);
                 
-                console.log('=== FORMULARIO ENVIADO ===');
-                console.log('Token original:', tokenInput.value);
-                console.log('Token limpio:', token);
-                console.log('Longitud:', token.length);
-                console.log('Acción del form:', form.action);
-                console.log('Método:', form.method);
-                
-                // Validación básica
                 if (token.length !== 32) {
                     e.preventDefault();
                     alert('El token debe tener exactamente 32 caracteres');
                     return;
                 }
                 
-                // Mostrar estado de carga
                 submitButton.disabled = true;
-                btnText.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Autenticando...
-                `;
-                
-                // Asegurar que el valor esté limpio antes del envío
+                btnText.innerHTML = 'Autenticando...';
                 tokenInput.value = token;
             });
             
-            // Focus automático
             tokenInput.focus();
-            
-            // Permitir pegar tokens largos
-            tokenInput.addEventListener('paste', function(e) {
-                setTimeout(() => {
-                    this.value = this.value.replace(/\s/g, '');
-                    this.dispatchEvent(new Event('input'));
-                }, 10);
-            });
         });
     </script>
+
+    <%- include('partials/footer') %>
 </body>
 </html>
