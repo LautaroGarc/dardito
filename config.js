@@ -5,8 +5,8 @@ const path = require('path');
 const config = {
   port: process.env.PORT || 3000,
   sessionSecret: process.env.SESSION_SECRET || 'dardito_secret_key_2025',
-  dbPath: path.join(__dirname, 'db.json'),
-  usersPath: path.join(__dirname, 'users.json'),
+  dbPath: path.join(__dirname, 'databases', 'db.json'),   
+  usersPath: path.join(__dirname, 'databases', 'users.json'),
   maxRetries: 3,
   retryDelay: 100
 };

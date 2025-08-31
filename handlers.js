@@ -11,17 +11,42 @@ const {
   validarTarea
 } = require('./config');
 
-/**
- * Autentica un usuario con su token
- * @param {string} token - Token de autenticación
- * @returns {Promise<Object|null>} - Datos del usuario o null si no es válido
- */
 async function autenticarUsuario(token) {
   try {
-    const usuarios = await leerUsuarios();
+    console.log('=== AUTENTICACIÓN DEBUG ===');
+    console.log('Token recibido:', JSON.stringify(token));
+    console.log('Tipo de token:', typeof token);
+    console.log('Longitud del token:', token ? token.length : 'undefined');
     
+    if (!token) {
+      console.log('ERROR: Token vacío o undefined');
+      return null;
+    }
+    
+    // Limpiar el token de espacios y caracteres raros
+    const tokenLimpio = token.toString().trim().replace(/[^\w]/g, '');
+    console.log('Token limpio:', JSON.stringify(tokenLimpio));
+    console.log('Longitud token limpio:', tokenLimpio.length);
+    
+    const usuarios = await leerUsuarios();
+    console.log('Total usuarios cargados:', Object.keys(usuarios).length);
+    
+    // Debug: mostrar todos los usuarios y sus tokens
     for (const [userId, userData] of Object.entries(usuarios)) {
-      if (userData.token === token) {
+      console.log(`\n--- Usuario ${userId} ---`);
+      console.log('Nickname:', userData.nickname);
+      console.log('Rol:', userData.rol);
+      console.log('Grupo:', userData.grupo);
+      console.log('Token almacenado:', JSON.stringify(userData.token));
+      console.log('Token limpio almacenado:', userData.token ? userData.token.trim() : 'undefined');
+      
+      // Comparación estricta
+      const tokenAlmacenadoLimpio = userData.token ? userData.token.toString().trim() : '';
+      console.log('Comparación:', `"${tokenLimpio}" === "${tokenAlmacenadoLimpio}"`, '=', tokenLimpio === tokenAlmacenadoLimpio);
+      
+      if (tokenLimpio === tokenAlmacenadoLimpio) {
+        console.log('¡¡¡ TOKEN ENCONTRADO !!!');
+        console.log('Usuario autenticado:', userData.nickname);
         return {
           id: userId,
           ...userData
@@ -29,9 +54,11 @@ async function autenticarUsuario(token) {
       }
     }
     
+    console.log('❌ TOKEN NO ENCONTRADO EN NINGÚN USUARIO');
     return null;
   } catch (error) {
-    console.error('Error en autenticación:', error);
+    console.error('💥 ERROR CRÍTICO en autenticación:', error);
+    console.error('Stack trace:', error.stack);
     return null;
   }
 }
