@@ -13,10 +13,13 @@ function regenerateToken(users, userId){
 }
 
 // FUNCIONES PARA LEER JSON
-
 function loadJSON(path) {
   try {
-    const data = fs.readFileSync(path, 'utf8'); // Cambié readFile por readFileSync
+    if (!fs.existsSync(path)) {
+      fs.writeFileSync(path, JSON.stringify({}));
+      return {};
+    }
+    const data = fs.readFileSync(path, 'utf8');
     return JSON.parse(data);
   } catch (error) {
     console.error('Error al cargar JSON:', error);

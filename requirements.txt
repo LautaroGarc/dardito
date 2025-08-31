@@ -1,3 +1,0 @@
-discord.js
-node-cron
-chart.js

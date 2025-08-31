@@ -60,7 +60,7 @@ module.exports = {
             }
           ],
           footer: {
-            text: "⚠️ Esta contraseña se muestra solo una vez. Guárdala de forma segura."
+            text: "⚠️ No compartas esta contraseña con nadie."
           }
         }],
         flags: 64
@@ -72,7 +72,7 @@ module.exports = {
       await interaction.reply({
         embeds: [{
           title: "🔐 Nueva Contraseña del Dashboard",
-          description: `Tu contraseña ha sido regenerada exitosamente`,
+          description: `Esta contraseña es **solo tuya y privada**`,
           color: 0x00ff00,
           fields: [
             {
@@ -87,7 +87,7 @@ module.exports = {
             }
           ],
           footer: {
-            text: "⚠️ Para regenerar la contraseña usa `/contraseña regenerar`"
+            text: "⚠️ No compartas esta contraseña con nadie."
           }
         }],
         flags: 64

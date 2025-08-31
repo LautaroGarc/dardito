@@ -7,11 +7,10 @@
     "start": "node start.js",
     "dev": "concurrently \"npm run dev:bot\" \"npm run dev:web\"",
     "dev:bot": "nodemon bot.js --watch bot.js --watch commands/ --watch functions.js --watch config.json",
-    "dev:web": "nodemon app.js --watch app.js --watch views/ --watch config.json",
+    "dev:web": "nodemon app.js --watch app.js --watch views/ --watch config.json --watch auth.js --watch config.js --watch handlers.js --watch routes.js",
     "dev:start": "nodemon start.js --watch start.js --watch config.json",
     "bot": "node bot.js",
-    "web": "node app.js",
-    "deploy": "node deploy-commands.js"
+    "web": "node app.js"
   },
   "dependencies": {
     "crypto": "^1.0.1",

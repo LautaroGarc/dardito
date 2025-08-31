@@ -3,606 +3,1429 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Líder - DARDITO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body class="bg-gray-50">
-    <!-- Navigation Header -->
-    <nav class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-semibold text-gray-900">DARDITO - Líder de <%= grupo %></h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600">Bienvenido, <%= user.nickname %></span>
-                    <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
-                        Cerrar Sesión
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Tabs de Navegación -->
-    <div class="bg-white border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mb-px flex space-x-8">
-            <button onclick="cambiarTab('resumen')" id="tab-resumen" 
-                    class="tab-button py-2 px-1 border-b-2 border-blue-500 font-medium text-sm text-blue-600">
-                Resumen General
-            </button>
-            <% if (datos.GenT) { %>
-            <button onclick="cambiarTab('gent')" id="tab-gent" 
-                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Generación T
-            </button>
-            <% } %>
-            <% if (datos.Proy) { %>
-            <button onclick="cambiarTab('proy')" id="tab-proy" 
-                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Proyecto Principal
-            </button>
-            <% } %>
-            <% if (datos.Proy2) { %>
-            <button onclick="cambiarTab('proy2')" id="tab-proy2" 
-                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Proyecto Secundario
-            </button>
-            <% } %>
-            <button onclick="cambiarTab('equipo')" id="tab-equipo" 
-                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Gestión de Equipo
-            </button>
-        </nav>
-    </div>
-
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <!-- Tab: Resumen General -->
-        <div id="content-resumen" class="tab-content">
-            <!-- Estadísticas Generales -->
-            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
-                                    <span class="text-white text-sm font-semibold">H</span>
-                                </div>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Historias</dt>
-                                    <dd class="text-lg font-medium text-gray-900"><%= estadisticas.resumenGeneral.totalHistorias || 0 %></dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-green-600 rounded-md flex items-center justify-center">
-                                    <span class="text-white text-sm font-semibold">SP</span>
-                                </div>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Story Points</dt>
-                                    <dd class="text-lg font-medium text-gray-900"><%= estadisticas.resumenGeneral.totalStoryPoints || 0 %></dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-yellow-600 rounded-md flex items-center justify-center">
-                                    <span class="text-white text-sm font-semibold">T</span>
-                                </div>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Tareas</dt>
-                                    <dd class="text-lg font-medium text-gray-900"><%= estadisticas.resumenGeneral.totalTareas || 0 %></dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-purple-600 rounded-md flex items-center justify-center">
-                                    <span class="text-white text-sm font-semibold">%</span>
-                                </div>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Completación</dt>
-                                    <dd class="text-lg font-medium text-gray-900"><%= estadisticas.resumenGeneral.porcentajeCompletacion || 0 %>%</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Progreso por Proyecto -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <% ['GenT', 'Proy', 'Proy2'].forEach(proyecto => { %>
-                <% if (datos[proyecto]) { %>
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
-                        <%= proyecto === 'GenT' ? 'Generación T' : proyecto === 'Proy' ? 'Proyecto Principal' : 'Proyecto Secundario' %>
-                    </h3>
-                    <% if (estadisticas.proyectos && estadisticas.proyectos[proyecto]) { %>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between text-sm font-medium">
-                                <span>Historias Completadas</span>
-                                <span><%= estadisticas.proyectos[proyecto].historiasCompletadas || 0 %>/<%= estadisticas.proyectos[proyecto].totalHistorias || 0 %></span>
-                            </div>
-                            <div class="mt-1 bg-gray-200 rounded-full h-2">
-                                <div class="bg-green-600 h-2 rounded-full" 
-                                     style="width: <%= estadisticas.proyectos[proyecto].porcentajeHistorias || 0 %>%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-sm font-medium">
-                                <span>Tareas del Sprint</span>
-                                <span><%= estadisticas.proyectos[proyecto].tareasCompletadas || 0 %>/<%= estadisticas.proyectos[proyecto].totalTareas || 0 %></span>
-                            </div>
-                            <div class="mt-1 bg-gray-200 rounded-full h-2">
-                                <div class="bg-blue-600 h-2 rounded-full" 
-                                     style="width: <%= estadisticas.proyectos[proyecto].porcentajeTareas || 0 %>%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <% } %>
-                </div>
-                <% } %>
-                <% }) %>
-            </div>
-
-            <!-- Alertas y Recomendaciones -->
-            <% if (estadisticas.alertas && estadisticas.alertas.length > 0) { %>
-            <div class="bg-white shadow rounded-lg p-6 mb-8">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Alertas del Sistema</h3>
-                <div class="space-y-3">
-                    <% estadisticas.alertas.forEach(alerta => { %>
-                    <div class="flex p-4 rounded-md <%= alerta.tipo === 'warning' ? 'bg-yellow-50' : alerta.tipo === 'success' ? 'bg-green-50' : 'bg-blue-50' %>">
-                        <div class="flex-shrink-0">
-                            <% if (alerta.tipo === 'warning') { %>
-                            <div class="h-5 w-5 text-yellow-400">⚠</div>
-                            <% } else if (alerta.tipo === 'success') { %>
-                            <div class="h-5 w-5 text-green-400">✓</div>
-                            <% } else { %>
-                            <div class="h-5 w-5 text-blue-400">ⓘ</div>
-                            <% } %>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium <%= alerta.tipo === 'warning' ? 'text-yellow-800' : alerta.tipo === 'success' ? 'text-green-800' : 'text-blue-800' %>">
-                                <%= alerta.mensaje %>
-                            </p>
-                            <p class="mt-1 text-sm <%= alerta.tipo === 'warning' ? 'text-yellow-700' : alerta.tipo === 'success' ? 'text-green-700' : 'text-blue-700' %>">
-                                <%= alerta.accionRecomendada %>
-                            </p>
-                        </div>
-                    </div>
-                    <% }) %>
-                </div>
-            </div>
-            <% } %>
-        </div>
-
-        <!-- Tabs de Proyectos (GenT, Proy, Proy2) -->
-        <% ['GenT', 'Proy', 'Proy2'].forEach(proyecto => { %>
-        <% if (datos[proyecto]) { %>
-        <div id="content-<%= proyecto.toLowerCase() %>" class="tab-content hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Product Backlog -->
-                <div class="lg:col-span-2">
-                    <div class="bg-white shadow rounded-lg">
-                        <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900">Product Backlog</h3>
-                            <button onclick="crearHistoria('<%= proyecto %>')" 
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                Nueva Historia
-                            </button>
-                        </div>
-                        <div class="border-t border-gray-200">
-                            <ul id="backlog-<%= proyecto.toLowerCase() %>" class="divide-y divide-gray-200">
-                                <!-- Las historias se cargan dinámicamente -->
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Panel de Gestión -->
-                <div class="space-y-6">
-                    <!-- Información del Sprint Actual -->
-                    <div class="bg-white shadow rounded-lg p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Sprint Actual</h3>
-                        <div class="space-y-2">
-                            <p class="text-sm text-gray-600">Sprint #<%= datos[proyecto].sprintActual || '1' %></p>
-                            <% if (datos[proyecto]['sprint' + (datos[proyecto].sprintActual || '1')]) { %>
-                            <% const sprint = datos[proyecto]['sprint' + (datos[proyecto].sprintActual || '1')] %>
-                            <p class="text-sm text-gray-600">
-                                Inicio: <%= sprint.fechaIni ? sprint.fechaIni.join('/') : 'N/A' %>
-                            </p>
-                            <p class="text-sm text-gray-600">
-                                Fin: <%= sprint.fechaFin ? sprint.fechaFin.join('/') : 'N/A' %>
-                            </p>
-                            <% } %>
-                        </div>
-                        <div class="mt-4">
-                            <button onclick="gestionarSprint('<%= proyecto %>')" 
-                                    class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                Gestionar Sprint
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Acciones Rápidas -->
-                    <div class="bg-white shadow rounded-lg p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Acciones Rápidas</h3>
-                        <div class="space-y-3">
-                            <button onclick="verTareas('<%= proyecto %>')" 
-                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                Ver Tareas
-                            </button>
-                            <button onclick="crearTarea('<%= proyecto %>')" 
-                                    class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                Nueva Tarea
-                            </button>
-                            <button onclick="verEstadisticas('<%= proyecto %>')" 
-                                    class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                Estadísticas
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <% } %>
-        <% }) %>
-
-        <!-- Tab: Gestión de Equipo -->
-        <div id="content-equipo" class="tab-content hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Lista de Miembros -->
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-4 py-5 sm:px-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Miembros del Equipo</h3>
-                    </div>
-                    <div class="border-t border-gray-200">
-                        <ul class="divide-y divide-gray-200">
-                            <% miembrosEquipo.forEach(miembro => { %>
-                            <li class="px-4 py-4">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10">
-                                            <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                                <span class="text-sm font-medium text-gray-700">
-                                                    <%= miembro.nickname.charAt(0).toUpperCase() %>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900"><%= miembro.nickname %></div>
-                                            <div class="text-sm text-gray-500 capitalize"><%= miembro.rol %></div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <% if (miembro.stats && miembro.stats[0] > 0) { %>
-                                        <div class="text-sm text-gray-900">
-                                            <%= (miembro.stats[0] / 3600).toFixed(1) %>h en llamadas
-                                        </div>
-                                        <% } %>
-                                        <div class="text-sm text-gray-500">
-                                            Tareas: <%= miembro.stats && miembro.stats[1] ? miembro.stats[1] : 0 %>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <% }) %>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Estadísticas del Equipo -->
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Rendimiento del Equipo</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm font-medium text-gray-700">Productividad Promedio</span>
-                            <span class="text-sm text-gray-900">
-                                <% 
-                                let totalTareas = 0;
-                                let totalCompletadas = 0;
-                                miembrosEquipo.forEach(m => {
-                                    totalTareas += m.stats && m.stats[1] ? m.stats[1] : 0;
-                                    totalCompletadas += m.stats && m.stats[2] ? m.stats[2] : 0;
-                                });
-                                const productividad = totalTareas > 0 ? Math.round((totalCompletadas / totalTareas) * 100) : 0;
-                                %>
-                                <%= productividad %>%
-                            </span>
-                        </div>
-                        <div class="bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-600 h-2 rounded-full" style="width: <%= productividad %>%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6">
-                        <button onclick="generarReporteEquipo()" 
-                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                            Generar Reporte
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modales -->
-    <!-- Modal para crear Historia de Usuario -->
-    <div id="modal-historia" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-lg shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Nueva Historia de Usuario</h3>
-                <form id="form-historia" class="space-y-4">
-                    <input type="hidden" id="historia-proyecto" value="">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Como</label>
-                        <input type="text" id="historia-como" required 
-                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Quiero</label>
-                        <input type="text" id="historia-quiero" required 
-                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Para</label>
-                        <input type="text" id="historia-para" required 
-                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Criterios de Aceptación</label>
-                        <textarea id="historia-criterios" rows="3" 
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Prioridad</label>
-                            <select id="historia-prioridad" 
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                <option value="ALTA">Alta</option>
-                                <option value="MEDIA">Media</option>
-                                <option value="BAJA">Baja</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Story Points</label>
-                            <input type="number" id="historia-points" min="1" max="21" value="3" 
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                    <div class="flex justify-end space-x-3 mt-6">
-                        <button type="button" onclick="cerrarModal('modal-historia')" 
-                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
-                            Cancelar
-                        </button>
-                        <button type="submit" 
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                            Crear Historia
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let tabActual = 'resumen';
-
-        // Función para cambiar tabs
-        function cambiarTab(tab) {
-            // Ocultar contenido actual
-            document.getElementById(`content-${tabActual}`).classList.add('hidden');
-            document.getElementById(`tab-${tabActual}`).classList.remove('border-blue-500', 'text-blue-600');
-            document.getElementById(`tab-${tabActual}`).classList.add('border-transparent', 'text-gray-500');
-
-            // Mostrar nuevo contenido
-            document.getElementById(`content-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).classList.add('border-blue-500', 'text-blue-600');
-            document.getElementById(`tab-${tab}`).classList.remove('border-transparent', 'text-gray-500');
-
-            tabActual = tab;
-
-            // Cargar contenido específico del tab
-            if (tab !== 'resumen' && tab !== 'equipo') {
-                cargarProductBacklog(tab.toUpperCase());
-            }
+    <title>Dashboard Líder - <%= userData.nombre %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c5282;
+            --secondary-color: #ed8936;
+            --success-color: #38a169;
+            --danger-color: #e53e3e;
+            --warning-color: #d69e2e;
+            --info-color: #3182ce;
+            --light-bg: #f7fafc;
         }
 
-        // Función para cargar Product Backlog
-        async function cargarProductBacklog(proyecto) {
-            try {
-                const response = await fetch(`/api/product-backlog/<%= grupo %>/${proyecto}`);
-                const data = await response.json();
-                
-                const container = document.getElementById(`backlog-${proyecto.toLowerCase()}`);
-                container.innerHTML = '';
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-                if (data.productBacklog && data.productBacklog.length > 0) {
-                    data.productBacklog.forEach(historia => {
-                        const li = document.createElement('li');
-                        li.className = 'px-4 py-4';
-                        li.innerHTML = `
-                            <div class="flex items-center justify-between">
-                                <div class="flex-1">
-                                    <div class="flex items-center">
-                                        <div class="text-sm font-medium text-gray-900">
-                                            ${historia[1]} - ${historia[2]}
-                                        </div>
-                                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                            historia[5] === 'ALTA' ? 'bg-red-100 text-red-800' :
-                                            historia[5] === 'MEDIA' ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-green-100 text-green-800'
-                                        }">
-                                            ${historia[5]}
-                                        </span>
-                                        <span class="ml-2 text-xs text-gray-500">
-                                            ${historia[6]} SP
-                                        </span>
-                                    </div>
-                                    <div class="text-sm text-gray-500 mt-1">
-                                        Para: ${historia[3]}
-                                    </div>
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .badge-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .btn-action {
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(44, 82, 130, 0.25);
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 10px;
+        }
+
+        .project-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0 animate__animated animate__fadeInLeft">
+                        <i class="fas fa-tachometer-alt me-3"></i>Dashboard Líder
+                    </h1>
+                    <p class="mb-0 opacity-75 animate__animated animate__fadeInLeft animate__delay-1s">
+                        Bienvenido, <%= userData.nombre %> | Grupo: <%= userData.grupo %>
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="animate__animated animate__fadeInRight">
+                        <span class="badge bg-success fs-6">
+                            <i class="fas fa-circle me-2"></i>En línea
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4">
+        <!-- Selector de Proyecto -->
+        <div class="project-selector">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">
+                        <i class="fas fa-project-diagram me-2"></i>Seleccionar Proyecto
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select" id="projectSelector" onchange="cambiarProyecto()">
+                        <option value="GenT" <%= (typeof grupoData !== 'undefined' && grupoData.proyecto === 'GenT') ? 'selected' : '' %>>GenT</option>
+                        <option value="Proy" <%= (typeof grupoData !== 'undefined' && grupoData.proyecto === 'Proy') ? 'selected' : '' %>>Proy</option>
+                        <option value="Proy2" <%= (typeof grupoData !== 'undefined' && grupoData.proyecto === 'Proy2') ? 'selected' : '' %>>Proy2</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4 justify-content-center" id="dashboardTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="resumen-tab" data-bs-toggle="pill" data-bs-target="#resumen" type="button" role="tab">
+                    <i class="fas fa-chart-line me-2"></i>Resumen
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="backlog-tab" data-bs-toggle="pill" data-bs-target="#backlog" type="button" role="tab">
+                    <i class="fas fa-list-ul me-2"></i>Product Backlog
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sprints-tab" data-bs-toggle="pill" data-bs-target="#sprints" type="button" role="tab">
+                    <i class="fas fa-running me-2"></i>Sprints
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="equipo-tab" data-bs-toggle="pill" data-bs-target="#equipo" type="button" role="tab">
+                    <i class="fas fa-users me-2"></i>Equipo
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reportes-tab" data-bs-toggle="pill" data-bs-target="#reportes" type="button" role="tab">
+                    <i class="fas fa-chart-bar me-2"></i>Reportes
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="dashboardTabContent">
+            <!-- Resumen General Tab -->
+            <div class="tab-pane fade show active" id="resumen" role="tabpanel">
+                <!-- Estadísticas Generales -->
+                <div class="row mb-4" id="statsContainer">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stat-card animate__animated animate__fadeInUp">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon" style="background-color: var(--primary-color);">
+                                    <i class="fas fa-tasks"></i>
                                 </div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                        historia[7] === 'COMPLETADO' ? 'bg-green-100 text-green-800' :
-                                        historia[7] === 'EN_PROCESO' ? 'bg-blue-100 text-blue-800' :
-                                        historia[7] === 'EN_SPRINT' ? 'bg-purple-100 text-purple-800' :
-                                        'bg-gray-100 text-gray-800'
-                                    }">
-                                        ${historia[7].replace('_', ' ')}
-                                    </span>
-                                    <button onclick="editarHistoria('${proyecto}', '${historia[0]}')" 
-                                            class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                        Editar
+                                <div class="ms-3">
+                                    <div class="text-muted small">Total HUs</div>
+                                    <div class="h4 mb-0" id="totalHUs">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stat-card animate__animated animate__fadeInUp animate__delay-1s">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon" style="background-color: var(--success-color);">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="text-muted small">HUs Completadas</div>
+                                    <div class="h4 mb-0" id="husCompletadas">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stat-card animate__animated animate__fadeInUp animate__delay-2s">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon" style="background-color: var(--warning-color);">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="text-muted small">HUs en Proceso</div>
+                                    <div class="h4 mb-0" id="husEnProceso">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stat-card animate__animated animate__fadeInUp animate__delay-3s">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon" style="background-color: var(--info-color);">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="text-muted small">% Completado</div>
+                                    <div class="h4 mb-0" id="porcentajeCompletado">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos de Resumen -->
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="chart-container">
+                            <h5 class="mb-3">
+                                <i class="fas fa-chart-pie me-2"></i>Estado del Proyecto
+                            </h5>
+                            <canvas id="proyectoChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="chart-container">
+                            <h5 class="mb-3">
+                                <i class="fas fa-chart-bar me-2"></i>Sprint Actual
+                            </h5>
+                            <canvas id="sprintChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress por HU -->
+                <div class="table-container">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Progreso por Historia de Usuario
+                        </h5>
+                        <button class="btn btn-outline-primary btn-sm" onclick="actualizarEstadisticas()">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="progressTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Historia de Usuario</th>
+                                    <th>Tareas Totales</th>
+                                    <th>Tareas Completadas</th>
+                                    <th>Progreso</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="progressTableBody">
+                                <!-- Datos dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Backlog Tab -->
+            <div class="tab-pane fade" id="backlog" role="tabpanel">
+                <div class="table-container">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list-ul me-2"></i>Product Backlog
+                        </h5>
+                        <button class="btn btn-primary btn-action" data-bs-toggle="modal" data-bs-target="#modalNuevaHU">
+                            <i class="fas fa-plus me-2"></i>Nueva Historia de Usuario
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="backlogTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Como</th>
+                                    <th>Quiero</th>
+                                    <th>Para</th>
+                                    <th>Prioridad</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backlogTableBody">
+                                <!-- Datos dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sprints Tab -->
+            <div class="tab-pane fade" id="sprints" role="tabpanel">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="table-container">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-running me-2"></i>Gestión de Sprints
+                                </h5>
+                                <div>
+                                    <button class="btn btn-primary btn-action me-2" data-bs-toggle="modal" data-bs-target="#modalNuevoSprint">
+                                        <i class="fas fa-plus me-2"></i>Nuevo Sprint
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-action" data-bs-toggle="modal" data-bs-target="#modalSeleccionarHUs">
+                                        <i class="fas fa-tasks me-2"></i>Seleccionar HUs
                                     </button>
                                 </div>
                             </div>
-                        `;
-                        container.appendChild(li);
-                    });
-                } else {
-                    container.innerHTML = '<li class="px-4 py-4 text-center text-gray-500">No hay historias de usuario</li>';
-                }
-            } catch (error) {
-                console.error('Error cargando backlog:', error);
-            }
-        }
+                            <div id="sprintsContainer">
+                                <!-- Sprints dinámicos -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="table-container">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-cogs me-2"></i>Tareas Técnicas
+                                </h5>
+                                <button class="btn btn-primary btn-action btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevaTarea">
+                                    <i class="fas fa-plus me-1"></i>Nueva Tarea
+                                </button>
+                            </div>
+                            <div id="tareasContainer">
+                                <!-- Tareas dinámicas -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        // Función para crear nueva historia
-        function crearHistoria(proyecto) {
-            document.getElementById('historia-proyecto').value = proyecto;
-            document.getElementById('modal-historia').classList.remove('hidden');
-        }
+            <!-- Equipo Tab -->
+            <div class="tab-pane fade" id="equipo" role="tabpanel">
+                <div class="row mb-4" id="equipoStatsContainer">
+                    <!-- Stats de equipo -->
+                </div>
+                <div class="table-container">
+                    <h5 class="mb-3">
+                        <i class="fas fa-users me-2"></i>Rendimiento del Equipo
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="equipoTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Miembro</th>
+                                    <th>Rol</th>
+                                    <th>Tareas Asignadas</th>
+                                    <th>Tareas Completadas</th>
+                                    <th>Tareas en Proceso</th>
+                                    <th>% Completado</th>
+                                    <th>Rendimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="equipoTableBody">
+                                <!-- Datos dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-        // Función para cerrar modal
-        function cerrarModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
+            <!-- Reportes Tab -->
+            <div class="tab-pane fade" id="reportes" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="chart-container">
+                            <h5 class="mb-3">
+                                <i class="fas fa-chart-line me-2"></i>Productividad por Sprint
+                            </h5>
+                            <canvas id="productividadChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="chart-container">
+                            <h5 class="mb-3">
+                                <i class="fas fa-chart-area me-2"></i>Burndown Chart
+                            </h5>
+                            <canvas id="burndownChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="chart-container">
+                            <h5 class="mb-3">
+                                <i class="fas fa-chart-bar me-2"></i>Distribución de Tareas por Miembro
+                            </h5>
+                            <canvas id="distribucionChart" width="800" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Función para gestionar sprint
-        function gestionarSprint(proyecto) {
-            window.location.href = `/proyecto/${proyecto}`;
-        }
+    <!-- Modal Nueva Historia de Usuario -->
+    <div class="modal fade" id="modalNuevaHU" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>Nueva Historia de Usuario
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNuevaHU">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="huId" class="form-label">ID de Historia</label>
+                                <input type="text" class="form-control" id="huId" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="huTitulo" class="form-label">Título</label>
+                                <input type="text" class="form-control" id="huTitulo" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="huComo" class="form-label">Como...</label>
+                            <input type="text" class="form-control" id="huComo" placeholder="Como usuario..." required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="huQuiero" class="form-label">Quiero...</label>
+                            <textarea class="form-control" id="huQuiero" rows="2" placeholder="Quiero poder..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="huPara" class="form-label">Para...</label>
+                            <textarea class="form-control" id="huPara" rows="2" placeholder="Para obtener..." required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="huPrioridad" class="form-label">Prioridad</label>
+                                <select class="form-select" id="huPrioridad" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Alta">Alta</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Baja">Baja</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="huPuntos" class="form-label">Story Points</label>
+                                <select class="form-select" id="huPuntos">
+                                    <option value="">Sin estimar</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="5">5</option>
+                                    <option value="8">8</option>
+                                    <option value="13">13</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="crearHistoriaUsuario()">
+                        <i class="fas fa-save me-2"></i>Crear Historia
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Función para ver tareas
-        async function verTareas(proyecto) {
-            try {
-                const sprintActual = '<%= datos.GenT ? datos.GenT.sprintActual : "1" %>';
-                const response = await fetch(`/api/tareas/<%= grupo %>/${proyecto}/${sprintActual}`);
-                const data = await response.json();
-                
-                // Mostrar tareas en modal o nueva página
-                console.log('Tareas:', data);
-                // Implementar vista de tareas
-            } catch (error) {
-                console.error('Error cargando tareas:', error);
-            }
-        }
+    <!-- Modal Nuevo Sprint -->
+    <div class="modal fade" id="modalNuevoSprint" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>Nuevo Sprint
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNuevoSprint">
+                        <div class="mb-3">
+                            <label for="sprintNombre" class="form-label">Nombre del Sprint</label>
+                            <input type="text" class="form-control" id="sprintNombre" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="sprintFechaInicio" class="form-label">Fecha de Inicio</label>
+                                <input type="date" class="form-control" id="sprintFechaInicio" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="sprintFechaFin" class="form-label">Fecha de Fin</label>
+                                <input type="date" class="form-control" id="sprintFechaFin" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sprintObjetivo" class="form-label">Objetivo del Sprint</label>
+                            <textarea class="form-control" id="sprintObjetivo" rows="3" placeholder="Describir el objetivo principal..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="crearSprint()">
+                        <i class="fas fa-save me-2"></i>Crear Sprint
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Función para crear nueva tarea
-        function crearTarea(proyecto) {
-            // Implementar modal de creación de tareas
-            alert(`Crear nueva tarea para ${proyecto}`);
-        }
+    <!-- Modal Seleccionar HUs para Sprint -->
+    <div class="modal fade" id="modalSeleccionarHUs" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-tasks me-2"></i>Seleccionar Historias para Sprint
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="sprintSeleccionar" class="form-label">Sprint</label>
+                        <select class="form-select" id="sprintSeleccionar" required>
+                            <option value="">Seleccionar sprint...</option>
+                        </select>
+                    </div>
+                    <div id="historiasDisponibles">
+                        <!-- Lista de historias disponibles -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="seleccionarHistorias()">
+                        <i class="fas fa-check me-2"></i>Seleccionar Historias
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Función para ver estadísticas
-        async function verEstadisticas(proyecto) {
-            try {
-                const response = await fetch(`/api/estadisticas/<%= grupo %>/${proyecto}`);
-                const data = await response.json();
-                
-                // Mostrar estadísticas detalladas
-                console.log('Estadísticas:', data);
-                // Implementar vista de estadísticas
-            } catch (error) {
-                console.error('Error cargando estadísticas:', error);
-            }
-        }
+    <!-- Modal Nueva Tarea -->
+    <div class="modal fade" id="modalNuevaTarea" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>Nueva Tarea Técnica
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNuevaTarea">
+                        <div class="mb-3">
+                            <label for="tareaHU" class="form-label">Historia de Usuario</label>
+                            <select class="form-select" id="tareaHU" required>
+                                <option value="">Seleccionar HU...</option>
+                            </select>
+                            <div class="form-text">La tarea se asignará a esta HU para calcular su progreso</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tareaTitulo" class="form-label">Título de la Tarea</label>
+                            <input type="text" class="form-control" id="tareaTitulo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tareaDescripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="tareaDescripcion" rows="3" placeholder="Describir la tarea técnica..."></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tareaAsignado" class="form-label">Asignado a</label>
+                                <select class="form-select" id="tareaAsignado" required>
+                                    <option value="">Seleccionar miembro...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tareaPrioridad" class="form-label">Prioridad</label>
+                                <select class="form-select" id="tareaPrioridad" required>
+                                    <option value="Alta">Alta</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Baja">Baja</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tareaEstimacion" class="form-label">Estimación (horas)</label>
+                            <input type="number" class="form-control" id="tareaEstimacion" min="1" max="40" step="0.5">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="crearTarea()">
+                        <i class="fas fa-save me-2"></i>Crear Tarea
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Función para generar reporte del equipo
-        async function generarReporteEquipo() {
-            try {
-                const response = await fetch(`/api/reportes/productividad/<%= grupo %>`);
-                const data = await response.json();
-                
-                // Mostrar o descargar reporte
-                console.log('Reporte:', data);
-                alert('Reporte generado correctamente');
-            } catch (error) {
-                console.error('Error generando reporte:', error);
-            }
-        }
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // Variables globales
+        let currentProject = '<%= (typeof grupoData !== "undefined" && grupoData.proyecto) ? grupoData.proyecto : "GenT" %>';
+        let currentGroup = '<%= userData.grupo %>';
+        let estadisticasData = null;
+        let charts = {};
 
-        // Manejador del formulario de historia
-        document.getElementById('form-historia').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            actualizarEstadisticas();
+        });
+
+        // Función principal de inicialización
+        function initializeDashboard() {
+            // Configurar event listeners
+            setupEventListeners();
             
-            const proyecto = document.getElementById('historia-proyecto').value;
-            const data = {
-                como: document.getElementById('historia-como').value,
-                quiero: document.getElementById('historia-quiero').value,
-                para: document.getElementById('historia-para').value,
-                criterio_aceptacion: document.getElementById('historia-criterios').value,
-                prioridad: document.getElementById('historia-prioridad').value,
-                history_points: parseInt(document.getElementById('historia-points').value)
+            // Cargar datos iniciales
+            cargarProductBacklog();
+            cargarSprints();
+            cargarEquipo();
+            
+            // Actualizar datos cada 5 minutos
+            setInterval(actualizarEstadisticas, 300000);
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Tab change events
+            document.querySelectorAll('[data-bs-toggle="pill"]').forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(event) {
+                    const target = event.target.getAttribute('data-bs-target');
+                    if (target === '#reportes') {
+                        setTimeout(initializeReportCharts, 100);
+                    }
+                });
+            });
+        }
+
+        // Cambiar proyecto
+        function cambiarProyecto() {
+            const selector = document.getElementById('projectSelector');
+            currentProject = selector.value;
+            
+            // Mostrar loading
+            showLoading();
+            
+            // Actualizar todos los datos
+            actualizarEstadisticas();
+            cargarProductBacklog();
+            cargarSprints();
+            cargarEquipo();
+            
+            // Ocultar loading después de un breve delay
+            setTimeout(hideLoading, 1000);
+        }
+
+        // Actualizar estadísticas
+        async function actualizarEstadisticas() {
+            try {
+                const response = await fetch(`/api/estadisticas/${currentGroup}/${currentProject}`);
+                if (!response.ok) throw new Error('Error al cargar estadísticas');
+                
+                estadisticasData = await response.json();
+                
+                // Actualizar cards de estadísticas
+                updateStatsCards();
+                
+                // Actualizar gráficos
+                updateCharts();
+                
+                // Actualizar tabla de progreso
+                updateProgressTable();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al cargar las estadísticas', 'error');
+            }
+        }
+
+        // Actualizar cards de estadísticas
+        function updateStatsCards() {
+            if (!estadisticasData) return;
+
+            const stats = estadisticasData.proyecto || {};
+            
+            document.getElementById('totalHUs').textContent = stats.totalHUs || 0;
+            document.getElementById('husCompletadas').textContent = stats.husCompletadas || 0;
+            document.getElementById('husEnProceso').textContent = stats.husEnProceso || 0;
+            
+            const porcentaje = stats.totalHUs > 0 ? 
+                Math.round((stats.husCompletadas / stats.totalHUs) * 100) : 0;
+            document.getElementById('porcentajeCompletado').textContent = porcentaje + '%';
+        }
+
+        // Actualizar gráficos
+        function updateCharts() {
+            if (!estadisticasData) return;
+
+            updateProyectoChart();
+            updateSprintChart();
+        }
+
+        // Gráfico estado del proyecto
+        function updateProyectoChart() {
+            const ctx = document.getElementById('proyectoChart').getContext('2d');
+            
+            if (charts.proyecto) {
+                charts.proyecto.destroy();
+            }
+
+            const stats = estadisticasData.proyecto || {};
+            
+            charts.proyecto = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completadas', 'En Proceso', 'Backlog'],
+                    datasets: [{
+                        data: [
+                            stats.husCompletadas || 0,
+                            stats.husEnProceso || 0,
+                            (stats.totalHUs || 0) - (stats.husCompletadas || 0) - (stats.husEnProceso || 0)
+                        ],
+                        backgroundColor: [
+                            '#38a169',
+                            '#d69e2e',
+                            '#e2e8f0'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico sprint actual
+        function updateSprintChart() {
+            const ctx = document.getElementById('sprintChart').getContext('2d');
+            
+            if (charts.sprint) {
+                charts.sprint.destroy();
+            }
+
+            const stats = estadisticasData.sprint || {};
+            
+            charts.sprint = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sprint Actual'],
+                    datasets: [
+                        {
+                            label: 'HUs Seleccionadas',
+                            data: [stats.husSeleccionadas || 0],
+                            backgroundColor: '#3182ce'
+                        },
+                        {
+                            label: 'HUs Completadas',
+                            data: [stats.husCompletadasSprint || 0],
+                            backgroundColor: '#38a169'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            stepSize: 1
+                        }
+                    }
+                }
+            });
+        }
+
+        // Actualizar tabla de progreso
+        function updateProgressTable() {
+            const tbody = document.getElementById('progressTableBody');
+            tbody.innerHTML = '';
+
+            if (!estadisticasData || !estadisticasData.historiasUsuario) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay datos disponibles</td></tr>';
+                return;
+            }
+
+            estadisticasData.historiasUsuario.forEach(hu => {
+                const progreso = hu.tareasCompletadas > 0 ? 
+                    Math.round((hu.tareasCompletadas / hu.tareasTotales) * 100) : 0;
+                
+                let estado = 'Backlog';
+                let badgeClass = 'bg-secondary';
+                
+                if (progreso === 100) {
+                    estado = 'Completada';
+                    badgeClass = 'bg-success';
+                } else if (progreso > 0) {
+                    estado = 'En Proceso';
+                    badgeClass = 'bg-warning text-dark';
+                }
+
+                const row = `
+                    <tr>
+                        <td><strong>${hu.id || 'N/A'}</strong></td>
+                        <td>${hu.tareasTotales || 0}</td>
+                        <td>${hu.tareasCompletadas || 0}</td>
+                        <td>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: ${progreso}%" 
+                                     aria-valuenow="${progreso}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">${progreso}%</small>
+                        </td>
+                        <td>
+                            <span class="badge ${badgeClass} badge-status">${estado}</span>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Cargar Product Backlog
+        async function cargarProductBacklog() {
+            try {
+                const response = await fetch(`/api/product-backlog/${currentGroup}/${currentProject}`);
+                if (!response.ok) throw new Error('Error al cargar product backlog');
+                
+                const backlog = await response.json();
+                updateBacklogTable(backlog);
+                
+                // Actualizar selector de HUs para tareas
+                updateHUSelector(backlog);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al cargar el product backlog', 'error');
+            }
+        }
+
+        // Actualizar tabla de backlog
+        function updateBacklogTable(backlog) {
+            const tbody = document.getElementById('backlogTableBody');
+            tbody.innerHTML = '';
+
+            if (!backlog || backlog.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No hay historias de usuario</td></tr>';
+                return;
+            }
+
+            backlog.forEach(hu => {
+                const prioridadClass = {
+                    'Alta': 'bg-danger',
+                    'Media': 'bg-warning text-dark',
+                    'Baja': 'bg-info'
+                }[hu.prioridad] || 'bg-secondary';
+
+                const row = `
+                    <tr>
+                        <td><strong>${hu.id}</strong></td>
+                        <td>${hu.titulo}</td>
+                        <td>${hu.como}</td>
+                        <td>${hu.quiero}</td>
+                        <td>${hu.para}</td>
+                        <td><span class="badge ${prioridadClass}">${hu.prioridad}</span></td>
+                        <td><span class="badge bg-secondary">${hu.estado || 'Backlog'}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editarHU('${hu.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Actualizar selector de HUs
+        function updateHUSelector(backlog) {
+            const selector = document.getElementById('tareaHU');
+            selector.innerHTML = '<option value="">Seleccionar HU...</option>';
+
+            if (backlog && backlog.length > 0) {
+                backlog.forEach(hu => {
+                    selector.innerHTML += `<option value="${hu.id}">${hu.id} - ${hu.titulo}</option>`;
+                });
+            }
+        }
+
+        // Crear Historia de Usuario
+        async function crearHistoriaUsuario() {
+            const formData = {
+                id: document.getElementById('huId').value,
+                titulo: document.getElementById('huTitulo').value,
+                como: document.getElementById('huComo').value,
+                quiero: document.getElementById('huQuiero').value,
+                para: document.getElementById('huPara').value,
+                prioridad: document.getElementById('huPrioridad').value,
+                storyPoints: document.getElementById('huPuntos').value || null
             };
 
             try {
-                const response = await fetch(`/api/product-backlog/<%= grupo %>/${proyecto}/historia`, {
+                const response = await fetch(`/api/product-backlog/${currentGroup}/${currentProject}/historia`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(formData)
                 });
 
-                if (response.ok) {
-                    cerrarModal('modal-historia');
-                    document.getElementById('form-historia').reset();
-                    // Recargar backlog
-                    cargarProductBacklog(proyecto);
-                    alert('Historia creada correctamente');
-                } else {
-                    throw new Error('Error al crear historia');
-                }
+                if (!response.ok) throw new Error('Error al crear la historia');
+
+                showNotification('Historia de usuario creada exitosamente', 'success');
+                
+                // Cerrar modal y limpiar form
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevaHU'));
+                modal.hide();
+                document.getElementById('formNuevaHU').reset();
+                
+                // Recargar datos
+                cargarProductBacklog();
+                actualizarEstadisticas();
+                
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al crear la historia');
+                showNotification('Error al crear la historia de usuario', 'error');
             }
-        });
+        }
 
-        // Cargar contenido inicial
-        document.addEventListener('DOMContentLoaded', () => {
-            // Cargar datos iniciales si es necesario
-        });
+        // Cargar Sprints
+        async function cargarSprints() {
+            try {
+                // Aquí deberías hacer una llamada para obtener la lista de sprints
+                // Por ahora simularemos algunos sprints
+                const sprintsContainer = document.getElementById('sprintsContainer');
+                const sprints = [1, 2, 3]; // IDs de sprints existentes
+                
+                sprintsContainer.innerHTML = '';
+                
+                for (let sprintNum of sprints) {
+                    try {
+                        const response = await fetch(`/api/sprint/${currentGroup}/${currentProject}/${sprintNum}`);
+                        if (response.ok) {
+                            const sprintData = await response.json();
+                            sprintsContainer.innerHTML += createSprintCard(sprintData, sprintNum);
+                        }
+                    } catch (error) {
+                        console.log(`Sprint ${sprintNum} no encontrado`);
+                    }
+                }
+                
+                // Actualizar selector de sprints
+                updateSprintSelector(sprints);
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Crear card de sprint
+        function createSprintCard(sprintData, sprintNum) {
+            const fechaInicio = sprintData.fechaInicio ? new Date(sprintData.fechaInicio).toLocaleDateString() : 'N/A';
+            const fechaFin = sprintData.fechaFin ? new Date(sprintData.fechaFin).toLocaleDateString() : 'N/A';
+            
+            return `
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-running me-2"></i>Sprint ${sprintNum}
+                        </h6>
+                        <div>
+                            <span class="badge bg-primary">${sprintData.estado || 'Activo'}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted">Inicio:</small> ${fechaInicio}<br>
+                                <small class="text-muted">Fin:</small> ${fechaFin}
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">HUs:</small> ${sprintData.historias ? sprintData.historias.length : 0}<br>
+                                <small class="text-muted">Progreso:</small> <span class="text-primary">75%</span>
+                            </div>
+                        </div>
+                        ${sprintData.objetivo ? `<p class="mt-2 mb-0"><small>${sprintData.objetivo}</small></p>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Actualizar selector de sprints
+        function updateSprintSelector(sprints) {
+            const selector = document.getElementById('sprintSeleccionar');
+            selector.innerHTML = '<option value="">Seleccionar sprint...</option>';
+            
+            sprints.forEach(num => {
+                selector.innerHTML += `<option value="${num}">Sprint ${num}</option>`;
+            });
+        }
+
+        // Crear Sprint
+        async function crearSprint() {
+            const formData = {
+                nombre: document.getElementById('sprintNombre').value,
+                fechaInicio: document.getElementById('sprintFechaInicio').value,
+                fechaFin: document.getElementById('sprintFechaFin').value,
+                objetivo: document.getElementById('sprintObjetivo').value
+            };
+
+            try {
+                const response = await fetch(`/api/sprint/${currentGroup}/${currentProject}/nuevo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) throw new Error('Error al crear el sprint');
+
+                showNotification('Sprint creado exitosamente', 'success');
+                
+                // Cerrar modal y limpiar form
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoSprint'));
+                modal.hide();
+                document.getElementById('formNuevoSprint').reset();
+                
+                // Recargar sprints
+                cargarSprints();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al crear el sprint', 'error');
+            }
+        }
+
+        // Crear Tarea
+        async function crearTarea() {
+            const formData = {
+                historiaUsuario: document.getElementById('tareaHU').value,
+                titulo: document.getElementById('tareaTitulo').value,
+                descripcion: document.getElementById('tareaDescripcion').value,
+                asignado: document.getElementById('tareaAsignado').value,
+                prioridad: document.getElementById('tareaPrioridad').value,
+                estimacion: document.getElementById('tareaEstimacion').value
+            };
+
+            try {
+                const response = await fetch(`/api/tareas/${currentGroup}/${currentProject}/crear`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) throw new Error('Error al crear la tarea');
+
+                showNotification('Tarea creada exitosamente', 'success');
+                
+                // Cerrar modal y limpiar form
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevaTarea'));
+                modal.hide();
+                document.getElementById('formNuevaTarea').reset();
+                
+                // Recargar datos
+                actualizarEstadisticas();
+                cargarSprints();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al crear la tarea', 'error');
+            }
+        }
+
+        // Cargar equipo
+        async function cargarEquipo() {
+            try {
+                const response = await fetch(`/api/estadisticas/equipo/${currentGroup}`);
+                if (!response.ok) throw new Error('Error al cargar datos del equipo');
+                
+                const equipoData = await response.json();
+                updateEquipoStats(equipoData);
+                updateEquipoTable(equipoData);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al cargar datos del equipo', 'error');
+            }
+        }
+
+        // Actualizar stats del equipo
+        function updateEquipoStats(equipoData) {
+            const container = document.getElementById('equipoStatsContainer');
+            container.innerHTML = '';
+
+            if (!equipoData || !equipoData.miembros) return;
+
+            const totalMiembros = equipoData.miembros.length;
+            const miembrosActivos = equipoData.miembros.filter(m => m.tareasAsignadas > 0).length;
+            const totalTareas = equipoData.miembros.reduce((sum, m) => sum + m.tareasAsignadas, 0);
+            const tareasCompletadas = equipoData.miembros.reduce((sum, m) => sum + m.tareasCompletadas, 0);
+
+            const statsCards = [
+                {
+                    title: 'Total Miembros',
+                    value: totalMiembros,
+                    icon: 'fas fa-users',
+                    color: 'var(--primary-color)'
+                },
+                {
+                    title: 'Miembros Activos',
+                    value: miembrosActivos,
+                    icon: 'fas fa-user-check',
+                    color: 'var(--success-color)'
+                },
+                {
+                    title: 'Total Tareas',
+                    value: totalTareas,
+                    icon: 'fas fa-tasks',
+                    color: 'var(--info-color)'
+                },
+                {
+                    title: 'Completadas',
+                    value: tareasCompletadas,
+                    icon: 'fas fa-check-circle',
+                    color: 'var(--success-color)'
+                }
+            ];
+
+            statsCards.forEach(stat => {
+                container.innerHTML += `
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon" style="background-color: ${stat.color};">
+                                    <i class="${stat.icon}"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="text-muted small">${stat.title}</div>
+                                    <div class="h4 mb-0">${stat.value}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Actualizar tabla del equipo
+        function updateEquipoTable(equipoData) {
+            const tbody = document.getElementById('equipoTableBody');
+            tbody.innerHTML = '';
+
+            if (!equipoData || !equipoData.miembros || equipoData.miembros.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No hay datos del equipo</td></tr>';
+                return;
+            }
+
+            // También actualizar selector de miembros para tareas
+            const selector = document.getElementById('tareaAsignado');
+            selector.innerHTML = '<option value="">Seleccionar miembro...</option>';
+
+            equipoData.miembros.forEach(miembro => {
+                const porcentaje = miembro.tareasAsignadas > 0 ? 
+                    Math.round((miembro.tareasCompletadas / miembro.tareasAsignadas) * 100) : 0;
+                
+                let rendimientoClass = 'text-success';
+                let rendimientoIcon = 'fas fa-arrow-up';
+                
+                if (porcentaje < 50) {
+                    rendimientoClass = 'text-danger';
+                    rendimientoIcon = 'fas fa-arrow-down';
+                } else if (porcentaje < 80) {
+                    rendimientoClass = 'text-warning';
+                    rendimientoIcon = 'fas fa-minus';
+                }
+
+                const row = `
+                    <tr>
+                        <td><strong>${miembro.nombre}</strong></td>
+                        <td><span class="badge bg-info">${miembro.rol || 'Miembro'}</span></td>
+                        <td>${miembro.tareasAsignadas || 0}</td>
+                        <td>${miembro.tareasCompletadas || 0}</td>
+                        <td>${miembro.tareasEnProceso || 0}</td>
+                        <td>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar" style="width: ${porcentaje}%"></div>
+                            </div>
+                            <small>${porcentaje}%</small>
+                        </td>
+                        <td>
+                            <i class="${rendimientoIcon} ${rendimientoClass}"></i>
+                            <span class="${rendimientoClass}">${porcentaje >= 80 ? 'Excelente' : porcentaje >= 50 ? 'Bueno' : 'Necesita mejora'}</span>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+
+                // Agregar al selector
+                selector.innerHTML += `<option value="${miembro.nombre}">${miembro.nombre} (${miembro.rol || 'Miembro'})</option>`;
+            });
+        }
+
+        // Inicializar gráficos de reportes
+        function initializeReportCharts() {
+            initProductividadChart();
+            initBurndownChart();
+            initDistribucionChart();
+        }
+
+        // Gráfico de productividad
+        function initProductividadChart() {
+            const ctx = document.getElementById('productividadChart').getContext('2d');
+            
+            if (charts.productividad) {
+                charts.productividad.destroy();
+            }
+
+            charts.productividad = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Sprint 1', 'Sprint 2', 'Sprint 3', 'Sprint 4'],
+                    datasets: [{
+                        label: 'Story Points Completados',
+                        data: [15, 22, 18, 25],
+                        borderColor: '#3182ce',
+                        backgroundColor: 'rgba(49, 130, 206, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Burndown chart
+        function initBurndownChart() {
+            const ctx = document.getElementById('burndownChart').getContext('2d');
+            
+            if (charts.burndown) {
+                charts.burndown.destroy();
+            }
+
+            charts.burndown = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Día 1', 'Día 3', 'Día 5', 'Día 7', 'Día 9', 'Día 11'],
+                    datasets: [
+                        {
+                            label: 'Ideal',
+                            data: [50, 40, 30, 20, 10, 0],
+                            borderColor: '#e2e8f0',
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Real',
+                            data: [50, 42, 35, 25, 12, 5],
+                            borderColor: '#e53e3e',
+                            backgroundColor: 'rgba(229, 62, 62, 0.1)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Gráfico de distribución
+        function initDistribucionChart() {
+            const ctx = document.getElementById('distribucionChart').getContext('2d');
+            
+            if (charts.distribucion) {
+                charts.distribucion.destroy();
+            }
+
+            charts.distribucion = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Juan', 'María', 'Pedro', 'Ana', 'Luis'],
+                    datasets: [
+                        {
+                            label: 'Tareas Asignadas',
+                            data: [8, 6, 7, 5, 9],
+                            backgroundColor: '#3182ce'
+                        },
+                        {
+                            label: 'Tareas Completadas',
+                            data: [6, 5, 6, 4, 7],
+                            backgroundColor: '#38a169'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Utilidades
+        function showNotification(message, type = 'info') {
+            // Crear el elemento de notificación
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type} position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 350px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove después de 5 segundos
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function showLoading() {
+            const loading = document.createElement('div');
+            loading.id = 'loadingOverlay';
+            loading.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center';
+            loading.style.cssText = 'background: rgba(0,0,0,0.5); z-index: 9999;';
+            loading.innerHTML = `
+                <div class="text-center text-white">
+                    <div class="spinner-border mb-3" role="status"></div>
+                    <div>Cargando datos...</div>
+                </div>
+            `;
+            document.body.appendChild(loading);
+        }
+
+        function hideLoading() {
+            const loading = document.getElementById('loadingOverlay');
+            if (loading) {
+                loading.remove();
+            }
+        }
+
+        // Funciones placeholder para funcionalidades futuras
+        function editarHU(id) {
+            showNotification(`Editar HU: ${id} (Funcionalidad en desarrollo)`, 'info');
+        }
+
+        function seleccionarHistorias() {
+            const sprint = document.getElementById('sprintSeleccionar').value;
+            if (!sprint) {
+                showNotification('Selecciona un sprint', 'error');
+                return;
+            }
+            
+            // Implementar lógica de selección de historias
+            showNotification('Funcionalidad de selección de historias en desarrollo', 'info');
+        }
     </script>
 </body>
 </html>
