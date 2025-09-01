@@ -3,133 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <%- include('partials/header') %>
+    <title>Dardito - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-header h1 {
+            color: #4a6bdf;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #c33;
+        }
+
+        .login-form {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a6bdf;
+            box-shadow: 0 0 0 2px rgba(74, 107, 223, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #4a6bdf;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3a5bc7;
+        }
+
+        .help-text {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .help-text code {
+            background-color: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md">
-            <!-- Logo y título -->
-            <div class="text-center mb-8">
-                <div class="mx-auto w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mb-4 shadow-lg transform hover:scale-105 transition-transform duration-200">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                    </svg>
-                </div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Dardito</h1>
-                <p class="text-gray-600">Sistema de gestión ágil para proyectos escolares</p>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Dardito v1.0</h1>
+            <p>Sistema de Gestión Ágil | Bot + Web</p>
+        </div>
+        
+        <% if (error) { %>
+            <div class="error-message"><%= error %></div>
+        <% } %>
+        
+        <form class="login-form" action="/auth" method="POST">
+            <div class="form-group">
+                <label for="token">Token de acceso:</label>
+                <input type="password" id="token" name="token" required placeholder="Ingresa tu token personal">
             </div>
-
-            <!-- Formulario de login -->
-            <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                <form method="POST" action="/auth" class="space-y-6" id="loginForm" enctype="application/x-www-form-urlencoded">
-                    <div>
-                        <label for="token" class="block text-sm font-medium text-gray-700 mb-2">
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2h-5m4 0V9a2 2 0 00-2-2M9 7v10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10"></path>
-                            </svg>
-                            Token de acceso
-                        </label>
-                        <div class="relative">
-                            <input 
-                                type="text" 
-                                id="token" 
-                                name="token" 
-                                required 
-                                placeholder="7d55e3dda13b5c0b9da7b98fceaae50b"
-                                autocomplete="off"
-                                spellcheck="false"
-                                class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white font-mono text-sm"
-                            >
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <p class="mt-1 text-xs text-gray-500">Token de 32 caracteres hexadecimales</p>
-                    </div>
-
-                    <!-- Mostrar error si existe -->
-                    <% if (typeof error !== 'undefined' && error) { %>
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-red-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span class="text-red-800 text-sm font-medium"><%= error %></span>
-                            </div>
-                        </div>
-                    <% } %>
-
-                    <!-- Botón de login rápido para admin (SOLO DESARROLLO) -->
-                    <div class="bg-gray-50 rounded-lg p-3">
-                        <p class="text-xs text-gray-600 mb-2">Quick login (desarrollo):</p>
-                        <button 
-                            type="button" 
-                            onclick="document.getElementById('token').value='7d55e3dda13b5c0b9da7b98fceaae50b'"
-                            class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 px-2 py-1 rounded transition-colors"
-                        >
-                            Admin Token
-                        </button>
-                    </div>
-
-                    <button 
-                        type="submit" 
-                        id="submitBtn"
-                        class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    >
-                        <span id="btnText">Iniciar Sesión</span>
-                    </button>
-                </form>
-            </div>
+            <button type="submit">Acceder</button>
+        </form>
+        
+        <div class="help-text">
+            <p>¿No tienes un token? Usa el comando <code>/contraseña mostrar</code> en Discord para obtenerlo.</p>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('loginForm');
-            const tokenInput = document.getElementById('token');
-            const submitButton = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            
-            // Validación en tiempo real
-            tokenInput.addEventListener('input', function() {
-                let value = this.value.replace(/\s/g, '');
-                this.value = value;
-                
-                if (value.length === 32) {
-                    this.classList.remove('border-gray-300', 'border-red-300');
-                    this.classList.add('border-green-400', 'bg-green-50');
-                } else if (value.length > 0) {
-                    this.classList.remove('border-gray-300', 'border-green-400', 'bg-green-50');
-                    this.classList.add('border-yellow-400', 'bg-yellow-50');
-                } else {
-                    this.classList.remove('border-green-400', 'border-yellow-400', 'bg-green-50', 'bg-yellow-50');
-                    this.classList.add('border-gray-300');
-                }
-            });
-            
-            form.addEventListener('submit', function(e) {
-                const token = tokenInput.value.trim();
-                console.log('Enviando token:', token);
-                
-                if (token.length !== 32) {
-                    e.preventDefault();
-                    alert('El token debe tener exactamente 32 caracteres');
-                    return;
-                }
-                
-                submitButton.disabled = true;
-                btnText.innerHTML = 'Autenticando...';
-                tokenInput.value = token;
-            });
-            
-            tokenInput.focus();
-        });
-    </script>
-
-    <%- include('partials/footer') %>
 </body>
 </html>

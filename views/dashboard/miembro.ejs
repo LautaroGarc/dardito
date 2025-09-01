@@ -1,332 +1,340 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Miembro - DARDITO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50">
-    <!-- Navigation Header -->
-    <nav class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-semibold text-gray-900">DARDITO - <%= grupo %></h1>
+<!-- views/dashboard-miembro.ejs -->
+<%- include('partials/header') %>
+<%- include('partials/navigation') %>
+
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header del Dashboard Miembro -->
+        <div class="mb-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                            Dashboard del Miembro 👤
+                        </h1>
+                        <p class="text-gray-600">
+                            Hola <strong><%= user.nickname %></strong>, aquí puedes ver y gestionar tus tareas asignadas.
+                        </p>
+                    </div>
+                    <div class="hidden sm:block">
+                        <div class="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Información del Usuario -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600"><%= user.nickname %></span>
-                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">Miembro</span>
-                    <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
-                        Cerrar Sesión
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Tabs de Navegación entre Proyectos -->
-    <div class="bg-white border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mb-px flex space-x-8">
-            <% if (datos.GenT) { %>
-            <button onclick="cambiarProyecto('gent')" id="tab-gent" 
-                    class="tab-button py-2 px-1 border-b-2 border-blue-500 font-medium text-sm text-blue-600">
-                Generación T
-            </button>
-            <% } %>
-            <% if (datos.Proy) { %>
-            <button onclick="cambiarProyecto('proy')" id="tab-proy" 
-                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Proyecto Principal
-            </button>
-            <% } %>
-            <% if (datos.Proy2) { %>
-            <button onclick="cambiarProyecto('proy2')" id="tab-proy2" 
-                    class="tab-button py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                Proyecto Secundario
-            </button>
-            <% } %>
-        </nav>
-    </div>
-
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <!-- Contenido de cada Proyecto -->
-        <% ['GenT', 'Proy', 'Proy2'].forEach(proyecto => { %>
-        <% if (datos[proyecto]) { %>
-        <div id="content-<%= proyecto.toLowerCase() %>" class="proyecto-content <%= proyecto === 'GenT' ? '' : 'hidden' %>">
-            
-            <!-- Navegación entre Sprints -->
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Navegación de Sprints</h3>
-                <div class="flex space-x-2 mb-4">
-                    <button onclick="cargarSprint('<%= proyecto.toLowerCase() %>', '1')" 
-                            class="sprint-btn bg-blue-600 text-white px-4 py-2 rounded text-sm" data-sprint="1">
-                        Sprint 1
-                    </button>
-                    <!-- Más sprints se cargarán dinámicamente -->
-                </div>
-                <div class="text-sm text-gray-600">
-                    Sprint Actual: <span id="sprint-actual-<%= proyecto.toLowerCase() %>" class="font-medium">1</span>
-                    | Estado: <span id="estado-sprint-<%= proyecto.toLowerCase() %>" class="font-medium">Activo</span>
-                    | Fechas: <span id="fechas-sprint-<%= proyecto.toLowerCase() %>">--/--/---- - --/--/----</span>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Nickname</h3>
+                        <p class="text-lg font-bold text-gray-900"><%= user.nickname %></p>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                <!-- Product Backlog (Solo Lectura) -->
-                <div class="bg-white rounded-lg shadow">
-                    <div class="px-6 py-4 border-b">
-                        <h3 class="text-lg font-medium text-gray-900">
-                            Product Backlog
-                        </h3>
-                        <p class="text-sm text-gray-500">Todas las historias de usuario del proyecto</p>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
                     </div>
-                    <div class="p-4">
-                        <div id="product-backlog-<%= proyecto.toLowerCase() %>" class="space-y-3 max-h-96 overflow-y-auto">
-                            <!-- Historias del backlog -->
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Rol</h3>
+                        <div class="flex items-center space-x-2">
+                            <p class="text-lg font-bold text-gray-900">Miembro</p>
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">Equipo</span>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Historias y Tareas del Sprint Actual -->
-                <div class="bg-white rounded-lg shadow">
-                    <div class="px-6 py-4 border-b">
-                        <h3 class="text-lg font-medium text-gray-900">
-                            Sprint Actual - HUs y Tareas
-                        </h3>
-                        <p class="text-sm text-gray-500">Historias seleccionadas y sus tareas técnicas</p>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
                     </div>
-                    <div class="p-4">
-                        <div id="sprint-content-<%= proyecto.toLowerCase() %>" class="space-y-4 max-h-96 overflow-y-auto">
-                            <!-- Historias del sprint con sus tareas -->
-                        </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Grupo</h3>
+                        <p class="text-lg font-bold text-gray-900"><%= user.grupo %></p>
                     </div>
                 </div>
             </div>
         </div>
-        <% } %>
-        <% }) %>
-    </div>
 
-    <script>
-        let proyectoActual = '<%= datos.GenT ? "gent" : datos.Proy ? "proy" : "proy2" %>';
-        let sprintActual = '1';
+        <!-- Mis Tareas -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <svg class="w-6 h-6 mr-3 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 4h6m-6 4h6"></path>
+                </svg>
+                Mis Tareas Asignadas
+            </h2>
 
-        // Función para cambiar de proyecto
-        function cambiarProyecto(proyecto) {
-            // Ocultar contenido actual
-            document.querySelectorAll('.proyecto-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-button').forEach(el => {
-                el.classList.remove('border-blue-500', 'text-blue-600');
-                el.classList.add('border-transparent', 'text-gray-500');
-            });
-
-            // Mostrar nuevo contenido
-            document.getElementById(`content-${proyecto}`).classList.remove('hidden');
-            document.getElementById(`tab-${proyecto}`).classList.add('border-blue-500', 'text-blue-600');
-            document.getElementById(`tab-${proyecto}`).classList.remove('border-transparent', 'text-gray-500');
-
-            proyectoActual = proyecto;
-            sprintActual = '1';
-
-            // Cargar datos del proyecto
-            cargarDatosProyecto(proyecto);
-        }
-
-        // Función para cargar datos del proyecto
-        async function cargarDatosProyecto(proyecto) {
-            try {
-                // Cargar Product Backlog
-                const backlogResponse = await fetch(`/api/product-backlog/<%= grupo %>/${proyecto.toUpperCase()}`);
-                const backlogData = await backlogResponse.json();
-                mostrarProductBacklog(proyecto, backlogData.productBacklog || []);
-
-                // Cargar Sprint
-                await cargarSprint(proyecto, sprintActual);
-
-            } catch (error) {
-                console.error('Error cargando proyecto:', error);
-                mostrarError('Error al cargar los datos del proyecto');
-            }
-        }
-
-        // Función para cargar sprint específico
-        async function cargarSprint(proyecto, numeroSprint) {
-            try {
-                const [sprintResponse, tareasResponse] = await Promise.all([
-                    fetch(`/api/sprint/<%= grupo %>/${proyecto.toUpperCase()}/${numeroSprint}`),
-                    fetch(`/api/tareas/<%= grupo %>/${proyecto.toUpperCase()}/${numeroSprint}`)
-                ]);
-
-                const sprintData = await sprintResponse.json();
-                const tareasData = await tareasResponse.json();
-
-                // Actualizar información del sprint
-                document.getElementById(`sprint-actual-${proyecto}`).textContent = numeroSprint;
-                if (sprintData.fechaIni && sprintData.fechaFin) {
-                    document.getElementById(`fechas-sprint-${proyecto}`).textContent = 
-                        `${sprintData.fechaIni.join('/')} - ${sprintData.fechaFin.join('/')}`;
-                }
-
-                // Mostrar historias y tareas del sprint
-                mostrarSprintContenido(proyecto, sprintData, tareasData.tareas || {});
-
-                sprintActual = numeroSprint;
-
-            } catch (error) {
-                console.error('Error cargando sprint:', error);
-                mostrarError('Error al cargar el sprint');
-            }
-        }
-
-        // Función para mostrar Product Backlog
-        function mostrarProductBacklog(proyecto, historias) {
-            const container = document.getElementById(`product-backlog-${proyecto}`);
-            container.innerHTML = '';
-
-            if (historias.length > 0) {
-                historias.forEach((historia, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'border border-gray-200 rounded-lg p-3 hover:bg-gray-50';
-                    
-                    const estadoColor = {
-                        'POR_HACER': 'bg-gray-100 text-gray-800',
-                        'EN_PROCESO': 'bg-blue-100 text-blue-800',
-                        'EN_SPRINT': 'bg-purple-100 text-purple-800',
-                        'COMPLETADO': 'bg-green-100 text-green-800'
-                    };
-
-                    div.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="text-sm font-medium text-gray-900 flex-1">
-                                <span class="text-gray-400 text-xs">#${historia[0] || index + 1}</span>
-                                Como <strong>${historia[2] || historia[1]}</strong>, quiero <strong>${historia[3] || historia[2]}</strong>
-                            </div>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoColor[historia[7]] || 'bg-gray-100 text-gray-800'}">
-                                ${(historia[7] || 'POR_HACER').replace('_', ' ')}
-                            </span>
-                        </div>
-                        <div class="text-xs text-gray-600">
-                            <strong>Para:</strong> ${historia[4] || historia[3]}
-                        </div>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                ${historia[6] || historia[1]} Story Points
-                            </span>
-                            <span class="text-xs ${
-                                (historia[5] || 'MEDIA') === 'ALTA' ? 'text-red-600' :
-                                (historia[5] || 'MEDIA') === 'MEDIA' ? 'text-yellow-600' :
-                                'text-green-600'
-                            }">
-                                Prioridad: ${historia[5] || 'MEDIA'}
-                            </span>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            } else {
-                container.innerHTML = '<div class="text-center text-gray-500 py-8">No hay historias en el Product Backlog</div>';
-            }
-        }
-
-        // Función para mostrar contenido del sprint (Historias + Tareas)
-        function mostrarSprintContenido(proyecto, sprintData, tareas) {
-            const container = document.getElementById(`sprint-content-${proyecto}`);
-            container.innerHTML = '';
-
-            if (sprintData.scrumBoard && sprintData.scrumBoard.length > 0) {
-                // Para cada historia en el sprint, mostrar sus tareas
-                sprintData.scrumBoard.forEach(historyId => {
-                    const historiaDiv = document.createElement('div');
-                    historiaDiv.className = 'border-l-4 border-blue-500 bg-blue-50 p-4 rounded-r-lg mb-4';
-                    
-                    // Encontrar tareas de esta historia
-                    const tareasDeHistoria = [];
-                    if (sprintData.scrumBoard[historyId]) {
-                        sprintData.scrumBoard[historyId].forEach(taskId => {
-                            if (tareas[taskId]) {
-                                tareasDeHistoria.push({ id: taskId, data: tareas[taskId] });
-                            }
-                        });
-                    }
-
-                    historiaDiv.innerHTML = `
-                        <div class="mb-3">
-                            <h4 class="font-medium text-blue-900 mb-1">
-                                Historia de Usuario #${historyId}
-                            </h4>
-                            <div class="text-sm text-blue-700">
-                                ${tareasDeHistoria.length} tarea${tareasDeHistoria.length !== 1 ? 's' : ''} técnica${tareasDeHistoria.length !== 1 ? 's' : ''}
-                            </div>
-                        </div>
-                        <div id="tareas-historia-${historyId}" class="space-y-2">
-                            <!-- Tareas de esta historia -->
-                        </div>
-                    `;
-
-                    container.appendChild(historiaDiv);
-
-                    // Mostrar tareas de esta historia
-                    const tareasContainer = document.getElementById(`tareas-historia-${historyId}`);
-                    if (tareasDeHistoria.length > 0) {
-                        tareasDeHistoria.forEach(({ id, data }) => {
-                            const tareaDiv = document.createElement('div');
-                            tareaDiv.className = 'bg-white border rounded p-3 ml-4';
+            <% if (typeof tareas !== 'undefined' && Object.keys(tareas).length > 0) { %>
+                <!-- Lista de tareas del usuario -->
+                <div class="space-y-4">
+                    <% for (const [proyecto, sprintsData] of Object.entries(tareas)) { %>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-900 mb-3 flex items-center">
+                                <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                                Proyecto: <%= proyecto %>
+                            </h3>
                             
-                            const estadoColor = {
-                                'POR_HACER': 'bg-gray-100 text-gray-800',
-                                'EN_PROCESO': 'bg-yellow-100 text-yellow-800',
-                                'COMPLETADO': 'bg-green-100 text-green-800',
-                                'VERIFICADO': 'bg-green-200 text-green-900'
-                            };
-
-                            tareaDiv.innerHTML = `
-                                <div class="flex justify-between items-start">
-                                    <div class="flex-1">
-                                        <div class="text-sm font-medium text-gray-900">${data[1]}</div>
-                                        <div class="text-xs text-gray-600 mt-1">
-                                            Asignado a: ${data[2] ? data[2].join(', ') : 'Sin asignar'}
-                                            ${data[3] ? ` | Prioridad: ${data[3]}` : ''}
-                                        </div>
+                            <% for (const [sprint, tareasArray] of Object.entries(sprintsData)) { %>
+                                <div class="mb-4">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2 capitalize"><%= sprint.replace('sprint', 'Sprint ') %></h4>
+                                    <div class="grid gap-3">
+                                        <% tareasArray.forEach(tarea => { %>
+                                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-3 h-3 rounded-full 
+                                                        <% if (tarea.estado === 'COMPLETADO') { %>bg-green-500<% } %>
+                                                        <% if (tarea.estado === 'EN_PROCESO') { %>bg-yellow-500<% } %>
+                                                        <% if (tarea.estado === 'POR_HACER') { %>bg-gray-400<% } %>
+                                                    "></div>
+                                                    <div>
+                                                        <p class="font-medium text-gray-900"><%= tarea.nombre %></p>
+                                                        <p class="text-sm text-gray-600"><%= tarea.descripcion %></p>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <span class="px-2 py-1 text-xs font-medium rounded-full
+                                                        <% if (tarea.estado === 'COMPLETADO') { %>bg-green-100 text-green-700<% } %>
+                                                        <% if (tarea.estado === 'EN_PROCESO') { %>bg-yellow-100 text-yellow-700<% } %>
+                                                        <% if (tarea.estado === 'POR_HACER') { %>bg-gray-100 text-gray-700<% } %>
+                                                    ">
+                                                        <%= tarea.estado.replace('_', ' ') %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        <% }); %>
                                     </div>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoColor[data[0]] || 'bg-gray-100 text-gray-800'}">
-                                        ${data[0].replace('_', ' ')}
-                                    </span>
                                 </div>
-                            `;
-                            
-                            tareasContainer.appendChild(tareaDiv);
-                        });
-                    } else {
-                        tareasContainer.innerHTML = '<div class="text-center text-gray-500 text-sm py-2 ml-4">No hay tareas técnicas para esta historia</div>';
-                    }
-                });
-
-            } else {
-                container.innerHTML = '<div class="text-center text-gray-500 py-8">🏃‍♂️ No hay historias seleccionadas para este sprint</div>';
-            }
-        }
-
-        // Función para mostrar errores
-        function mostrarError(mensaje) {
-            const div = document.createElement('div');
-            div.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg z-50';
-            div.innerHTML = `
-                <div class="flex items-center">
-                    <span class="mr-2">❌</span>
-                    <span>${mensaje}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-red-700 hover:text-red-900">✕</button>
+                            <% } %>
+                        </div>
+                    <% } %>
                 </div>
-            `;
-            document.body.appendChild(div);
-            setTimeout(() => div.remove(), 5000);
-        }
+            <% } else { %>
+                <!-- Estado sin tareas -->
+                <div class="text-center py-12">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 4h6m-6 4h6"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No hay tareas asignadas</h3>
+                    <p class="text-gray-600 mb-6">
+                        <% if (!proyectoIniciado) { %>
+                            Esperando que el líder inicie el proyecto para comenzar a trabajar.
+                        <% } else { %>
+                            Cuando tengas tareas asignadas, aparecerán aquí.
+                        <% } %>
+                    </p>
+                    
+                    <% if (!proyectoIniciado) { %>
+                        <div class="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Proyecto pendiente de inicialización
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
 
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', () => {
-            cargarDatosProyecto(proyectoActual);
-        });
-    </script>
-</body>
-</html>
+        <!-- Estadísticas Personales -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Mis Estadísticas
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-medium text-blue-600">Tareas Completadas</h3>
+                            <p class="text-2xl font-bold text-blue-900">
+                                <% if (user.stats && Array.isArray(user.stats)) { %>
+                                    <%= user.stats[2] || 0 %>
+                                <% } else { %>
+                                    0
+                                <% } %>
+                            </p>
+                        </div>
+                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-medium text-green-600">Tareas Asignadas</h3>
+                            <p class="text-2xl font-bold text-green-900">
+                                <% if (user.stats && Array.isArray(user.stats)) { %>
+                                    <%= user.stats[1] || 0 %>
+                                <% } else { %>
+                                    0
+                                <% } %>
+                            </p>
+                        </div>
+                        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-medium text-purple-600">Tiempo en Llamadas</h3>
+                            <p class="text-2xl font-bold text-purple-900">
+                                <% if (user.stats && Array.isArray(user.stats)) { %>
+                                    <%= Math.floor((user.stats[0] || 0) / 60) %>m
+                                <% } else { %>
+                                    0m
+                                <% } %>
+                            </p>
+                        </div>
+                        <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del Proyecto -->
+        <% if (proyectoIniciado) { %>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    Estado del Proyecto - <%= user.grupo %>
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h3 class="font-medium text-gray-900 flex items-center">
+                            <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                            Proyecto Activo
+                        </h3>
+                        <p class="text-gray-600">
+                            Tu grupo <strong><%= user.grupo %></strong> tiene el proyecto iniciado. 
+                            Puedes colaborar en las tareas asignadas por el líder del equipo.
+                        </p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <h3 class="font-medium text-gray-900">Tu Rol en el Equipo</h3>
+                        <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                            <div class="flex items-center space-x-3">
+                                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <div>
+                                    <p class="font-medium text-yellow-800">Miembro del Equipo</p>
+                                    <p class="text-sm text-yellow-600">Ejecutas tareas y colaboras en el desarrollo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } else { %>
+            <!-- Estado sin proyecto iniciado -->
+            <div class="bg-yellow-50 rounded-xl border border-yellow-200 p-6">
+                <div class="text-center">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-yellow-800 mb-2">Esperando Inicio del Proyecto</h3>
+                    <p class="text-yellow-700 mb-4">
+                        El líder de tu grupo <strong><%= user.grupo %></strong> aún no ha iniciado el proyecto.
+                    </p>
+                    <p class="text-sm text-yellow-600">
+                        Una vez que el proyecto esté iniciado, podrás ver y trabajar en tus tareas asignadas.
+                    </p>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    // Función para actualizar estado de tareas
+    async function actualizarEstadoTarea(proyecto, sprint, tareaId, nuevoEstado) {
+        try {
+            const response = await fetch(`/api/tareas/${proyecto}/${sprint}/${tareaId}/estado`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ estado: nuevoEstado })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Estado de tarea actualizado', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (error) {
+            showToast('Error al actualizar la tarea', 'error');
+        }
+    }
+    
+    // Función para mostrar notificaciones
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    ${type === 'success' ? 
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' :
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                    }
+                </div>
+                <div class="flex-1">
+                    <p>${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 opacity-70 hover:opacity-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 100);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    }
+</script>
+
+<%- include('partials/footer') %>
