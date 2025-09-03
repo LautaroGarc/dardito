@@ -875,6 +875,75 @@ async function obtenerEstadisticasGlobales() {
   }
 }
 
+/**
+ * Obtiene el scrumboard con las historias de usuario de un sprint específico
+ * @param {string} grupo - Nombre del grupo
+ * @param {string} proyecto - Nombre del proyecto
+ * @param {string} sprint - Sprint específico
+ * @returns {Promise<Array>} - Array de historias de usuario del scrumboard
+ */
+async function obtenerScrumboardSprint(grupo, proyecto, sprint) {
+  try {
+    const db = await leerDB();
+    
+    // Verificar que exista el sprint
+    if (!db[grupo] || !db[grupo][proyecto] || !db[grupo][proyecto][sprint]) {
+      throw new Error('Sprint no encontrado');
+    }
+
+    const sprintData = db[grupo][proyecto][sprint];
+    const scrumBoardIds = sprintData.scrumBoard || [];
+    const productBacklog = db[grupo][proyecto].productBacklog || [];
+    
+    console.log(`📋 Scrumboard del ${sprint}:`, scrumBoardIds);
+    console.log(`Total historias en scrumboard: ${scrumBoardIds.length}`);
+
+    // Filtrar las historias del backlog que están en el scrumboard
+    const historiasScrumboard = productBacklog.filter(historia => 
+      scrumBoardIds.includes(historia[0]) // historia[0] = ID
+    );
+
+    console.log(`Historias encontradas en scrumboard: ${historiasScrumboard.length}`);
+    
+    return historiasScrumboard;
+  } catch (error) {
+    console.error('Error obteniendo scrumboard del sprint:', error);
+    throw error;
+  }
+}
+
+/**
+ * Obtiene estadísticas del scrumboard de un sprint
+ * @param {string} grupo - Nombre del grupo
+ * @param {string} proyecto - Nombre del proyecto
+ * @param {string} sprint - Sprint específico
+ */
+async function obtenerEstadisticasScrumboard(grupo, proyecto, sprint) {
+  try {
+    const scrumboard = await obtenerScrumboardSprint(grupo, proyecto, sprint);
+    
+    const estadisticas = {
+      totalHistorias: scrumboard.length,
+      totalStoryPoints: scrumboard.reduce((sum, historia) => sum + (historia[6] || 0), 0),
+      porEstado: {
+        POR_HACER: scrumboard.filter(h => h[7] === 'POR_HACER').length,
+        EN_PROGRESO: scrumboard.filter(h => h[7] === 'EN_PROGRESO').length,
+        COMPLETADO: scrumboard.filter(h => h[7] === 'COMPLETADO').length
+      },
+      porPrioridad: {
+        Alta: scrumboard.filter(h => h[5] === 'Alta').length,
+        Media: scrumboard.filter(h => h[5] === 'Media').length,
+        Baja: scrumboard.filter(h => h[5] === 'Baja').length
+      }
+    };
+    
+    return estadisticas;
+  } catch (error) {
+    console.error('Error obteniendo estadísticas del scrumboard:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   autenticarUsuario,
   inicializarProyecto,
@@ -890,5 +959,7 @@ module.exports = {
   obtenerTareasSprint,
   actualizarBurndownChart,
   cambiarRolUsuario,
-  obtenerEstadisticasGlobales
+  obtenerEstadisticasGlobales,
+  obtenerScrumboardSprint,
+  obtenerEstadisticasScrumboard
 };

@@ -793,6 +793,51 @@ router.get('/metricas', requireAuth, requireScrumMaster, checkProjectStatus, asy
 });
 
 /**
+ * GET /api/scrumboard/:proyecto/:sprint - Obtener scrumboard del sprint
+ */
+router.get('/api/scrumboard/:proyecto/:sprint', requireAuth, requirePermission('leer'), async (req, res) => {
+  try {
+    const { proyecto, sprint } = req.params;
+    
+    const scrumboard = await obtenerScrumboardSprint(req.user.grupo, proyecto, sprint);
+    
+    res.json({
+      success: true,
+      data: scrumboard,
+      total: scrumboard.length
+    });
+  } catch (error) {
+    console.error('Error obteniendo scrumboard:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/scrumboard/:proyecto/:sprint/estadisticas - Estadísticas del scrumboard
+ */
+router.get('/api/scrumboard/:proyecto/:sprint/estadisticas', requireAuth, requirePermission('leer'), async (req, res) => {
+  try {
+    const { proyecto, sprint } = req.params;
+    
+    const estadisticas = await obtenerEstadisticasScrumboard(req.user.grupo, proyecto, sprint);
+    
+    res.json({
+      success: true,
+      data: estadisticas
+    });
+  } catch (error) {
+    console.error('Error obteniendo estadísticas del scrumboard:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
  * GET /admin - Panel de administración
  */
 router.get('/admin', requireAuth, requireAdmin, async (req, res) => {
