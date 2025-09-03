@@ -70,6 +70,9 @@ async function autenticarUsuario(token) {
  */
 async function inicializarProyecto(grupo, configuracion) {
   try {
+    console.log('🚀 Inicializando proyecto para grupo:', grupo);
+    console.log('Configuración:', configuracion);
+    
     const db = await leerDB();
     const fechaActual = obtenerFechaActual();
     
@@ -157,8 +160,9 @@ async function inicializarProyecto(grupo, configuracion) {
     }
 
     await escribirDB(db);
+    console.log('✅ Proyecto inicializado exitosamente');
   } catch (error) {
-    console.error('Error inicializando proyecto:', error);
+    console.error('💥 Error inicializando proyecto:', error);
     throw error;
   }
 }
@@ -496,8 +500,13 @@ function calcularSprintsTranscurridos(grupoData) {
  */
 async function obtenerDashboard(usuario) {
   try {
+    console.log('\n📊 === OBTENIENDO DASHBOARD ===');
+    console.log('Usuario:', usuario.nickname);
+    console.log('Rol:', usuario.rol);
+    console.log('Grupo:', usuario.grupo);
+    
     const dashboardData = {
-      usuario: usuario,
+      user: usuario, // ← Cambiado de "usuario" a "user"
       proyectoIniciado: false,
       proyectos: {},
       metricas: {},
@@ -506,42 +515,73 @@ async function obtenerDashboard(usuario) {
 
     // Verificar si es administrador
     if (usuario.rol === 'auditor') {
+      console.log('→ Cargando dashboard de administrador');
       return await obtenerDashboardAdmin(dashboardData);
     }
 
+    console.log('→ Verificando estado del proyecto para grupo:', usuario.grupo);
     const db = await leerDB();
+    console.log('DB cargada exitosamente');
+    
     const grupoData = db[usuario.grupo];
+    console.log('Datos del grupo:', grupoData ? 'ENCONTRADOS' : 'NO ENCONTRADOS');
+    
+    if (!grupoData) {
+      console.log('❌ Grupo no encontrado en DB');
+      return dashboardData;
+    }
+    
+    console.log('Estado "started":', grupoData.started);
+    console.log('Claves del grupo:', Object.keys(grupoData));
     
     if (!grupoData || grupoData.started !== 'y') {
+      console.log('❌ Proyecto no iniciado para grupo:', usuario.grupo);
       return dashboardData;
     }
 
+    console.log('✅ Proyecto iniciado, cargando datos...');
     dashboardData.proyectoIniciado = true;
 
     // Obtener datos específicos según el rol
+    console.log('→ Cargando datos específicos para rol:', usuario.rol);
+    
     switch (usuario.rol) {
       case 'miembro':
+        console.log('→ Cargando tareas para miembro');
         dashboardData.tareas = await obtenerTareasUsuario(usuario.grupo, usuario);
+        console.log('Tareas cargadas:', Object.keys(dashboardData.tareas).length, 'proyectos');
         break;
         
       case 'scrumMaster':
+        console.log('→ Cargando tareas y métricas para scrumMaster');
         dashboardData.tareas = await obtenerTareasUsuario(usuario.grupo, usuario);
         dashboardData.metricas = await calcularMetricasEquipo(usuario.grupo);
+        console.log('Datos cargados para scrumMaster');
         break;
         
       case 'lider':
+        console.log('→ Cargando proyectos y métricas para líder');
         dashboardData.proyectos = {
           GenT: grupoData.GenT,
           Proy: grupoData.Proy,
           Proy2: grupoData.Proy2
         };
         dashboardData.metricas = await calcularMetricasEquipo(usuario.grupo);
+        console.log('Proyectos cargados:', Object.keys(dashboardData.proyectos));
         break;
+        
+      default:
+        console.log('⚠️ Rol no reconocido:', usuario.rol);
     }
 
+    console.log('✅ Dashboard cargado exitosamente');
+    console.log('=== FIN OBTENER DASHBOARD ===\n');
+    
     return dashboardData;
   } catch (error) {
-    console.error('Error obteniendo dashboard:', error);
+    console.error('💥 ERROR CRÍTICO en obtenerDashboard:', error);
+    console.error('Stack trace:', error.stack);
+    console.error('Usuario que causó el error:', usuario);
     throw error;
   }
 }
@@ -552,6 +592,8 @@ async function obtenerDashboard(usuario) {
  */
 async function obtenerDashboardAdmin(dashboardData) {
   try {
+    console.log('🔧 Cargando dashboard de administrador...');
+    
     const db = await leerDB();
     const usuarios = await leerUsuarios();
     
@@ -563,9 +605,13 @@ async function obtenerDashboardAdmin(dashboardData) {
       proyectosIniciados: 0
     };
 
+    console.log('Total de grupos en DB:', Object.keys(db).length);
+
     // Obtener datos de todos los grupos
     for (const [nombreGrupo, grupoData] of Object.entries(db)) {
       if (nombreGrupo.startsWith('Grupo') && grupoData) {
+        console.log(`Procesando grupo: ${nombreGrupo}`);
+        
         dashboardData.todosLosGrupos[nombreGrupo] = {
           iniciado: grupoData.started === 'y',
           miembros: Object.values(usuarios).filter(user => user.grupo === nombreGrupo),
@@ -584,9 +630,10 @@ async function obtenerDashboardAdmin(dashboardData) {
       }
     }
 
+    console.log('✅ Dashboard admin cargado exitosamente');
     return dashboardData;
   } catch (error) {
-    console.error('Error obteniendo dashboard admin:', error);
+    console.error('💥 Error obteniendo dashboard admin:', error);
     throw error;
   }
 }

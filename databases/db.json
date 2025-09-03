@@ -1,5 +1,123 @@
 {
-  "Grupo1": {},
+  "Grupo1": {
+    "started": "y",
+    "duracion-sprint-gent": 2,
+    "duracion-sprint-proyecto": 1,
+    "GenT": {
+      "sprintActual": "1",
+      "productBacklog": [],
+      "sprint1": {
+        "fechaIni": [
+          1,
+          9,
+          2025
+        ],
+        "fechaFin": [
+          15,
+          9,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {},
+        "burndownChart": {
+          "plannedWork": [],
+          "actualWork": []
+        }
+      },
+      "sprint2": {
+        "fechaIni": [
+          15,
+          9,
+          2025
+        ],
+        "fechaFin": [
+          29,
+          9,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {},
+        "burndownChart": {
+          "plannedWork": [],
+          "actualWork": []
+        }
+      },
+      "sprint3": {
+        "fechaIni": [
+          29,
+          9,
+          2025
+        ],
+        "fechaFin": [
+          13,
+          10,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {},
+        "burndownChart": {
+          "plannedWork": [],
+          "actualWork": []
+        }
+      }
+    },
+    "Proy": {
+      "sprintActual": "1",
+      "productBacklog": [],
+      "sprint1": {
+        "fechaIni": [
+          1,
+          9,
+          2025
+        ],
+        "fechaFin": [
+          8,
+          9,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {},
+        "burndownChart": {
+          "plannedWork": [],
+          "actualWork": []
+        }
+      }
+    },
+    "estadisticas": {
+      "velocidadEquipo": [],
+      "satisfaccionCliente": [],
+      "metricas": {
+        "totalStoryPoints": 0,
+        "completedStoryPoints": 0,
+        "averageVelocity": 0,
+        "tareasTotal": 0,
+        "tareasCompletadas": 0,
+        "miembrosActivos": 6
+      }
+    },
+    "Proy2": {
+      "sprintActual": "1",
+      "productBacklog": [],
+      "sprint1": {
+        "fechaIni": [
+          1,
+          9,
+          2025
+        ],
+        "fechaFin": [
+          8,
+          9,
+          2025
+        ],
+        "scrumBoard": [],
+        "tasks": {},
+        "burndownChart": {
+          "plannedWork": [],
+          "actualWork": []
+        }
+      }
+    }
+  },
   "Grupo2": {
     "started": "y",
     "duracion-sprint-gent": 1,

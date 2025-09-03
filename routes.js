@@ -125,14 +125,45 @@ router.get('/dashboard', requireAuth, checkProjectStatus, async (req, res) => {
   try {
     const dashboardData = await obtenerDashboard(req.user);
     
-    res.render('dashboard', {
-      title: 'Dashboard - Dardito',
+    // Mapear rol a template específico
+    const templatesPorRol = {
+      'miembro': 'dashboard/miembro',
+      'scrumMaster': 'dashboard/scrummaster', 
+      'lider': 'dashboard/lider',
+      'auditor': 'dashboard/auditor'
+    };
+
+    const template = templatesPorRol[req.user.rol];
+    
+    if (!template) {
+      console.error('Rol no reconocido:', req.user.rol);
+      return res.status(500).render('error', {
+        message: 'Rol de usuario no válido',
+        user: req.user
+      });
+    }
+
+    console.log(`Renderizando template: ${template} para rol: ${req.user.rol}`);
+    
+    // Preparar datos para el template asegurando que 'user' esté disponible
+    const templateData = {
+      title: `Dashboard ${req.user.rol.charAt(0).toUpperCase() + req.user.rol.slice(1)} - Dardito`,
+      user: req.user, // Variable user disponible en el template
       ...dashboardData
+    };
+    
+    console.log('Datos enviados al template:', {
+      hasUser: !!templateData.user,
+      userNickname: templateData.user?.nickname,
+      userRol: templateData.user?.rol,
+      proyectoIniciado: templateData.proyectoIniciado
     });
+    
+    res.render(template, templateData);
   } catch (error) {
     console.error('Error cargando dashboard:', error);
     res.status(500).render('error', {
-      message: 'Error cargando el dashboard',
+      message: 'Error cargando el dashboard: ' + error.message,
       user: req.user
     });
   }
@@ -145,7 +176,8 @@ router.get('/iniciar-proyecto', requireAuth, requireLider, async (req, res) => {
   try {
     res.render('iniciar-proyecto', {
       title: 'Iniciar Proyecto - Dardito',
-      user: req.user
+      user: req.user,
+      error: null // Asegurar que la variable 'error' siempre esté definida
     });
   } catch (error) {
     console.error('Error cargando página de inicio:', error);
@@ -157,7 +189,47 @@ router.get('/iniciar-proyecto', requireAuth, requireLider, async (req, res) => {
 });
 
 /**
- * POST /iniciar-proyecto - Procesar inicio de proyecto
+ * GET /proyecto-no-iniciado - Página informativa para usuarios no líderes cuando el proyecto no está iniciado
+ */
+router.get('/proyecto-no-iniciado', requireAuth, async (req, res) => {
+  try {
+    // Verificar que efectivamente el proyecto no esté iniciado
+    const { verificarProyectoIniciado } = require('./auth');
+    const proyectoIniciado = await verificarProyectoIniciado(req.user.grupo);
+    
+    // Si el proyecto ya está iniciado, redirigir al dashboard
+    if (proyectoIniciado) {
+      return res.redirect('/dashboard');
+    }
+    
+    // Si es líder, redirigir a iniciar proyecto
+    if (req.user.rol === 'lider') {
+      return res.redirect('/iniciar-proyecto');
+    }
+    
+    // Obtener información del líder del grupo para mostrar
+    const { leerUsuarios } = require('./config');
+    const usuarios = await leerUsuarios();
+    const liderGrupo = Object.values(usuarios).find(user => 
+      user.grupo === req.user.grupo && user.rol === 'lider'
+    );
+    
+    res.render('proyecto-no-iniciado', {
+      title: 'Proyecto No Iniciado - Dardito',
+      user: req.user,
+      liderGrupo: liderGrupo
+    });
+  } catch (error) {
+    console.error('Error cargando página proyecto no iniciado:', error);
+    res.status(500).render('error', {
+      message: 'Error cargando la página',
+      user: req.user
+    });
+  }
+});
+
+/**
+ * POST /iniciar-proyecto - Procesar inicio de proyecto (solo líderes)
  */
 router.post('/iniciar-proyecto', requireAuth, requireLider, async (req, res) => {
   try {

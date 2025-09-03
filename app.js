@@ -60,7 +60,25 @@ verificarArchivosIniciales();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 2. Middleware de debug para POST /auth
+// 2. Middleware de logging general para debugging
+app.use((req, res, next) => {
+  console.log(`\n🌐 ${new Date().toISOString()} - ${req.method} ${req.path}`);
+  
+  // Log especial para rutas problemáticas
+  if (req.path.includes('dashboard') || req.path.includes('proyecto') || req.path.includes('auth')) {
+    console.log('📍 Ruta importante detectada:', {
+      method: req.method,
+      path: req.path,
+      sessionId: req.sessionID,
+      hasSession: !!req.session,
+      userId: req.session?.userId
+    });
+  }
+  
+  next();
+});
+
+// 3. Middleware de debug para POST /auth
 app.use((req, res, next) => {
   if (req.method === 'POST' && req.path === '/auth') {
     console.log('\n🔍 === MIDDLEWARE DEBUG /auth ===');
@@ -75,10 +93,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// 3. Archivos estáticos
+// 4. Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 4. Configuración de sesiones
+// 5. Configuración de sesiones
 app.use(session({
   secret: 'dardito_secret_key_2025', 
   resave: false,
@@ -90,17 +108,18 @@ app.use(session({
   }
 }));
 
-// 5. Configuración del motor de plantillas EJS
+// 6. Configuración del motor de plantillas EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 6. Middleware de debug para sesiones
+// 7. Middleware de debug para sesiones
 app.use((req, res, next) => {
-  if (req.path.includes('dashboard') || req.path.includes('auth')) {
+  if (req.path.includes('dashboard') || req.path.includes('auth') || req.path.includes('proyecto')) {
     console.log('🔐 Sesión actual:', {
       sessionId: req.sessionID,
       userId: req.session.userId,
-      path: req.path
+      path: req.path,
+      method: req.method
     });
   }
   next();
@@ -115,12 +134,23 @@ const routes = require('./routes');
 app.use('/', routes);
 
 // ===============================
-// MANEJO DE ERRORES
+// MANEJO DE ERRORES MEJORADO
 // ===============================
 
-// Middleware de manejo de errores global
+// Middleware de manejo de errores global con logging detallado
 app.use((err, req, res, next) => {
-  console.error('💥 Error en servidor:', err.stack);
+  console.error('\n💥 === ERROR EN SERVIDOR ===');
+  console.error('Timestamp:', new Date().toISOString());
+  console.error('Ruta:', req.method, req.path);
+  console.error('Usuario:', req.session?.userId || 'No autenticado');
+  console.error('Error name:', err.name);
+  console.error('Error message:', err.message);
+  console.error('Error stack:', err.stack);
+  console.error('Error code:', err.code);
+  console.error('Request body:', JSON.stringify(req.body, null, 2));
+  console.error('Request params:', JSON.stringify(req.params, null, 2));
+  console.error('Request query:', JSON.stringify(req.query, null, 2));
+  console.error('=== FIN ERROR ===\n');
   
   // Errores de JSON malformado
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
@@ -134,19 +164,32 @@ app.use((err, req, res, next) => {
   if (err.code === 'ENOENT') {
     return res.status(500).json({
       success: false,
-      message: 'Error al acceder a los archivos del sistema'
+      message: 'Error al acceder a los archivos del sistema',
+      details: `Archivo no encontrado: ${err.path}`
+    });
+  }
+  
+  // Errores de template no encontrado
+  if (err.message && err.message.includes('Failed to lookup view')) {
+    console.error('❌ Template EJS no encontrado:', err.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Template de vista no encontrado',
+      details: err.message
     });
   }
   
   // Error genérico del servidor
   res.status(500).json({
     success: false,
-    message: 'Error interno del servidor'
+    message: 'Error interno del servidor',
+    details: process.env.NODE_ENV === 'development' ? err.message : 'Contactar al administrador'
   });
 });
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
+  console.log(`❌ Ruta no encontrada: ${req.method} ${req.path}`);
   res.status(404).json({
     success: false,
     message: 'Ruta no encontrada'
@@ -161,10 +204,26 @@ app.listen(PORT, () => {
   console.log(`📍 URL: http://localhost:${PORT}`);
   console.log(`📅 Fecha: ${new Date().toLocaleString('es-AR')}`);
   console.log('💡 Sistema de gestión ágil para proyectos escolares');
+  console.log('🔧 Modo DEBUG activado');
   console.log('=======================================\n');
   
   // Verificar archivos nuevamente después del inicio
   setTimeout(verificarArchivosIniciales, 1000);
+});
+
+// Manejo de errores no capturados
+process.on('uncaughtException', (err) => {
+  console.error('\n💀 UNCAUGHT EXCEPTION:');
+  console.error('Error:', err.name, '-', err.message);
+  console.error('Stack:', err.stack);
+  console.error('💀 El servidor continuará ejecutándose...\n');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('\n⚠️ UNHANDLED REJECTION:');
+  console.error('Promise:', promise);
+  console.error('Reason:', reason);
+  console.error('⚠️ El servidor continuará ejecutándose...\n');
 });
 
 // Manejo de cierre graceful del servidor

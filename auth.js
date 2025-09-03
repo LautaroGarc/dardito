@@ -87,7 +87,15 @@ function requireAdmin(req, res, next) {
 async function verificarProyectoIniciado(grupo) {
   try {
     const db = await leerDB();
-    return db[grupo] && db[grupo].started === 'y';
+    const grupoData = db[grupo];
+    
+    // Si el grupo no existe o está vacío, no está iniciado
+    if (!grupoData || Object.keys(grupoData).length === 0) {
+      return false;
+    }
+    
+    // Si existe el atributo started y es 'y', está iniciado
+    return grupoData.started === 'y';
   } catch (error) {
     console.error('Error verificando proyecto:', error);
     return false;
@@ -96,6 +104,7 @@ async function verificarProyectoIniciado(grupo) {
 
 /**
  * Middleware para redirigir según estado del proyecto
+ * SOLO se aplica a la ruta /dashboard
  */
 async function checkProjectStatus(req, res, next) {
   try {
@@ -103,23 +112,34 @@ async function checkProjectStatus(req, res, next) {
       return next();
     }
 
-    const proyectoIniciado = await verificarProyectoIniciado(req.user.grupo);
-    
-    // Si el usuario es líder y el proyecto no está iniciado
-    if (req.user.rol === 'lider' && !proyectoIniciado) {
-      if (req.path !== '/iniciar-proyecto' && req.path !== '/dashboard') {
-        return res.redirect('/iniciar-proyecto');
-      }
-    }
-    
-    // Si el proyecto no está iniciado y no es líder
-    if (!proyectoIniciado && req.user.rol !== 'lider' && req.user.rol !== 'auditor') {
-      return res.status(403).render('error', {
-        message: 'El proyecto aún no ha sido iniciado por el líder del grupo',
-        user: req.user
-      });
+    // Solo aplicar esta lógica para la ruta /dashboard
+    if (req.path !== '/dashboard') {
+      return next();
     }
 
+    const proyectoIniciado = await verificarProyectoIniciado(req.user.grupo);
+    
+    console.log('🔍 Verificación de proyecto:');
+    console.log('- Usuario:', req.user.nickname);
+    console.log('- Rol:', req.user.rol);
+    console.log('- Grupo:', req.user.grupo);
+    console.log('- Proyecto iniciado:', proyectoIniciado);
+    
+    if (!proyectoIniciado) {
+      // Si el proyecto no está iniciado
+      if (req.user.rol === 'lider') {
+        // El líder va a iniciar proyecto
+        console.log('→ Redirigiendo líder a /iniciar-proyecto');
+        return res.redirect('/iniciar-proyecto');
+      } else {
+        // Otros roles van a proyecto no iniciado
+        console.log('→ Redirigiendo a /proyecto-no-iniciado');
+        return res.redirect('/proyecto-no-iniciado');
+      }
+    }
+
+    // Si el proyecto está iniciado, continuar normalmente al dashboard
+    console.log('→ Proyecto iniciado, continuando al dashboard');
     next();
   } catch (error) {
     console.error('Error verificando estado del proyecto:', error);

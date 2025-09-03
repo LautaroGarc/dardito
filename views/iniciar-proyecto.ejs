@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dardito - Iniciar Proyecto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #4a6bdf;
+            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .icon {
+            font-size: 2.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .leader-badge {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 1rem 0;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #c33;
+        }
+
+        .user-info {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .user-info h3 {
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .user-info p {
+            color: #666;
+            margin-bottom: 0.3rem;
+        }
+
+        .user-info strong {
+            color: #2d3748;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h3 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a6bdf;
+            box-shadow: 0 0 0 3px rgba(74, 107, 223, 0.1);
+        }
+
+        .form-help {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 0.3rem;
+            line-height: 1.4;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .preview-section {
+            background-color: #f7fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid #4299e1;
+        }
+
+        .preview-section h4 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .preview-item {
+            background-color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .preview-item strong {
+            color: #4a6bdf;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: #4a6bdf;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3a5bc7;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background-color: #edf2f7;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+
+        .warning-box {
+            background-color: #fffbeb;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .warning-box strong {
+            color: #b45309;
+        }
+
+        .footer-text {
+            text-align: center;
+            color: #718096;
+            font-size: 0.85rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Iniciar Proyecto</h1>
+            <p>Configura los parámetros iniciales para comenzar a trabajar</p>
+            <div class="leader-badge">
+                Líder de Equipo
+            </div>
+        </div>
+
+        <div class="user-info">
+            <h3>Información del Líder</h3>
+            <p><strong>Nombre:</strong> <%= user.nickname %></p>
+            <p><strong>Grupo:</strong> <%= user.grupo %></p>
+        </div>
+
+        <% if (error) { %>
+            <div class="error-message">
+                <strong>Error:</strong> <%= error %>
+            </div>
+        <% } %>
+
+        <form action="/iniciar-proyecto" method="POST" id="proyectoForm">
+            <div class="form-section">
+                <h3>Configuración del Proyecto</h3>
+                
+                <div class="form-group">
+                    <label for="cantidadProyectos">Cantidad de Proyectos</label>
+                    <select id="cantidadProyectos" name="cantidadProyectos" required onchange="updatePreview()">
+                        <option value="">Selecciona una opción</option>
+                        <option value="1">1 Proyecto (GenT + Proy)</option>
+                        <option value="2">2 Proyectos (GenT + Proy + Proy2)</option>
+                    </select>
+                    <div class="form-help">
+                        Elige cuántos proyectos paralelos manejará tu equipo además de Generación T.
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Duración de Sprints</h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="duracionSprintGenT">Sprint Generación T (semanas)</label>
+                        <input type="number" id="duracionSprintGenT" name="duracionSprintGenT" 
+                               min="1" max="8" required onchange="updatePreview()" 
+                               placeholder="Ej: 2">
+                        <div class="form-help">
+                            Duración de cada sprint para el proyecto GenT.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duracionSprintProyecto">Sprint Proyectos (semanas)</label>
+                        <input type="number" id="duracionSprintProyecto" name="duracionSprintProyecto" 
+                               min="1" max="8" required onchange="updatePreview()" 
+                               placeholder="Ej: 3">
+                        <div class="form-help">
+                            Duración de cada sprint para los otros proyectos.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <h4>Vista Previa de la Configuración</h4>
+                <div id="previewContent"></div>
+            </div>
+
+            <div class="warning-box">
+                <strong>Importante:</strong> Una vez que inicies el proyecto, esta configuración 
+                no se podrá modificar. Coordiná con tu equipo antes de seguir.
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                    Iniciar Proyecto
+                </button>
+                
+                <form method="POST" action="/logout" style="display: inline;">
+                    <button type="submit" class="btn btn-secondary">
+                        Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+        </form>
+
+        <div class="footer-text">
+            <p>
+                <strong>Dardito v1.0</strong> | Sistema de Gestión Ágil<br>
+                Como líder, eres responsable de la configuración inicial del proyecto.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function updatePreview() {
+            const cantidadProyectos = document.getElementById('cantidadProyectos').value;
+            const duracionGenT = document.getElementById('duracionSprintGenT').value;
+            const duracionProyecto = document.getElementById('duracionSprintProyecto').value;
+            const previewSection = document.getElementById('previewSection');
+            const previewContent = document.getElementById('previewContent');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (cantidadProyectos && duracionGenT && duracionProyecto) {
+                previewSection.style.display = 'block';
+                submitBtn.disabled = false;
+
+                let projectsText = cantidadProyectos === '1' ? 
+                    'GenT + Proy (2 proyectos)' : 
+                    'GenT + Proy + Proy2 (3 proyectos)';
+
+                previewContent.innerHTML = `
+                    <div class="preview-item">
+                        <strong>Proyectos:</strong> ${projectsText}
+                    </div>
+                    <div class="preview-item">
+                        <strong>Sprint GenT:</strong> ${duracionGenT} semana(s) por sprint
+                    </div>
+                    <div class="preview-item">
+                        <strong>Sprint Proyectos:</strong> ${duracionProyecto} semana(s) por sprint
+                    </div>
+                    <div class="preview-item">
+                        <strong>Estado inicial:</strong> Sprint 1 activo en todos los proyectos
+                    </div>
+                `;
+            } else {
+                previewSection.style.display = 'none';
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Validar formulario antes de envío
+        document.getElementById('proyectoForm').addEventListener('submit', function(e) {
+            const cantidadProyectos = document.getElementById('cantidadProyectos').value;
+            const duracionGenT = document.getElementById('duracionSprintGenT').value;
+            const duracionProyecto = document.getElementById('duracionSprintProyecto').value;
+
+            if (!cantidadProyectos || !duracionGenT || !duracionProyecto) {
+                e.preventDefault();
+                alert('Por favor completa todos los campos antes de continuar.');
+                return false;
+            }
+
+            // Confirmar antes de enviar
+            const confirmMessage = `¿Estás seguro de iniciar el proyecto con esta configuración?\n\n` +
+                `• Proyectos: ${cantidadProyectos === '1' ? '2' : '3'} proyectos\n` +
+                `• Sprint GenT: ${duracionGenT} semana(s)\n` +
+                `• Sprint Proyectos: ${duracionProyecto} semana(s)\n\n` +
+                `Esta configuración no se podrá modificar después.`;
+
+            if (!confirm(confirmMessage)) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Deshabilitar botón para evitar doble envío
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = '⏳ Iniciando...';
+        });
+
+        // Auto-focus en el primer campo
+        document.getElementById('cantidadProyectos').focus();
+    </script>
+</body>
+</html>
