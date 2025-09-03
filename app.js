@@ -56,15 +56,12 @@ verificarArchivosIniciales();
 // CONFIGURACIÓN DE MIDDLEWARES (ORDEN CRÍTICO)
 // ===============================
 
-// 1. Middleware de parsing ANTES que todo
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 2. Middleware de logging general para debugging
 app.use((req, res, next) => {
   console.log(`\n🌐 ${new Date().toISOString()} - ${req.method} ${req.path}`);
   
-  // Log especial para rutas problemáticas
   if (req.path.includes('dashboard') || req.path.includes('proyecto') || req.path.includes('auth')) {
     console.log('📍 Ruta importante detectada:', {
       method: req.method,
@@ -78,7 +75,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// 3. Middleware de debug para POST /auth
 app.use((req, res, next) => {
   if (req.method === 'POST' && req.path === '/auth') {
     console.log('\n🔍 === MIDDLEWARE DEBUG /auth ===');
@@ -93,26 +89,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// 4. Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 5. Configuración de sesiones
 app.use(session({
   secret: 'dardito_secret_key_2025', 
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: false, // false para desarrollo
+    secure: false,
     httpOnly: true,
-    maxAge: 4 * 60 * 60 * 1000 // 4 horas
+    maxAge: 10 * 60 * 60 * 1000
   }
 }));
 
-// 6. Configuración del motor de plantillas EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 7. Middleware de debug para sesiones
 app.use((req, res, next) => {
   if (req.path.includes('dashboard') || req.path.includes('auth') || req.path.includes('proyecto')) {
     console.log('🔐 Sesión actual:', {
@@ -124,6 +116,11 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+/*app.use(cors({
+  origin: ['right-mite-infinite.ngrok-free.app'], // Solo tu dominio
+  credentials: true
+}));*/
 
 // ===============================
 // RUTAS
@@ -201,7 +198,7 @@ app.use((req, res) => {
 // ===============================
 app.listen(PORT, () => {
   console.log('\n🚀 === SERVIDOR DARDITO INICIADO ===');
-  console.log(`📍 URL: http://localhost:${PORT}`);
+  console.log(`📍 URL: http://right-mite-infinite.ngrok-free.app`);
   console.log(`📅 Fecha: ${new Date().toLocaleString('es-AR')}`);
   console.log('💡 Sistema de gestión ágil para proyectos escolares');
   console.log('🔧 Modo DEBUG activado');

@@ -720,10 +720,6 @@ router.get('/api/reportes/progreso', requireAuth, requireScrumMaster, async (req
   }
 });
 
-// ===============================
-// PÁGINAS DE GESTIÓN
-// ===============================
-
 /**
  * GET /backlog/:proyecto - Página de gestión del product backlog
  */
@@ -860,10 +856,6 @@ router.get('/admin', requireAuth, requireAdmin, async (req, res) => {
     });
   }
 });
-
-// ===============================
-// MANEJO DE ERRORES ESPECÍFICOS
-// ===============================
 
 /**
  * Middleware para manejar errores 404 en APIs

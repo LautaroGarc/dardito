@@ -23,7 +23,6 @@ async function autenticarUsuario(token) {
       return null;
     }
     
-    // Limpiar el token de espacios y caracteres raros
     const tokenLimpio = token.toString().trim().replace(/[^\w]/g, '');
     console.log('Token limpio:', JSON.stringify(tokenLimpio));
     console.log('Longitud token limpio:', tokenLimpio.length);
@@ -31,7 +30,6 @@ async function autenticarUsuario(token) {
     const usuarios = await leerUsuarios();
     console.log('Total usuarios cargados:', Object.keys(usuarios).length);
     
-    // Debug: mostrar todos los usuarios y sus tokens
     for (const [userId, userData] of Object.entries(usuarios)) {
       console.log(`\n--- Usuario ${userId} ---`);
       console.log('Nickname:', userData.nickname);
@@ -40,7 +38,6 @@ async function autenticarUsuario(token) {
       console.log('Token almacenado:', JSON.stringify(userData.token));
       console.log('Token limpio almacenado:', userData.token ? userData.token.trim() : 'undefined');
       
-      // Comparación estricta
       const tokenAlmacenadoLimpio = userData.token ? userData.token.toString().trim() : '';
       console.log('Comparación:', `"${tokenLimpio}" === "${tokenAlmacenadoLimpio}"`, '=', tokenLimpio === tokenAlmacenadoLimpio);
       
@@ -75,15 +72,13 @@ async function inicializarProyecto(grupo, configuracion) {
     
     const db = await leerDB();
     const fechaActual = obtenerFechaActual();
-    
-    // Validar configuración
+    n
     const { cantidadProyectos, duracionSprintGenT, duracionSprintProyecto } = configuracion;
     
     if (!cantidadProyectos || cantidadProyectos < 1 || cantidadProyectos > 2) {
       throw new Error('Cantidad de proyectos debe ser 1 o 2');
     }
 
-    // Inicializar estructura del grupo
     db[grupo] = {
       started: 'y',
       'duracion-sprint-gent': parseInt(duracionSprintGenT),
@@ -141,7 +136,6 @@ async function inicializarProyecto(grupo, configuracion) {
       } : null
     };
 
-    // Crear sprints adicionales para GenT si es necesario
     const maxSprints = Math.max(parseInt(duracionSprintGenT), parseInt(duracionSprintProyecto));
     for (let i = 2; i <= maxSprints + 1; i++) {
       const sprintAnterior = db[grupo].GenT[`sprint${i-1}`];
@@ -204,7 +198,6 @@ async function agregarHistoria(grupo, proyecto, historia, creador) {
 
     db[grupo][proyecto].productBacklog.push(nuevaHistoria);
     
-    // Actualizar métricas
     if (db[grupo].estadisticas) {
       db[grupo].estadisticas.metricas.totalStoryPoints += parseInt(historia.storyPoints);
     }
@@ -233,20 +226,16 @@ async function obtenerProductBacklog(grupo, proyecto, usuario) {
 
     const backlog = db[grupo][proyecto].productBacklog || [];
     
-    // Administradores y líderes ven todo
     if (usuario.rol === 'auditor' || usuario.rol === 'lider') {
       return backlog;
     }
     
-    // Scrum masters ven todo pero solo lectura
     if (usuario.rol === 'scrumMaster') {
       return backlog;
     }
     
-    // Miembros ven solo historias relevantes para ellos
     return backlog.filter(historia => {
-      // Lógica para filtrar historias relevantes para miembros
-      return true; // Por ahora retornamos todas
+      return true;
     });
   } catch (error) {
     console.error('Error obteniendo product backlog:', error);
@@ -290,7 +279,6 @@ async function crearTarea(grupo, proyecto, sprint, tarea) {
 
     db[grupo][proyecto][sprint].tasks[idTarea] = nuevaTarea;
     
-    // Actualizar scrum board si es necesario
     db[grupo][proyecto][sprint].scrumBoard.push(idTarea);
 
     await escribirDB(db);
@@ -323,7 +311,6 @@ async function actualizarEstadoTarea(grupo, proyecto, sprint, tareaId, nuevoEsta
       throw new Error('Tarea no encontrada');
     }
 
-    // Verificar permisos
     const { puedeModificarTarea } = require('./auth');
     if (!puedeModificarTarea(usuario, tarea)) {
       throw new Error('Sin permisos para modificar esta tarea');
@@ -337,7 +324,6 @@ async function actualizarEstadoTarea(grupo, proyecto, sprint, tareaId, nuevoEsta
     tarea.estado = nuevoEstado;
     tarea.fechaActualizacion = new Date().toISOString();
     
-    // Si se completa la tarea, actualizar estadísticas del usuario
     if (nuevoEstado === 'COMPLETADO') {
       await actualizarEstadisticasUsuario(usuario.id, 'tareas_completadas');
     }
@@ -364,7 +350,6 @@ async function obtenerTareasUsuario(grupo, usuario) {
 
     const tareas = {};
     
-    // Recorrer todos los proyectos del grupo
     for (const [proyectoNombre, proyectoData] of Object.entries(db[grupo])) {
       if (!proyectoData || typeof proyectoData !== 'object' || !proyectoData.sprintActual) {
         continue;
@@ -372,7 +357,6 @@ async function obtenerTareasUsuario(grupo, usuario) {
 
       tareas[proyectoNombre] = {};
       
-      // Recorrer todos los sprints del proyecto
       for (const [sprintNombre, sprintData] of Object.entries(proyectoData)) {
         if (!sprintNombre.startsWith('sprint') || !sprintData.tasks) {
           continue;
@@ -417,13 +401,11 @@ async function calcularMetricasEquipo(grupo) {
       miembrosActivos: 0
     };
 
-    // Calcular métricas de todos los proyectos
     for (const [proyectoNombre, proyectoData] of Object.entries(db[grupo])) {
       if (!proyectoData || typeof proyectoData !== 'object' || !proyectoData.productBacklog) {
         continue;
       }
 
-      // Contar story points del product backlog
       proyectoData.productBacklog.forEach(historia => {
         const storyPoints = parseInt(historia[6]) || 0;
         metricas.totalStoryPoints += storyPoints;
@@ -433,7 +415,6 @@ async function calcularMetricasEquipo(grupo) {
         }
       });
 
-      // Contar tareas de todos los sprints
       for (const [sprintNombre, sprintData] of Object.entries(proyectoData)) {
         if (!sprintNombre.startsWith('sprint') || !sprintData.tasks) {
           continue;
@@ -453,11 +434,9 @@ async function calcularMetricasEquipo(grupo) {
     metricas.averageVelocity = sprintsTranscurridos > 0 ? 
       Math.round(metricas.completedStoryPoints / sprintsTranscurridos * 100) / 100 : 0;
 
-    // Contar miembros activos del grupo
     const usuarios = await leerUsuarios();
     metricas.miembrosActivos = Object.values(usuarios).filter(user => user.grupo === grupo).length;
 
-    // Actualizar métricas en la base de datos
     if (!db[grupo].estadisticas) {
       db[grupo].estadisticas = { velocidadEquipo: [], satisfaccionCliente: [], metricas: {} };
     }
@@ -480,7 +459,6 @@ async function calcularMetricasEquipo(grupo) {
 function calcularSprintsTranscurridos(grupoData) {
   let sprints = 0;
   
-  // Contar sprints de GenT
   for (let i = 1; i <= 10; i++) {
     if (grupoData.GenT && grupoData.GenT[`sprint${i}`]) {
       const sprint = grupoData.GenT[`sprint${i}`];
@@ -506,14 +484,13 @@ async function obtenerDashboard(usuario) {
     console.log('Grupo:', usuario.grupo);
     
     const dashboardData = {
-      user: usuario, // ← Cambiado de "usuario" a "user"
+      user: usuario,
       proyectoIniciado: false,
       proyectos: {},
       metricas: {},
       tareas: {}
     };
 
-    // Verificar si es administrador
     if (usuario.rol === 'auditor') {
       console.log('→ Cargando dashboard de administrador');
       return await obtenerDashboardAdmin(dashboardData);
@@ -542,7 +519,6 @@ async function obtenerDashboard(usuario) {
     console.log('✅ Proyecto iniciado, cargando datos...');
     dashboardData.proyectoIniciado = true;
 
-    // Obtener datos específicos según el rol
     console.log('→ Cargando datos específicos para rol:', usuario.rol);
     
     switch (usuario.rol) {
@@ -607,7 +583,6 @@ async function obtenerDashboardAdmin(dashboardData) {
 
     console.log('Total de grupos en DB:', Object.keys(db).length);
 
-    // Obtener datos de todos los grupos
     for (const [nombreGrupo, grupoData] of Object.entries(db)) {
       if (nombreGrupo.startsWith('Grupo') && grupoData) {
         console.log(`Procesando grupo: ${nombreGrupo}`);
@@ -693,7 +668,6 @@ async function moverHistoriaASprint(grupo, proyecto, historiaId) {
     const historia = backlog[historiaIndex];
     const sprintActual = db[grupo][proyecto].sprintActual;
     
-    // Mover al scrum board del sprint actual
     if (!db[grupo][proyecto][`sprint${sprintActual}`].scrumBoard.includes(historiaId)) {
       db[grupo][proyecto][`sprint${sprintActual}`].scrumBoard.push(historiaId);
     }
@@ -751,12 +725,10 @@ async function actualizarBurndownChart(grupo, proyecto, sprint) {
     const trabajoRestante = trabajoTotal - trabajoCompletado;
     const fechaActual = new Date().toISOString().split('T')[0];
 
-    // Actualizar datos del burndown chart
     if (!sprintData.burndownChart) {
       sprintData.burndownChart = { plannedWork: [], actualWork: [] };
     }
 
-    // Agregar punto actual si no existe para esta fecha
     const existePunto = sprintData.burndownChart.actualWork.some(punto => punto.fecha === fechaActual);
     if (!existePunto) {
       sprintData.burndownChart.actualWork.push({
@@ -829,14 +801,12 @@ async function obtenerEstadisticasGlobales() {
       }
     };
 
-    // Contar usuarios por rol
     Object.values(usuarios).forEach(usuario => {
       if (estadisticas.usuarios.porRol[usuario.rol] !== undefined) {
         estadisticas.usuarios.porRol[usuario.rol]++;
       }
     });
 
-    // Analizar grupos y proyectos
     for (const [nombreGrupo, grupoData] of Object.entries(db)) {
       if (nombreGrupo.startsWith('Grupo')) {
         estadisticas.grupos.total++;
@@ -844,14 +814,12 @@ async function obtenerEstadisticasGlobales() {
         if (grupoData && grupoData.started === 'y') {
           estadisticas.grupos.iniciados++;
           
-          // Contar historias y tareas
           for (const [proyectoNombre, proyectoData] of Object.entries(grupoData)) {
             if (proyectoData && proyectoData.productBacklog) {
               estadisticas.proyectos.totalHistorias += proyectoData.productBacklog.length;
               estadisticas.proyectos.historiasCompletadas += 
                 proyectoData.productBacklog.filter(h => h[7] === 'COMPLETADO').length;
               
-              // Contar tareas de todos los sprints
               for (const [sprintNombre, sprintData] of Object.entries(proyectoData)) {
                 if (sprintNombre.startsWith('sprint') && sprintData.tasks) {
                   const tareas = Object.values(sprintData.tasks);
@@ -886,7 +854,6 @@ async function obtenerScrumboardSprint(grupo, proyecto, sprint) {
   try {
     const db = await leerDB();
     
-    // Verificar que exista el sprint
     if (!db[grupo] || !db[grupo][proyecto] || !db[grupo][proyecto][sprint]) {
       throw new Error('Sprint no encontrado');
     }
@@ -898,9 +865,8 @@ async function obtenerScrumboardSprint(grupo, proyecto, sprint) {
     console.log(`📋 Scrumboard del ${sprint}:`, scrumBoardIds);
     console.log(`Total historias en scrumboard: ${scrumBoardIds.length}`);
 
-    // Filtrar las historias del backlog que están en el scrumboard
     const historiasScrumboard = productBacklog.filter(historia => 
-      scrumBoardIds.includes(historia[0]) // historia[0] = ID
+      scrumBoardIds.includes(historia[0])
     );
 
     console.log(`Historias encontradas en scrumboard: ${historiasScrumboard.length}`);
@@ -944,6 +910,193 @@ async function obtenerEstadisticasScrumboard(grupo, proyecto, sprint) {
   }
 }
 
+/**
+ * Obtiene información específica de un proyecto
+ * @param {string} grupo - Nombre del grupo
+ * @param {string} proyecto - Nombre del proyecto
+ * @returns {Promise<Object>} - Información del proyecto
+ */
+async function obtenerInfoProyecto(grupo, proyecto) {
+  try {
+    const db = await leerDB();
+    
+    if (!db[grupo] || !db[grupo][proyecto]) {
+      throw new Error('Proyecto no encontrado');
+    }
+
+    const proyectoData = db[grupo][proyecto];
+    
+    return {
+      nombre: proyecto,
+      sprintActual: proyectoData.sprintActual || '1',
+      totalHistorias: proyectoData.productBacklog ? proyectoData.productBacklog.length : 0,
+      sprints: obtenerSprintsDisponibles(proyectoData),
+      fechaInicio: proyectoData.sprint1 ? proyectoData.sprint1.fechaIni : null,
+      duracionSprint: proyecto === 'GenT' ? 
+        db[grupo]['duracion-sprint-gent'] : 
+        db[grupo]['duracion-sprint-proyecto']
+    };
+  } catch (error) {
+    console.error('Error obteniendo información del proyecto:', error);
+    throw error;
+  }
+}
+
+/**
+ * Obtiene la lista de sprints disponibles de un proyecto
+ * @param {Object} proyectoData - Datos del proyecto
+ * @returns {Array<string>} - Lista de sprints disponibles
+ */
+function obtenerSprintsDisponibles(proyectoData) {
+  const sprints = [];
+  
+  for (let i = 1; i <= 10; i++) {
+    if (proyectoData[`sprint${i}`]) {
+      sprints.push(i.toString());
+    }
+  }
+  
+  return sprints;
+}
+
+/**
+ * Obtiene estadísticas específicas de un miembro
+ * @param {string} grupo - Nombre del grupo
+ * @param {Object} usuario - Datos del usuario
+ * @returns {Promise<Object>} - Estadísticas del miembro
+ */
+async function obtenerEstadisticasMiembro(grupo, usuario) {
+  try {
+    const usuarios = await leerUsuarios();
+    const misDatos = usuarios[usuario.id];
+    
+    if (!misDatos) {
+      throw new Error('Datos del usuario no encontrados');
+    }
+
+    const misTareas = await obtenerTareasUsuario(grupo, usuario);
+    
+    // Calcular estadísticas del miembro
+    let totalTareasAsignadas = 0;
+    let totalTareasCompletadas = 0;
+    let totalHorasEstimadas = 0;
+    let totalHorasCompletadas = 0;
+    
+    for (const [proyecto, sprints] of Object.entries(misTareas)) {
+      for (const [sprint, tareas] of Object.entries(sprints)) {
+        const tareasAsignadas = tareas.filter(t => 
+          t.personas_asignadas && t.personas_asignadas.includes(usuario.nickname)
+        );
+        
+        totalTareasAsignadas += tareasAsignadas.length;
+        totalTareasCompletadas += tareasAsignadas.filter(t => t.estado === 'COMPLETADO').length;
+        
+        tareasAsignadas.forEach(tarea => {
+          const estimacion = parseInt(tarea.estimacion) || 0;
+          totalHorasEstimadas += estimacion;
+          if (tarea.estado === 'COMPLETADO') {
+            totalHorasCompletadas += estimacion;
+          }
+        });
+      }
+    }
+    
+    return {
+      segundosEnLlamada: misDatos.stats[0] || 0,
+      tareasAsignadas: totalTareasAsignadas,
+      tareasCompletadas: totalTareasCompletadas,
+      horasEstimadas: totalHorasEstimadas,
+      horasCompletadas: totalHorasCompletadas,
+      eficiencia: totalTareasAsignadas > 0 ? 
+        Math.round((totalTareasCompletadas / totalTareasAsignadas) * 100) : 0,
+      eficienciaHoras: totalHorasEstimadas > 0 ?
+        Math.round((totalHorasCompletadas / totalHorasEstimadas) * 100) : 0,
+      grupo: usuario.grupo,
+      rol: usuario.rol
+    };
+  } catch (error) {
+    console.error('Error obteniendo estadísticas del miembro:', error);
+    throw error;
+  }
+}
+
+/**
+ * Obtiene las tareas asignadas específicamente a un usuario
+ * @param {string} grupo - Nombre del grupo
+ * @param {Object} usuario - Datos del usuario
+ * @returns {Promise<Object>} - Tareas asignadas al usuario
+ */
+async function obtenerMisTareas(grupo, usuario) {
+  try {
+    const todasLasTareas = await obtenerTareasUsuario(grupo, usuario);
+    const misTareas = {};
+    
+    for (const [proyecto, sprints] of Object.entries(todasLasTareas)) {
+      misTareas[proyecto] = {};
+      
+      for (const [sprint, tareas] of Object.entries(sprints)) {
+        const tareasAsignadas = tareas.filter(tarea => 
+          tarea.personas_asignadas && tarea.personas_asignadas.includes(usuario.nickname)
+        );
+        
+        if (tareasAsignadas.length > 0) {
+          misTareas[proyecto][sprint] = tareasAsignadas;
+        }
+      }
+    }
+    
+    return misTareas;
+  } catch (error) {
+    console.error('Error obteniendo mis tareas:', error);
+    throw error;
+  }
+}
+
+/**
+ * Verifica si un proyecto existe para un grupo
+ * @param {string} grupo - Nombre del grupo
+ * @param {string} proyecto - Nombre del proyecto
+ * @returns {Promise<boolean>} - Existe el proyecto
+ */
+async function verificarProyectoExiste(grupo, proyecto) {
+  try {
+    const db = await leerDB();
+    return !!(db[grupo] && db[grupo][proyecto]);
+  } catch (error) {
+    console.error('Error verificando proyecto:', error);
+    return false;
+  }
+}
+
+/**
+ * Obtiene el dashboard con datos específicos para miembros
+ * @param {Object} usuario - Datos del usuario
+ * @returns {Promise<Object>} - Datos del dashboard optimizados para miembros
+ */
+async function obtenerDashboardMiembro(usuario) {
+  try {
+    const dashboardBase = await obtenerDashboard(usuario);
+    
+    // Agregar datos específicos para miembros
+    dashboardBase.proyectosInfo = {};
+    dashboardBase.misEstadisticas = await obtenerEstadisticasMiembro(usuario.grupo, usuario);
+    dashboardBase.misTareas = await obtenerMisTareas(usuario.grupo, usuario);
+    
+    // Obtener información de cada proyecto
+    const proyectos = ['GenT', 'Proy', 'Proy2'];
+    for (const proyecto of proyectos) {
+      if (await verificarProyectoExiste(usuario.grupo, proyecto)) {
+        dashboardBase.proyectosInfo[proyecto] = await obtenerInfoProyecto(usuario.grupo, proyecto);
+      }
+    }
+    
+    return dashboardBase;
+  } catch (error) {
+    console.error('Error obteniendo dashboard de miembro:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   autenticarUsuario,
   inicializarProyecto,
@@ -961,5 +1114,11 @@ module.exports = {
   cambiarRolUsuario,
   obtenerEstadisticasGlobales,
   obtenerScrumboardSprint,
-  obtenerEstadisticasScrumboard
+  obtenerEstadisticasScrumboard,
+  obtenerInfoProyecto,
+  obtenerSprintsDisponibles,
+  obtenerEstadisticasMiembro,
+  obtenerMisTareas,
+  verificarProyectoExiste,
+  obtenerDashboardMiembro
 };
