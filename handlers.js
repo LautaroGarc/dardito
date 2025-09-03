@@ -72,7 +72,6 @@ async function inicializarProyecto(grupo, configuracion) {
     
     const db = await leerDB();
     const fechaActual = obtenerFechaActual();
-    n
     const { cantidadProyectos, duracionSprintGenT, duracionSprintProyecto } = configuracion;
     
     if (!cantidadProyectos || cantidadProyectos < 1 || cantidadProyectos > 2) {
@@ -483,6 +482,10 @@ async function obtenerDashboard(usuario) {
     console.log('Rol:', usuario.rol);
     console.log('Grupo:', usuario.grupo);
     
+    if (!usuario || !usuario.grupo) {
+      throw new Error('Usuario o grupo no definido');
+    }
+
     const dashboardData = {
       user: usuario,
       proyectoIniciado: false,
@@ -557,8 +560,13 @@ async function obtenerDashboard(usuario) {
   } catch (error) {
     console.error('💥 ERROR CRÍTICO en obtenerDashboard:', error);
     console.error('Stack trace:', error.stack);
-    console.error('Usuario que causó el error:', usuario);
-    throw error;
+    return {
+      user: usuario,
+      proyectoIniciado: false,
+      proyectos: {},
+      metricas: {},
+      tareas: {}
+    };
   }
 }
 

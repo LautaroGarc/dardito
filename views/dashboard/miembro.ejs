@@ -150,15 +150,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
     // VARIABLES GLOBALES
     // ============================================
-    
+
+
     let currentSection = 'dashboard';
     let selectedProject = null;
     let selectedSprint = null;
     let proyectosDisponibles = [];
-    let currentUser = <%- JSON.stringify(user) %>;
-    let dashboardData = <%- JSON.stringify(typeof proyectos !== 'undefined' ? { proyectos: proyectos } : {}) %>;
+    let sprintsDisponibles = []; // CORREGIDO: Variable faltante declarada
+    let currentUser = <%- typeof user !== 'undefined' ? JSON.stringify(user) : '{}' %>;
+    let dashboardData = <%- typeof proyectos !== 'undefined' ? JSON.stringify({ proyectos: proyectos }) : '{}' %>;
+    
+    // Parsear los datos
+    try {
+        currentUser = typeof currentUser === 'string' ? JSON.parse(currentUser) : currentUser;
+        dashboardData = typeof dashboardData === 'string' ? JSON.parse(dashboardData) : dashboardData;
+    } catch (e) {
+        console.error('Error parseando datos:', e);
+        currentUser = {};
+        dashboardData = {};
+    }
 
-    console.log('🚀 Inicializando dashboard de miembro...');
     console.log('Usuario actual:', currentUser);
     console.log('Dashboard data:', dashboardData);
 
@@ -323,10 +334,12 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Obtener información básica del proyecto para determinar sprints disponibles
             const response = await fetch(`/api/backlog/${proyecto}`);
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error(data.message || 'Error cargando datos del proyecto');
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (!data.success) {
+                    console.warn('Respuesta del backlog no exitosa:', data.message);
+                }
             }
 
             // Simular sprints disponibles (del 1 al 5 por defecto, pero se verificarán)
@@ -737,8 +750,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Event delegation para botones de proyecto (dashboard)
         document.getElementById('proyecto-selector')?.addEventListener('click', function(e) {
-            if (e.target.classList.contains('proyecto-tab') || e.target.closest('.proyecto-tab')) {
-                const boton = e.target.classList.contains('proyecto-tab') ? e.target : e.target.closest('.proyecto-tab');
+            const boton = e.target.closest('.proyecto-tab');
+            if (boton) {
                 const proyecto = boton.dataset.proyecto;
                 if (proyecto) {
                     seleccionarProyecto(proyecto);
@@ -748,8 +761,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Event delegation para botones de proyecto (backlog)
         document.getElementById('backlog-proyecto-selector')?.addEventListener('click', function(e) {
-            if (e.target.classList.contains('proyecto-tab') || e.target.closest('.proyecto-tab')) {
-                const boton = e.target.classList.contains('proyecto-tab') ? e.target : e.target.closest('.proyecto-tab');
+            const boton = e.target.closest('.proyecto-tab');
+            if (boton) {
                 const proyecto = boton.dataset.proyecto;
                 if (proyecto) {
                     seleccionarProyecto(proyecto);
@@ -763,8 +776,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Event delegation para botones de sprint
         document.getElementById('sprint-selector')?.addEventListener('click', function(e) {
-            if (e.target.classList.contains('sprint-tab') || e.target.closest('.sprint-tab')) {
-                const boton = e.target.classList.contains('sprint-tab') ? e.target : e.target.closest('.sprint-tab');
+            const boton = e.target.closest('.sprint-tab');
+            if (boton) {
                 const sprint = boton.dataset.sprint;
                 if (sprint) {
                     seleccionarSprint(sprint);
@@ -1158,7 +1171,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     console.log('🛠️ Funciones de debug disponibles en window.debugDashboard');
-});
 });
 
 // ============================================

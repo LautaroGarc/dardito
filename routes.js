@@ -125,7 +125,11 @@ router.get('/dashboard', requireAuth, checkProjectStatus, async (req, res) => {
   try {
     const dashboardData = await obtenerDashboard(req.user);
     
-    // Mapear rol a template específico
+    // Verificar que dashboardData tenga la estructura esperada
+    if (!dashboardData || typeof dashboardData !== 'object') {
+      throw new Error('Datos del dashboard inválidos');
+    }
+
     const templatesPorRol = {
       'miembro': 'dashboard/miembro',
       'scrumMaster': 'dashboard/scrummaster', 
@@ -136,39 +140,27 @@ router.get('/dashboard', requireAuth, checkProjectStatus, async (req, res) => {
     const template = templatesPorRol[req.user.rol];
     
     if (!template) {
-      console.error('Rol no reconocido:', req.user.rol);
       return res.status(500).render('error', {
         message: 'Rol de usuario no válido',
         user: req.user
       });
     }
 
-    console.log(`Renderizando template: ${template} para rol: ${req.user.rol}`);
-    
-    // Preparar datos para el template asegurando que 'user' esté disponible
-    const templateData = {
+    res.render(template, {
       title: `Dashboard ${req.user.rol.charAt(0).toUpperCase() + req.user.rol.slice(1)} - Dardito`,
-      user: req.user, // Variable user disponible en el template
+      user: req.user,
       ...dashboardData
-    };
-    
-    console.log('Datos enviados al template:', {
-      hasUser: !!templateData.user,
-      userNickname: templateData.user?.nickname,
-      userRol: templateData.user?.rol,
-      proyectoIniciado: templateData.proyectoIniciado
     });
     
-    res.render(template, templateData);
   } catch (error) {
     console.error('Error cargando dashboard:', error);
-    res.status(500).render('error', {
-      message: 'Error cargando el dashboard: ' + error.message,
-      user: req.user
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+      details: error.message // Mejor para debugging
     });
   }
 });
-
 /**
  * GET /iniciar-proyecto - Formulario para iniciar proyecto (solo líderes)
  */
