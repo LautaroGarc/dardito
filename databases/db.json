@@ -5,7 +5,56 @@
     "duracion-sprint-proyecto": 1,
     "GenT": {
       "sprintActual": "1",
-      "productBacklog": [],
+      "productBacklog": [
+        [
+          "HU1756092819627",
+          "dfgdfgdfgdg",
+          "drgdrggrrgdrg",
+          "drgdrgdrgrgrgdgrdrg",
+          "drgdrgrgdrgdrgdrg",
+          "MEDIA",
+          20,
+          "POR_HACER",
+          "2025-08-25T03:33:39.627Z",
+          "Abigail Barraza"
+        ],
+        [
+          "HU1756092823324",
+          "safdasdf",
+          "asdfasdf",
+          "asdfasdf",
+          "adsfasdfasdfasdfasdfasdf",
+          "BAJA",
+          5,
+          "POR_HACER",
+          "2025-08-25T03:33:43.324Z",
+          "Abigail Barraza"
+        ],
+        [
+          "HU1756092841375",
+          "adfasdf",
+          "asdfasdf",
+          "asdfasdf",
+          "asdfasdfasdfasdf",
+          "MEDIA",
+          3,
+          "POR_HACER",
+          "2025-08-25T03:34:01.375Z",
+          "Abigail Barraza"
+        ],
+        [
+          "HU1756092872640",
+          "asc",
+          "ac",
+          "ca",
+          "sc",
+          "ALTA",
+          3,
+          "POR_HACER",
+          "2025-08-25T03:34:32.640Z",
+          "Abigail Barraza"
+        ]
+      ],
       "sprint1": {
         "fechaIni": [
           1,
@@ -17,8 +66,20 @@
           9,
           2025
         ],
-        "scrumBoard": [],
-        "tasks": {},
+        "scrumBoard": [["HU1756092819627"]],
+        "tasks": {
+          "TAR1756092912347": {
+            "id": "TAR1756092912347",
+            "nombre": "Configurar servidor backend",
+            "descripcion": "Preparar el entorno del servidor Node.js",
+            "estado": "COMPLETADO",
+            "personas_asignadas": ["Ana López", "Pedro Martínez"],
+            "fechaCreacion": "2025-08-24T09:45:22.111Z",
+            "fechaActualizacion": "2025-08-25T16:40:18.999Z",
+            "historia_id": "HU1756092819627",
+            "estimacion": 6
+          }
+        },
         "burndownChart": {
           "plannedWork": [],
           "actualWork": []
@@ -247,7 +308,9 @@
           9,
           2025
         ],
-        "scrumBoard": [],
+        "scrumBoard": [
+          ["HU1756092849666"]
+        ],
         "tasks": {},
         "burndownChart": {
           "plannedWork": [],

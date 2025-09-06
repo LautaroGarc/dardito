@@ -1,12 +1,12 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { loadJSON } = require('../functions.js');
 const path = require('path');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ranking')
-        .setDescription('Muestra el ranking de tiempo en llamadas de voz'),
-    
+        .setDescription('Muestra el ranking de tiempo en llamadas de voz')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction) {
         try {
             const usersPath = path.join(__dirname, '..', 'databases', 'users.json');

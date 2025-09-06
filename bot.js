@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Collection, Routes, REST } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Routes, REST, ActivityType } = require('discord.js');
 const { loadJSON, saveJSON } = require('./functions.js')
 const fs = require('fs');
 const path = require('path');
@@ -161,6 +161,13 @@ client.once('clientReady', async () => {
   
   const guild = client.guilds.cache.get(config.discord.guildId);
   
+  client.user.setPresence({
+    name: 'DASHBOARD DARDITO WEB',
+    type: ActivityType.Streaming,
+    state: 'Dashboard Grupos - Dardito',
+    buttons: [{ label: 'Dashboard Dardito WEB', url: 'https://right-mite-infinite.ngrok-free.app' }]
+  }); 
+
   // TAREAS PROGRAMADAS
   const cron = require('node-cron');
   
@@ -170,8 +177,6 @@ client.once('clientReady', async () => {
   }, {
     timezone: "America/Argentina/Buenos_Aires"
   });
-  
-  client.user.setActivity('/contraseña', { type: 'LISTENING' });
   
   console.log('[ + ] Bot completamente inicializado');
 });

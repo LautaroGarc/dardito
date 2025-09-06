@@ -151,12 +151,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // VARIABLES GLOBALES
     // ============================================
 
-
     let currentSection = 'dashboard';
     let selectedProject = null;
     let selectedSprint = null;
     let proyectosDisponibles = [];
-    let sprintsDisponibles = []; // CORREGIDO: Variable faltante declarada
+    let sprintsDisponibles = [];
     let currentUser = <%- typeof user !== 'undefined' ? JSON.stringify(user) : '{}' %>;
     let dashboardData = <%- typeof proyectos !== 'undefined' ? JSON.stringify({ proyectos: proyectos }) : '{}' %>;
     
@@ -191,33 +190,25 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             showLoading(true);
             
-            // Hacer petición al dashboard para obtener la estructura de proyectos
-            const response = await fetch('/dashboard');
+            const response = await fetch('/api/mi-grupo/proyectos');
             if (!response.ok) {
-                throw new Error('Error obteniendo datos del dashboard');
+                throw new Error('Error obteniendo proyectos del grupo');
             }
             
-            // Los proyectos base siempre están disponibles
-            proyectosDisponibles = ['GenT', 'Proy'];
-            
-            // Verificar si existe Proy2 consultando la API
-            try {
-                const proy2Response = await fetch('/api/backlog/Proy2');
-                if (proy2Response.ok) {
-                    proyectosDisponibles.push('Proy2');
-                }
-            } catch (e) {
-                console.log('Proy2 no disponible para este grupo');
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message || 'Error en la respuesta');
             }
             
-            console.log('Proyectos disponibles:', proyectosDisponibles);
+            proyectosDisponibles = data.data.proyectos.map(p => p.nombre);
+            
+            console.log('Proyectos disponibles para el grupo:', proyectosDisponibles);
             renderizarSelectorProyectos();
             
         } catch (error) {
             console.error('Error cargando proyectos:', error);
             showToast('Error cargando proyectos: ' + error.message, 'error');
             
-            // Fallback: proyectos básicos
             proyectosDisponibles = ['GenT', 'Proy'];
             renderizarSelectorProyectos();
         } finally {
@@ -231,17 +222,25 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const proyectosHTML = proyectosDisponibles.map(proyecto => {
             const nombre = proyecto === 'GenT' ? 'GenT' : 
-                          proyecto === 'Proy' ? 'Proyecto Principal' : 'Proyecto 2';
+                        proyecto === 'Proy' ? 'Proyecto Principal' : 
+                        proyecto === 'Proy2' ? 'Proyecto 2' : proyecto;
             const icono = proyecto === 'GenT' ? 
                 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' :
                 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 00-2-2m0 0V5a2 2 0 012-2h14a2 2 0 012 2v2M7 7h10';
-                          
+                            
             return `
-                <button class="proyecto-tab" data-proyecto="${proyecto}">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icono}"></path>
-                    </svg>
-                    ${nombre}
+                <button class="proyecto-tab bg-white border-2 border-gray-200 rounded-xl p-4 transition-all duration-300 hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50" data-proyecto="${proyecto}">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0 p-2 bg-gray-100 rounded-lg">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icono}"></path>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-semibold text-gray-900">${nombre}</div>
+                            <div class="text-sm text-gray-500">Proyecto activo</div>
+                        </div>
+                    </div>
                 </button>
             `;
         }).join('');
@@ -259,7 +258,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('dashboard-content').classList.remove('hidden');
         document.getElementById('backlog-content').classList.add('hidden');
         
-        // Limpiar selección
         selectedProject = null;
         selectedSprint = null;
         document.getElementById('proyecto-content').classList.add('hidden');
@@ -273,7 +271,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('dashboard-content').classList.add('hidden');
         document.getElementById('backlog-content').classList.remove('hidden');
         
-        // Limpiar selección
         selectedProject = null;
         document.getElementById('backlog-proyecto-content').classList.add('hidden');
         document.getElementById('no-backlog-proyecto-message').classList.remove('hidden');
@@ -282,7 +279,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function actualizarEstadoNavegacion() {
-        // Actualizar estado visual de los botones de navegación
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
         });
@@ -305,7 +301,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Proyecto seleccionado:', proyecto);
             
-            // Actualizar estado visual de los tabs
             const selector = currentSection === 'dashboard' ? '#proyecto-selector' : '#backlog-proyecto-selector';
             document.querySelectorAll(`${selector} .proyecto-tab`).forEach(tab => {
                 tab.classList.remove('active');
@@ -330,38 +325,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    async function cargarDatosSprint(proyecto) {
-        try {
-            // Obtener información básica del proyecto para determinar sprints disponibles
-            const response = await fetch(`/api/backlog/${proyecto}`);
-            if (response.ok) {
-                const data = await response.json();
-                
-                if (!data.success) {
-                    console.warn('Respuesta del backlog no exitosa:', data.message);
-                }
-            }
-
-            // Simular sprints disponibles (del 1 al 5 por defecto, pero se verificarán)
-            sprintsDisponibles = [];
-            for (let i = 1; i <= 5; i++) {
-                sprintsDisponibles.push(i.toString());
-            }
-            
-            const sprintActual = '1'; // Por defecto sprint 1, idealmente esto vendría del backend
-            
-            renderizarSelectorSprints(sprintActual);
-            await seleccionarSprint(sprintActual);
-            
-        } catch (error) {
-            console.error('Error cargando datos del sprint:', error);
-            // Fallback: crear sprints básicos
-            sprintsDisponibles = ['1', '2', '3'];
-            renderizarSelectorSprints('1');
-            await seleccionarSprint('1');
-        }
-    }
-
     function renderizarSelectorSprints(sprintActual) {
         const selector = document.getElementById('sprint-selector');
         if (!selector) return;
@@ -369,17 +332,53 @@ document.addEventListener('DOMContentLoaded', function() {
         const sprintsHTML = sprintsDisponibles.map(sprint => {
             const esActual = sprint === sprintActual;
             return `
-                <button class="sprint-tab ${esActual ? 'active' : ''}" data-sprint="${sprint}">
-                    <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                    Sprint ${sprint}
-                    ${esActual ? '<span class="ml-1 text-xs">(Actual)</span>' : ''}
+                <button class="sprint-tab bg-white border-2 border-gray-200 rounded-lg px-4 py-2 transition-all duration-300 hover:border-green-400 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 ${esActual ? 'border-green-500 bg-green-100' : ''}" data-sprint="${sprint}">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span class="font-medium">Sprint ${sprint}</span>
+                        ${esActual ? '<span class="text-xs bg-green-600 text-white px-2 py-1 rounded-full ml-2">Actual</span>' : ''}
+                    </div>
                 </button>
             `;
         }).join('');
         
         selector.innerHTML = sprintsHTML;
+    }
+
+    async function cargarDatosSprint(proyecto) {
+        try {
+            showLoading(true);
+            
+            const response = await fetch(`/api/proyecto/${proyecto}/info`);
+            if (!response.ok) {
+                throw new Error('Error obteniendo información del proyecto');
+            }
+            
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message || 'Error en la respuesta del proyecto');
+            }
+            
+            const proyectoInfo = data.data;
+            sprintsDisponibles = proyectoInfo.sprints || ['1'];
+            const sprintActual = proyectoInfo.sprintActual || '1';
+            
+            console.log('Sprints disponibles para', proyecto, ':', sprintsDisponibles);
+            console.log('Sprint actual:', sprintActual);
+            
+            renderizarSelectorSprints(sprintActual);
+            await seleccionarSprint(sprintActual);
+            
+        } catch (error) {
+            console.error('Error cargando datos del sprint:', error);
+            sprintsDisponibles = ['1', '2', '3'];
+            renderizarSelectorSprints('1');
+            await seleccionarSprint('1');
+        } finally {
+            showLoading(false);
+        }
     }
 
     async function seleccionarSprint(sprint) {
@@ -388,13 +387,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Sprint seleccionado:', sprint);
             
-            // Actualizar estado visual de los tabs
             document.querySelectorAll('.sprint-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.querySelector(`[data-sprint="${sprint}"]`)?.classList.add('active');
 
-            // Cargar datos del sprint
             await Promise.all([
                 cargarScrumboard(selectedProject, sprint),
                 cargarTareasSprint(selectedProject, sprint)
@@ -407,33 +404,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================
-    // SCRUMBOARD
+    // SCRUMBOARD - VERSIÓN CORREGIDA
     // ============================================
     
     async function cargarScrumboard(proyecto, sprint) {
         try {
-            const response = await fetch(`/api/scrumboard/${proyecto}/sprint${sprint}`);
+            // CORRECCIÓN: Cargar historias específicas del sprint seleccionado
+            const response = await fetch(`/api/historias/${proyecto}/sprint${sprint}`);
             const data = await response.json();
             
             if (!data.success) {
-                console.warn('No se pudo cargar scrumboard, mostrando vacío');
+                console.warn('No se pudo cargar scrumboard del sprint, mostrando vacío');
                 renderizarScrumboard([]);
                 return;
             }
 
             const historias = data.data || [];
+            console.log(`Historias del sprint ${sprint}:`, historias);
             renderizarScrumboard(historias);
             
         } catch (error) {
             console.error('Error cargando scrumboard:', error);
-            renderizarScrumboard([]); // Mostrar scrumboard vacío
+            renderizarScrumboard([]);
         }
     }
 
     function renderizarScrumboard(historias) {
-        const porHacer = historias.filter(h => h[7] === 'POR_HACER');
-        const enProceso = historias.filter(h => h[7] === 'EN_PROCESO');
-        const completado = historias.filter(h => h[7] === 'COMPLETADO');
+        const porHacer = historias.filter(h => h[7] === 'POR_HACER' || h[7] === 'TODO');
+        const enProceso = historias.filter(h => h[7] === 'EN_PROCESO' || h[7] === 'IN_PROGRESS');
+        const completado = historias.filter(h => h[7] === 'COMPLETADO' || h[7] === 'DONE');
 
         // Actualizar contadores
         document.getElementById('count-por-hacer').textContent = porHacer.length;
@@ -448,25 +447,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderizarHistoriasScrumboard(historias) {
         if (historias.length === 0) {
-            return '<div class="text-gray-500 text-sm text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">No hay historias</div>';
+            return `
+                <div class="scrumboard-empty-state">
+                    <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <p class="text-xs text-gray-500 text-center">No hay historias</p>
+                </div>
+            `;
         }
 
         return historias.map(historia => {
             const [id, titulo, como, quiero, para, prioridad, storyPoints, estado] = historia;
             
             return `
-                <div class="historia-card cursor-pointer hover:shadow-lg" data-historia-id="${id}">
-                    <div class="flex justify-between items-start mb-2">
-                        <h5 class="font-medium text-gray-900 text-sm leading-tight">${titulo}</h5>
-                        <div class="flex flex-col space-y-1 ml-2 flex-shrink-0">
-                            <span class="prioridad-badge ${prioridad.toLowerCase()}">${prioridad}</span>
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded text-center">${storyPoints} SP</span>
+                <div class="scrumboard-story-card" data-historia-id="${id}">
+                    <div class="scrumboard-story-header">
+                        <h5 class="scrumboard-story-title">${titulo}</h5>
+                        <div class="scrumboard-story-badges">
+                            <span class="priority-badge priority-${prioridad.toLowerCase()}">${prioridad}</span>
+                            <span class="story-points-badge">${storyPoints} SP</span>
                         </div>
                     </div>
-                    <div class="text-xs text-gray-600 space-y-1">
-                        <div class="truncate"><strong>Como:</strong> ${como}</div>
-                        <div class="truncate"><strong>Quiero:</strong> ${quiero}</div>
-                        <div class="truncate"><strong>Para:</strong> ${para}</div>
+                    <div class="scrumboard-story-content">
+                        <div class="story-detail">
+                            <span class="story-label">Como:</span> 
+                            <span class="story-text">${como}</span>
+                        </div>
+                        <div class="story-detail">
+                            <span class="story-label">Quiero:</span> 
+                            <span class="story-text">${quiero}</span>
+                        </div>
+                        <div class="story-detail">
+                            <span class="story-label">Para:</span> 
+                            <span class="story-text">${para}</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -493,7 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
         } catch (error) {
             console.error('Error cargando tareas:', error);
-            renderizarTareas([]); // Mostrar lista vacía
+            renderizarTareas([]);
         }
     }
 
@@ -561,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================
-    // PRODUCT BACKLOG
+    // PRODUCT BACKLOG - VISTA MEJORADA
     // ============================================
     
     async function cargarProductBacklog(proyecto) {
@@ -595,80 +610,129 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Actualizar título
         const nombreProyecto = proyecto === 'GenT' ? 'GenT' : 
-                             proyecto === 'Proy' ? 'Proyecto Principal' : 'Proyecto 2';
+                             proyecto === 'Proy' ? 'Proyecto Principal' : 
+                             proyecto === 'Proy2' ? 'Proyecto 2' : proyecto;
         if (titleContainer) {
             titleContainer.textContent = `Product Backlog - ${nombreProyecto}`;
         }
 
         // Calcular estadísticas
         const totalSP = historias.reduce((sum, h) => sum + (parseInt(h[6]) || 0), 0);
-        const completadas = historias.filter(h => h[7] === 'COMPLETADO').length;
+        const completadas = historias.filter(h => h[7] === 'COMPLETADO' || h[7] === 'DONE').length;
+        const prioridades = historias.reduce((acc, h) => {
+            acc[h[5]] = (acc[h[5]] || 0) + 1;
+            return acc;
+        }, {});
         
         if (statsContainer) {
             statsContainer.innerHTML = `
-                <div class="flex items-center space-x-1">
+                <div class="backlog-stat">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2"></path>
                     </svg>
                     <span>${historias.length} historias</span>
                 </div>
-                <div class="flex items-center space-x-1">
+                <div class="backlog-stat">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
                     <span>${totalSP} SP total</span>
                 </div>
-                <div class="flex items-center space-x-1">
+                <div class="backlog-stat">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
                     </svg>
                     <span>${completadas} completadas</span>
+                </div>
+                <div class="backlog-stat">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Alta: ${prioridades.ALTA || 0}</span>
                 </div>
             `;
         }
 
         if (historias.length === 0) {
             container.innerHTML = `
-                <div class="col-span-full text-center py-12 text-gray-500">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                    <p class="text-lg font-medium">No hay historias de usuario</p>
-                    <p class="text-sm">El product backlog está vacío</p>
+                <div class="backlog-empty-state">
+                    <div class="backlog-empty-icon">
+                        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                    </div>
+                    <h3 class="backlog-empty-title">No hay historias de usuario</h3>
+                    <p class="backlog-empty-description">El product backlog está vacío</p>
                 </div>
             `;
             return;
         }
 
-        const historiasHTML = historias.map(historia => {
+        // Ordenar por prioridad (Alta -> Media -> Baja)
+        const ordenPrioridad = { 'ALTA': 1, 'MEDIA': 2, 'BAJA': 3 };
+        const historiasOrdenadas = [...historias].sort((a, b) => {
+            return (ordenPrioridad[a[5]] || 4) - (ordenPrioridad[b[5]] || 4);
+        });
+
+        const historiasHTML = historiasOrdenadas.map((historia, index) => {
             const [id, titulo, como, quiero, para, prioridad, storyPoints, estado, fechaCreacion, creador] = historia;
             
             return `
-                <div class="historia-card card-hover" data-historia-id="${id}">
-                    <div class="flex justify-between items-start mb-3">
-                        <h4 class="font-semibold text-gray-900 leading-tight">${titulo}</h4>
-                        <div class="flex flex-col space-y-1 ml-2 flex-shrink-0">
-                            <span class="prioridad-badge ${prioridad.toLowerCase()}">${prioridad}</span>
+                <div class="backlog-story-card" data-historia-id="${id}" style="animation-delay: ${index * 0.1}s">
+                    <div class="backlog-story-header">
+                        <div class="backlog-story-id">#${id}</div>
+                        <div class="backlog-story-badges">
+                            <span class="priority-badge priority-${prioridad.toLowerCase()}">${prioridad}</span>
+                            <span class="status-badge status-${estado.toLowerCase().replace('_', '-')}">${estado.replace('_', ' ')}</span>
                         </div>
                     </div>
                     
-                    <div class="space-y-2 text-sm text-gray-600 mb-4">
-                        <div><strong class="text-gray-800">Como:</strong> ${como}</div>
-                        <div><strong class="text-gray-800">Quiero:</strong> ${quiero}</div>
-                        <div><strong class="text-gray-800">Para:</strong> ${para}</div>
+                    <h4 class="backlog-story-title">${titulo}</h4>
+                    
+                    <div class="backlog-story-content">
+                        <div class="story-section">
+                            <div class="story-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span>Como</span>
+                            </div>
+                            <p class="story-section-content">${como}</p>
+                        </div>
+                        
+                        <div class="story-section">
+                            <div class="story-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                                <span>Quiero</span>
+                            </div>
+                            <p class="story-section-content">${quiero}</p>
+                        </div>
+                        
+                        <div class="story-section">
+                            <div class="story-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Para</span>
+                            </div>
+                            <p class="story-section-content">${para}</p>
+                        </div>
                     </div>
                     
-                    <div class="flex justify-between items-center pt-3 border-t border-gray-100">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
-                                ${storyPoints} SP
-                            </span>
-                            <span class="historia-badge ${estado.toLowerCase().replace('_', '-')}">
-                                ${estado.replace('_', ' ')}
-                            </span>
+                    <div class="backlog-story-footer">
+                        <div class="story-points">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            <span>${storyPoints} Story Points</span>
                         </div>
-                        <div class="text-xs text-gray-500">
-                            por ${creador || 'Desconocido'}
+                        <div class="story-creator">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span>por ${creador || 'Desconocido'}</span>
                         </div>
                     </div>
                 </div>
@@ -702,14 +766,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             showToast('Estado de tarea actualizado correctamente', 'success');
             
-            // Recargar tareas para mostrar el cambio
             await cargarTareasSprint(selectedProject, selectedSprint);
             
         } catch (error) {
             console.error('Error actualizando estado de tarea:', error);
             showToast('Error actualizando tarea: ' + error.message, 'error');
             
-            // Revertir el cambio en el selector
             const selector = document.querySelector(`[data-tarea-id="${tareaId}"] .estado-select`);
             if (selector) {
                 selector.value = selector.dataset.originalValue || 'POR_HACER';
@@ -724,11 +786,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
     
     function configurarEventListeners() {
-        // ============================================
-        // NAVEGACIÓN PRINCIPAL
-        // ============================================
-        
-        // Dashboard link
+        // Navegación principal
         document.querySelectorAll('.dashboard-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -736,7 +794,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Product Backlog link
         document.querySelectorAll('.backlog-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -744,11 +801,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // ============================================
-        // SELECCIÓN DE PROYECTOS
-        // ============================================
-        
-        // Event delegation para botones de proyecto (dashboard)
+        // Selección de proyectos
         document.getElementById('proyecto-selector')?.addEventListener('click', function(e) {
             const boton = e.target.closest('.proyecto-tab');
             if (boton) {
@@ -759,7 +812,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Event delegation para botones de proyecto (backlog)
         document.getElementById('backlog-proyecto-selector')?.addEventListener('click', function(e) {
             const boton = e.target.closest('.proyecto-tab');
             if (boton) {
@@ -770,11 +822,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // ============================================
-        // SELECCIÓN DE SPRINTS
-        // ============================================
-        
-        // Event delegation para botones de sprint
+        // Selección de sprints
         document.getElementById('sprint-selector')?.addEventListener('click', function(e) {
             const boton = e.target.closest('.sprint-tab');
             if (boton) {
@@ -785,18 +833,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // ============================================
-        // ACTUALIZACIÓN DE ESTADOS DE TAREAS
-        // ============================================
-        
-        // Event delegation para selects de estado de tareas
+        // Actualización de estados de tareas
         document.getElementById('tareas-list')?.addEventListener('change', function(e) {
             if (e.target.classList.contains('estado-select')) {
                 const tareaId = e.target.dataset.tareaId;
                 const nuevoEstado = e.target.value;
                 const estadoAnterior = e.target.dataset.originalValue || 'POR_HACER';
                 
-                // Confirmar cambio si es una transición importante
                 if (nuevoEstado === 'COMPLETADO' && estadoAnterior !== 'COMPLETADO') {
                     if (confirm('¿Marcar esta tarea como completada?')) {
                         actualizarEstadoTarea(tareaId, nuevoEstado);
@@ -809,24 +852,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // ============================================
-        // ATAJOS DE TECLADO
-        // ============================================
-        
+        // Atajos de teclado
         document.addEventListener('keydown', function(e) {
-            // Alt + D = Dashboard
             if (e.altKey && e.key.toLowerCase() === 'd') {
                 e.preventDefault();
                 mostrarSeccionDashboard();
             }
             
-            // Alt + B = Backlog
             if (e.altKey && e.key.toLowerCase() === 'b') {
                 e.preventDefault();
                 mostrarSeccionBacklog();
             }
             
-            // Alt + 1,2,3 = Seleccionar proyecto
             if (e.altKey && ['1', '2', '3'].includes(e.key)) {
                 e.preventDefault();
                 const proyectoIndex = parseInt(e.key) - 1;
@@ -882,12 +919,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         container.appendChild(toast);
         
-        // Mostrar toast
         setTimeout(() => {
             toast.classList.add('show');
         }, 100);
 
-        // Auto-remover después de 5 segundos
         setTimeout(() => {
             removeToast(toastId);
         }, 5000);
@@ -903,300 +938,60 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Función global para remover toasts (llamada desde onclick)
     window.removeToast = removeToast;
-
-    // ============================================
-    // OVERRIDE DEL DASHBOARD MANAGER PARA MIEMBROS
-    // ============================================
-    
-    // Sobrescribir las funciones del dashboard manager para el comportamiento específico de miembros
-    if (window.dashboardManager) {
-        window.dashboardManager.loadBacklog = function() {
-            mostrarSeccionBacklog();
-        };
-    }
-
-    // ============================================
-    // OBTENER SPRINTS DISPONIBLES DE UN PROYECTO
-    // ============================================
-    
-    async function obtenerSprintsDisponibles(proyecto) {
-        try {
-            // Intentar obtener información del proyecto usando endpoints existentes
-            const response = await fetch(`/api/tareas/${proyecto}/sprint1`);
-            const data = await response.json();
-            
-            if (data.success) {
-                // Si sprint1 existe, asumir que hay al menos 3 sprints
-                return ['1', '2', '3'];
-            } else {
-                // Fallback
-                return ['1'];
-            }
-        } catch (error) {
-            console.error('Error obteniendo sprints:', error);
-            return ['1'];
-        }
-    }
-
-    // ============================================
-    // FUNCIONES DE FORMATEO
-    // ============================================
-    
-    function formatearFecha(fechaArray) {
-        if (!fechaArray || fechaArray.length !== 3) return 'Sin fecha';
-        const [dia, mes, anio] = fechaArray;
-        return `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${anio}`;
-    }
-
-    function obtenerColorPrioridad(prioridad) {
-        switch (prioridad.toLowerCase()) {
-            case 'alta': return 'bg-red-100 text-red-800';
-            case 'media': return 'bg-yellow-100 text-yellow-800';
-            case 'baja': return 'bg-green-100 text-green-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    }
-
-    function obtenerColorEstado(estado) {
-        switch (estado) {
-            case 'COMPLETADO': return 'bg-green-100 text-green-800';
-            case 'EN_PROCESO': return 'bg-blue-100 text-blue-800';
-            case 'POR_HACER': return 'bg-gray-100 text-gray-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    }
-
-    // ============================================
-    // ACTUALIZACIÓN DINÁMICA DE DATOS
-    // ============================================
-    
-    // Actualizar datos cada 30 segundos
-    let intervalId = null;
-    
-    function iniciarActualizacionAutomatica() {
-        if (intervalId) {
-            clearInterval(intervalId);
-        }
-        
-        intervalId = setInterval(async () => {
-            if (selectedProject && selectedSprint && currentSection === 'dashboard') {
-                try {
-                    console.log('🔄 Actualizando datos automáticamente...');
-                    await Promise.all([
-                        cargarScrumboard(selectedProject, selectedSprint),
-                        cargarTareasSprint(selectedProject, selectedSprint)
-                    ]);
-                } catch (error) {
-                    console.error('Error en actualización automática:', error);
-                }
-            }
-        }, 30000); // 30 segundos
-    }
-
-    function detenerActualizacionAutomatica() {
-        if (intervalId) {
-            clearInterval(intervalId);
-            intervalId = null;
-        }
-    }
-
-    // ============================================
-    // MANEJO DE ERRORES DE RED
-    // ============================================
-    
-    function manejarErrorRed(error) {
-        console.error('Error de red:', error);
-        
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            showToast('Error de conexión. Verifica tu conexión a internet.', 'error');
-        } else if (error.message.includes('404')) {
-            showToast('Recurso no encontrado. Puede que el proyecto no esté configurado.', 'warning');
-        } else if (error.message.includes('403')) {
-            showToast('No tienes permisos para realizar esta acción.', 'error');
-        } else {
-            showToast('Error del servidor: ' + error.message, 'error');
-        }
-    }
-
-    // ============================================
-    // INFORMACIÓN DE ESTADO EN TIEMPO REAL
-    // ============================================
-    
-    function mostrarEstadoConexion() {
-        const estadoElement = document.createElement('div');
-        estadoElement.id = 'connection-status';
-        estadoElement.className = 'fixed bottom-4 left-4 px-3 py-2 rounded-lg text-sm font-medium z-40';
-        estadoElement.innerHTML = `
-            <div class="flex items-center space-x-2">
-                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span>Conectado</span>
-            </div>
-        `;
-        estadoElement.style.backgroundColor = 'rgba(34, 197, 94, 0.9)';
-        estadoElement.style.color = 'white';
-        
-        document.body.appendChild(estadoElement);
-        
-        // Auto-ocultar después de 3 segundos
-        setTimeout(() => {
-            estadoElement.style.opacity = '0';
-            setTimeout(() => {
-                estadoElement.remove();
-            }, 300);
-        }, 3000);
-    }
-
-    // ============================================
-    // VALIDACIONES
-    // ============================================
-    
-    function validarSeleccion() {
-        if (!selectedProject) {
-            showToast('Selecciona un proyecto primero', 'warning');
-            return false;
-        }
-        
-        if (currentSection === 'dashboard' && !selectedSprint) {
-            showToast('Selecciona un sprint primero', 'warning');
-            return false;
-        }
-        
-        return true;
-    }
-
-    // ============================================
-    // PERSISTENCIA DE ESTADO
-    // ============================================
-    
-    function guardarEstadoLocal() {
-        const estado = {
-            currentSection,
-            selectedProject,
-            selectedSprint,
-            timestamp: Date.now()
-        };
-        
-        try {
-            // Usar variable en memoria en lugar de localStorage
-            window.dashboardState = estado;
-        } catch (error) {
-            console.warn('No se puede guardar estado:', error);
-        }
-    }
-
-    function restaurarEstadoLocal() {
-        try {
-            const estado = window.dashboardState;
-            
-            if (estado && (Date.now() - estado.timestamp) < 300000) { // 5 minutos
-                currentSection = estado.currentSection || 'dashboard';
-                selectedProject = estado.selectedProject;
-                selectedSprint = estado.selectedSprint;
-                
-                if (currentSection === 'backlog') {
-                    mostrarSeccionBacklog();
-                    if (selectedProject) {
-                        setTimeout(() => seleccionarProyecto(selectedProject), 500);
-                    }
-                } else if (selectedProject) {
-                    setTimeout(() => {
-                        seleccionarProyecto(selectedProject);
-                        if (selectedSprint) {
-                            setTimeout(() => seleccionarSprint(selectedSprint), 500);
-                        }
-                    }, 500);
-                }
-            }
-        } catch (error) {
-            console.warn('No se puede restaurar estado:', error);
-        }
-    }
 
     // ============================================
     // INICIALIZACIÓN FINAL
     // ============================================
     
-    // Inicializar la aplicación
     inicializar();
     
-    // Mostrar estado de conexión
-    mostrarEstadoConexion();
-    
-    // Iniciar actualizaciones automáticas
-    iniciarActualizacionAutomatica();
-    
-    // Limpiar intervalos al cerrar/recargar página
-    window.addEventListener('beforeunload', () => {
-        detenerActualizacionAutomatica();
-    });
-
-    console.log('✅ Dashboard de miembro inicializado correctamente');
-    
-    // ============================================
-    // FUNCIONES GLOBALES PARA DEBUGGING
-    // ============================================
-    
-    // Funciones de debug disponibles en la consola
-    window.debugDashboard = {
-        mostrarEstado: () => {
-            console.log('=== ESTADO ACTUAL DEL DASHBOARD ===');
-            console.log('Sección actual:', currentSection);
-            console.log('Proyecto seleccionado:', selectedProject);
-            console.log('Sprint seleccionado:', selectedSprint);
-            console.log('Proyectos disponibles:', proyectosDisponibles);
-            console.log('Sprints disponibles:', sprintsDisponibles);
-            console.log('Usuario actual:', currentUser);
-        },
-        
-        recargarProyectos: () => {
-            cargarProyectosDisponibles();
-        },
-        
-        recargarSprint: () => {
-            if (selectedProject && selectedSprint) {
-                Promise.all([
+    let intervalId = setInterval(async () => {
+        if (selectedProject && selectedSprint && currentSection === 'dashboard') {
+            try {
+                await Promise.all([
                     cargarScrumboard(selectedProject, selectedSprint),
                     cargarTareasSprint(selectedProject, selectedSprint)
                 ]);
-            } else {
-                console.warn('Selecciona un proyecto y sprint primero');
+            } catch (error) {
+                console.error('Error en actualización automática:', error);
             }
-        },
-        
-        simularCambioEstado: (tareaId, estado) => {
-            actualizarEstadoTarea(tareaId, estado);
         }
-    };
+    }, 30000);
     
-    console.log('🛠️ Funciones de debug disponibles en window.debugDashboard');
-});
+    window.addEventListener('beforeunload', () => {
+        clearInterval(intervalId);
+    });
 
-// ============================================
-// ESTILOS CSS ADICIONALES
-// ============================================
+    console.log('✅ Dashboard de miembro inicializado correctamente');
+});
 </script>
 
 <style>
+    /* ============================================
+       ESTILOS ORIGINALES
+       ============================================ */
     .proyecto-tab {
-        @apply px-4 py-2 rounded-lg border transition-all duration-200 cursor-pointer;
+        @apply cursor-pointer transition-all duration-300;
     }
     .proyecto-tab.active {
-        @apply bg-blue-600 text-white border-blue-600 shadow-md;
+        @apply border-blue-500 bg-blue-100 shadow-lg;
     }
-    .proyecto-tab:not(.active) {
-        @apply bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300;
+    .proyecto-tab.active .flex-shrink-0 {
+        @apply bg-blue-200;
+    }
+    .proyecto-tab.active svg {
+        @apply text-blue-600;
     }
     
     .sprint-tab {
-        @apply px-3 py-1 rounded-md text-sm transition-all duration-200 cursor-pointer;
+        @apply cursor-pointer transition-all duration-300;
     }
     .sprint-tab.active {
-        @apply bg-green-600 text-white shadow-sm;
+        @apply border-green-500 bg-green-100 shadow-md;
     }
-    .sprint-tab:not(.active) {
-        @apply bg-gray-100 text-gray-700 hover:bg-green-100;
+    .sprint-tab:not(.active):hover {
+        @apply border-green-400 bg-green-50;
     }
 
     .historia-card {
@@ -1211,36 +1006,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     .tarea-card:not(.asignada) {
         @apply bg-white hover:bg-gray-50;
-    }
-
-    .scrumboard-column {
-        @apply bg-gray-50 rounded-lg p-4 min-h-[200px];
-    }
-
-    .historia-badge {
-        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
-    }
-    .historia-badge.por-hacer {
-        @apply bg-gray-100 text-gray-800;
-    }
-    .historia-badge.en-proceso {
-        @apply bg-blue-100 text-blue-800;
-    }
-    .historia-badge.completado {
-        @apply bg-green-100 text-green-800;
-    }
-
-    .prioridad-badge {
-        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
-    }
-    .prioridad-badge.alta {
-        @apply bg-red-100 text-red-800;
-    }
-    .prioridad-badge.media {
-        @apply bg-yellow-100 text-yellow-800;
-    }
-    .prioridad-badge.baja {
-        @apply bg-green-100 text-green-800;
     }
 
     .fade-in {
@@ -1259,6 +1024,221 @@ document.addEventListener('DOMContentLoaded', function() {
     .card-hover:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ============================================
+       SCRUMBOARD STYLES - Mejorados
+       ============================================ */
+
+    .scrumboard-column {
+        @apply bg-gradient-to-b from-gray-50 to-gray-100 rounded-xl p-5 min-h-[300px] border border-gray-200;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .scrumboard-story-card {
+        @apply bg-white rounded-lg border border-gray-200 p-4 mb-3 shadow-sm transition-all duration-300;
+        cursor: pointer;
+    }
+
+    .scrumboard-story-card:hover {
+        @apply shadow-md border-gray-300;
+        transform: translateY(-2px);
+    }
+
+    .scrumboard-story-header {
+        @apply flex justify-between items-start mb-3;
+    }
+
+    .scrumboard-story-title {
+        @apply font-semibold text-gray-900 text-sm leading-tight flex-1 mr-2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .scrumboard-story-badges {
+        @apply flex flex-col space-y-1 flex-shrink-0;
+    }
+
+    .scrumboard-story-content {
+        @apply space-y-2;
+    }
+
+    .story-detail {
+        @apply text-xs text-gray-600 flex flex-col;
+    }
+
+    .story-label {
+        @apply font-medium text-gray-800 mb-1;
+    }
+
+    .story-text {
+        @apply text-gray-600 leading-relaxed;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .story-points-badge {
+        @apply text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full font-medium text-center;
+    }
+
+    .scrumboard-empty-state {
+        @apply text-center py-8 px-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50;
+    }
+
+    /* ============================================
+       PRODUCT BACKLOG STYLES - Completamente nuevos
+       ============================================ */
+
+    #backlog-historias {
+        @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6;
+    }
+
+    .backlog-story-card {
+        @apply bg-white rounded-xl border-2 border-gray-100 p-6 shadow-sm transition-all duration-300;
+        background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+        cursor: pointer;
+    }
+
+    .backlog-story-card:hover {
+        @apply border-gray-300 shadow-lg;
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .backlog-story-header {
+        @apply flex justify-between items-start mb-4;
+    }
+
+    .backlog-story-id {
+        @apply text-xs font-mono bg-gray-100 text-gray-600 px-2 py-1 rounded-md;
+    }
+
+    .backlog-story-badges {
+        @apply flex space-x-2;
+    }
+
+    .backlog-story-title {
+        @apply text-lg font-bold text-gray-900 mb-4 leading-tight;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .backlog-story-content {
+        @apply space-y-4 mb-6;
+    }
+
+    .story-section {
+        @apply bg-gray-50 rounded-lg p-3 border-l-4;
+    }
+
+    .story-section:nth-child(1) {
+        @apply border-blue-400;
+    }
+
+    .story-section:nth-child(2) {
+        @apply border-green-400;
+    }
+
+    .story-section:nth-child(3) {
+        @apply border-purple-400;
+    }
+
+    .story-section-header {
+        @apply flex items-center space-x-2 mb-2 text-sm font-semibold text-gray-700;
+    }
+
+    .story-section-header svg {
+        @apply text-gray-500;
+    }
+
+    .story-section-content {
+        @apply text-sm text-gray-600 leading-relaxed;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .backlog-story-footer {
+        @apply flex justify-between items-center pt-4 border-t border-gray-100;
+    }
+
+    .story-points {
+        @apply flex items-center space-x-1 text-sm font-semibold text-indigo-600;
+    }
+
+    .story-creator {
+        @apply flex items-center space-x-1 text-xs text-gray-500;
+    }
+
+    /* ============================================
+       BADGES - Sistema unificado
+       ============================================ */
+
+    .priority-badge {
+        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold;
+    }
+
+    .priority-alta {
+        @apply bg-red-100 text-red-800 ring-2 ring-red-200;
+    }
+
+    .priority-media {
+        @apply bg-yellow-100 text-yellow-800 ring-2 ring-yellow-200;
+    }
+
+    .priority-baja {
+        @apply bg-green-100 text-green-800 ring-2 ring-green-200;
+    }
+
+    .status-badge {
+        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+    }
+
+    .status-completado, .status-done {
+        @apply bg-green-100 text-green-800;
+    }
+
+    .status-en-proceso, .status-in-progress {
+        @apply bg-blue-100 text-blue-800;
+    }
+
+    .status-por-hacer, .status-todo {
+        @apply bg-gray-100 text-gray-800;
+    }
+
+    /* ============================================
+       STATISTICS SECTION
+       ============================================ */
+
+    .backlog-stat {
+        @apply flex items-center space-x-1 text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full;
+    }
+
+    /* ============================================
+       EMPTY STATES - Mejorados
+       ============================================ */
+
+    .backlog-empty-state {
+        @apply col-span-full text-center py-16;
+    }
+
+    .backlog-empty-icon {
+        @apply mx-auto mb-6 p-4 bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center;
+    }
+
+    .backlog-empty-title {
+        @apply text-xl font-semibold text-gray-900 mb-3;
+    }
+
+    .backlog-empty-description {
+        @apply text-gray-500 text-lg;
     }
 
     /* Loading spinner */
@@ -1318,14 +1298,41 @@ document.addEventListener('DOMContentLoaded', function() {
         background: rgba(255, 255, 255, 0.9);
     }
 
-    /* Responsive improvements */
+    /* ============================================
+       RESPONSIVE IMPROVEMENTS
+       ============================================ */
+
     @media (max-width: 768px) {
+        .backlog-story-card {
+            @apply p-4;
+        }
+        
+        .backlog-story-title {
+            @apply text-base;
+        }
+        
+        .story-section {
+            @apply p-2;
+        }
+        
+        .story-section-content {
+            -webkit-line-clamp: 2;
+        }
+        
+        .scrumboard-story-card {
+            @apply p-3;
+        }
+        
+        .scrumboard-story-title {
+            @apply text-xs;
+        }
+
         .proyecto-tab {
-            @apply text-sm px-3 py-2;
+            @apply text-sm;
         }
         
         .sprint-tab {
-            @apply text-xs px-2 py-1;
+            @apply text-xs px-3 py-2;
         }
         
         .historia-card {
@@ -1335,6 +1342,49 @@ document.addEventListener('DOMContentLoaded', function() {
         .tarea-card {
             @apply text-sm;
         }
+    }
+
+    @media (max-width: 640px) {
+        #backlog-historias {
+            @apply grid-cols-1 gap-4;
+        }
+        
+        .backlog-story-footer {
+            @apply flex-col space-y-2 items-start;
+        }
+    }
+
+    /* ============================================
+       ANIMATIONS
+       ============================================ */
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .backlog-story-card {
+        animation: slideInUp 0.3s ease-out forwards;
+    }
+
+    /* ============================================
+       ACCESSIBILITY IMPROVEMENTS
+       ============================================ */
+
+    .backlog-story-card:focus,
+    .scrumboard-story-card:focus {
+        @apply outline-none ring-2 ring-blue-500 ring-opacity-50;
+    }
+
+    .backlog-story-card:focus-visible,
+    .scrumboard-story-card:focus-visible {
+        @apply outline-2 outline-blue-500;
     }
 
     /* Custom scrollbar para contenedores largos */
@@ -1366,6 +1416,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     .sprint-tab:focus {
         @apply ring-2 ring-green-500 ring-opacity-50 outline-none;
+    }
+
+    /* Selector containers */
+    #proyecto-selector, #backlog-proyecto-selector {
+        @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+    }
+
+    #sprint-selector {
+        @apply flex flex-wrap gap-3;
     }
 </style>
 

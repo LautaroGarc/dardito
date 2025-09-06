@@ -161,6 +161,58 @@ router.get('/dashboard', requireAuth, checkProjectStatus, async (req, res) => {
     });
   }
 });
+
+// REEMPLAZAR el endpoint existente /api/mi-grupo/proyectos
+router.get('/api/mi-grupo/proyectos', requireAuth, async (req, res) => {
+  try {
+    const { leerDB } = require('./config');
+    const db = await leerDB();
+    const grupoData = db[req.user.grupo];
+    
+    if (!grupoData || grupoData.started !== 'y') {
+      return res.json({
+        success: true,
+        data: {
+          proyectos: [],
+          total: 0,
+          grupo: req.user.grupo,
+          iniciado: false
+        }
+      });
+    }
+
+    // Obtener lista de proyectos que realmente existen
+    const proyectos = [];
+    
+    if (grupoData.GenT && typeof grupoData.GenT === 'object') {
+      proyectos.push({ nombre: 'GenT', tipo: 'gent' });
+    }
+    if (grupoData.Proy && typeof grupoData.Proy === 'object') {
+      proyectos.push({ nombre: 'Proy', tipo: 'proyecto' });
+    }
+    if (grupoData.Proy2 && typeof grupoData.Proy2 === 'object') {
+      proyectos.push({ nombre: 'Proy2', tipo: 'proyecto' });
+    }
+    
+    res.json({
+      success: true,
+      data: {
+        proyectos: proyectos,
+        total: proyectos.length,
+        grupo: req.user.grupo,
+        iniciado: true
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error obteniendo proyectos del grupo:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
 /**
  * GET /iniciar-proyecto - Formulario para iniciar proyecto (solo líderes)
  */
@@ -176,6 +228,29 @@ router.get('/iniciar-proyecto', requireAuth, requireLider, async (req, res) => {
     res.status(500).render('error', {
       message: 'Error cargando la página',
       user: req.user
+    });
+  }
+});
+
+/**
+ * GET /api/proyecto/:proyecto/info - Obtener información específica de un proyecto
+ */
+router.get('/api/proyecto/:proyecto/info', requireAuth, requireGroupAccess, async (req, res) => {
+  try {
+    const { proyecto } = req.params;
+    const { obtenerInfoProyecto } = require('./handlers');
+    
+    const info = await obtenerInfoProyecto(req.grupoObjetivo, proyecto);
+    
+    res.json({
+      success: true,
+      data: info
+    });
+  } catch (error) {
+    console.error('Error obteniendo información del proyecto:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 });
@@ -318,6 +393,55 @@ router.post('/api/backlog/:proyecto/mover-a-sprint', requireAuth, requirePermiss
     });
   } catch (error) {
     console.error('Error moviendo historia:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Agregar esta ruta en routes.js
+/**
+ * GET /api/historias/:proyecto/sprint:sprint - Obtener historias del sprint (para miembros)
+ */
+router.get('/api/historias/:proyecto/sprint:sprint', requireAuth, requirePermission('leer'), async (req, res) => {
+  try {
+    const { proyecto, sprint } = req.params;
+    const sprintKey = `sprint${sprint}`;
+    
+    const scrumboard = await obtenerScrumboardSprint(req.user.grupo, proyecto, sprintKey);
+    
+    res.json({
+      success: true,
+      data: scrumboard,
+      total: scrumboard.length
+    });
+  } catch (error) {
+    console.error('Error obteniendo historias del sprint:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/tareas/:proyecto/sprint:sprint - Obtener tareas del sprint (para miembros)
+ */
+router.get('/api/tareas/:proyecto/sprint:sprint', requireAuth, requirePermission('leer'), async (req, res) => {
+  try {
+    const { proyecto, sprint } = req.params;
+    const sprintKey = `sprint${sprint}`;
+    
+    const tareas = await obtenerTareasSprint(req.user.grupo, proyecto, sprintKey);
+    
+    res.json({
+      success: true,
+      data: tareas,
+      total: Object.keys(tareas).length
+    });
+  } catch (error) {
+    console.error('Error obteniendo tareas del sprint:', error);
     res.status(500).json({
       success: false,
       message: error.message

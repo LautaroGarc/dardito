@@ -873,9 +873,15 @@ async function obtenerScrumboardSprint(grupo, proyecto, sprint) {
     console.log(`📋 Scrumboard del ${sprint}:`, scrumBoardIds);
     console.log(`Total historias en scrumboard: ${scrumBoardIds.length}`);
 
-    const historiasScrumboard = productBacklog.filter(historia => 
-      scrumBoardIds.includes(historia[0])
-    );
+    // Filtrar las historias que están en el scrumboard
+    const historiasScrumboard = productBacklog.filter(historia => {
+      // Buscar por ID de historia (primer elemento del array)
+      return scrumBoardIds.some(idArray => {
+        // Manejar tanto arrays como strings/IDs simples
+        const historiaId = Array.isArray(idArray) ? idArray[0] : idArray;
+        return historiaId === historia[0];
+      });
+    });
 
     console.log(`Historias encontradas en scrumboard: ${historiasScrumboard.length}`);
     
