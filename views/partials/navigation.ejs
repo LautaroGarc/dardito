@@ -102,10 +102,10 @@
                             <div class="text-sm font-medium text-gray-900"><%= user.nickname %></div>
                             <div class="text-xs text-gray-500 flex items-center">
                                 <div class="w-2 h-2 rounded-full mr-1 
-                                    <% if (user.rol === 'auditor') { %>bg-purple-400<% } %>
-                                    <% if (user.rol === 'lider') { %>bg-blue-400<% } %>
-                                    <% if (user.rol === 'scrumMaster') { %>bg-green-400<% } %>
-                                    <% if (user.rol === 'miembro') { %>bg-yellow-400<% } %>
+                                    <% if (user.rol === 'auditor') { %>bg-green-400<% } %>
+                                    <% if (user.rol === 'lider') { %>bg-yellow-400<% } %>
+                                    <% if (user.rol === 'scrumMaster') { %>bg-purple-400<% } %>
+                                    <% if (user.rol === 'miembro') { %>bg-blue-400<% } %>
                                 "></div>
                                 <%= user.rol %>
                                 <% if (user.grupo && user.grupo !== 'Admin') { %>
@@ -131,23 +131,6 @@
                         </button>
                         <div class="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div class="py-1">
-                                <!-- Información del usuario -->
-                                <div class="px-4 py-3 border-b border-gray-100">
-                                    <div class="text-sm font-medium text-gray-900"><%= user.nickname %></div>
-                                    <div class="text-xs text-gray-500 flex items-center mt-1">
-                                        <div class="w-2 h-2 rounded-full mr-2 
-                                            <% if (user.rol === 'auditor') { %>bg-purple-400<% } %>
-                                            <% if (user.rol === 'lider') { %>bg-blue-400<% } %>
-                                            <% if (user.rol === 'scrumMaster') { %>bg-green-400<% } %>
-                                            <% if (user.rol === 'miembro') { %>bg-yellow-400<% } %>
-                                        "></div>
-                                        <%= user.rol %> 
-                                        <% if (user.grupo && user.grupo !== 'Admin') { %>
-                                            | <%= user.grupo %>
-                                        <% } %>
-                                    </div>
-                                </div>
-                                
                                 <!-- Enlaces del menú -->
                                 <a href="https://discord.com/invite/QYppQjV5uR" target="_blank" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

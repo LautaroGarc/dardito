@@ -1,0 +1,870 @@
+<!-- Header de estadísticas -->
+<div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-6 mb-6 text-white">
+    <h2 class="text-2xl font-bold">Estadísticas del Proyecto</h2>
+    <p class="text-purple-100 mt-1">Métricas y análisis de rendimiento del equipo</p>
+</div>
+
+<!-- Selector de proyectos para estadísticas -->
+<div class="mb-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Seleccionar Proyecto</h3>
+    <div id="stats-proyecto-selector" class="flex flex-wrap gap-3">
+        <!-- Los proyectos se cargarán dinámicamente -->
+    </div>
+</div>
+
+<!-- Contenido de estadísticas -->
+<div id="stats-proyecto-content" class="hidden">
+    <!-- Estadísticas del Proyecto -->
+    <div class="mb-8">
+        <h3 class="text-xl font-semibold text-gray-900 mb-6">Estadísticas del Proyecto</h3>
+        
+        <!-- Barra de progreso general del proyecto -->
+        <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200">
+            <h4 class="text-lg font-medium text-gray-900 mb-4">Progreso General</h4>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>Todas las Historias de Usuario</span>
+                        <span id="stats-todas-hu-porcentaje">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="stats-todas-hu-barra" class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>Sprint Actual</span>
+                        <span id="stats-sprint-actual-porcentaje">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="stats-sprint-actual-barra" class="bg-green-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Story Points -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 p-3 bg-blue-100 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-500">History Points Totales</p>
+                        <p id="stats-hp-total" class="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 p-3 bg-green-100 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-500">HP Completados</p>
+                        <p id="stats-hp-completados" class="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 p-3 bg-purple-100 rounded-lg">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-500">Porcentaje HP</p>
+                        <p id="stats-hp-porcentaje" class="text-2xl font-bold text-gray-900">0%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promedio de History Points -->
+        <div id="stats-promedio-container" class="bg-white rounded-lg p-6 mb-8 shadow-sm border border-gray-200 hidden">
+            <h4 class="text-lg font-medium text-gray-900 mb-4">Análisis de Velocity</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-sm text-gray-500 mb-2">Promedio HP por Sprint</p>
+                    <p id="stats-promedio-hp" class="text-3xl font-bold text-indigo-600">0</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 mb-2">HP Sprint Actual vs Promedio</p>
+                    <div class="flex items-center space-x-2">
+                        <p id="stats-sprint-vs-promedio" class="text-2xl font-bold text-gray-900">0</p>
+                        <span id="stats-tendencia-icon" class="text-lg">📊</span>
+                    </div>
+                    <p id="stats-tendencia-texto" class="text-xs text-gray-500 mt-1">Igual al promedio</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas de Usuarios -->
+    <div class="mb-8">
+        <h3 class="text-xl font-semibold text-gray-900 mb-6">Estadísticas del Equipo</h3>
+        
+        <!-- Burndown Chart -->
+        <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200">
+            <h4 class="text-lg font-medium text-gray-900 mb-4">Burndown Chart</h4>
+            <div class="mb-4">
+                <label for="stats-sprint-selector" class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Sprint</label>
+                <select id="stats-sprint-selector" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Seleccionar sprint...</option>
+                </select>
+            </div>
+            <div id="stats-burndown-container" class="h-96">
+                <canvas id="stats-burndown-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Heatmap de Usuarios -->
+        <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200">
+            <h4 class="text-lg font-medium text-gray-900 mb-4">Heatmap del Equipo</h4>
+            <div class="mb-4 text-sm text-gray-600">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <span>Bajo</span>
+                        <div class="flex space-x-1">
+                            <div class="w-4 h-4 bg-red-500 rounded"></div>
+                            <div class="w-4 h-4 bg-orange-500 rounded"></div>
+                            <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+                            <div class="w-4 h-4 bg-green-400 rounded"></div>
+                            <div class="w-4 h-4 bg-green-600 rounded"></div>
+                        </div>
+                        <span>Alto</span>
+                    </div>
+                </div>
+            </div>
+            <div id="stats-heatmap-container" class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Tiempo en Reuniones</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Trabajo Completado</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Tareas Asignadas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-heatmap-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Los datos se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Estadísticas Individuales -->
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <h4 class="text-lg font-medium text-gray-900 mb-4">Estadísticas Individuales</h4>
+            <div id="stats-individuales-container" class="space-y-4">
+                <!-- Las estadísticas individuales se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mensaje cuando no hay proyecto seleccionado -->
+<div id="no-stats-proyecto-message" class="text-center py-12">
+    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4"></path>
+    </svg>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">Selecciona un proyecto</h3>
+    <p class="text-gray-500">Elige un proyecto para ver sus estadísticas</p>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Esperar a que la aplicación principal esté lista
+    if (!window.miembroApp) {
+        window.addEventListener('miembroAppReady', initStats);
+    } else {
+        initStats();
+    }
+
+    function initStats() {
+        console.log('📊 Inicializando Estadísticas...');
+        
+        // ============================================
+        // VARIABLES LOCALES DE ESTADÍSTICAS
+        // ============================================
+        
+        const statsState = {
+            selectedProject: null,
+            selectedSprint: null,
+            proyectosDisponibles: [],
+            sprintsDisponibles: [],
+            burndownChart: null
+        };
+
+        // ============================================
+        // GESTIÓN DE PROYECTOS
+        // ============================================
+        
+        async function cargarProyectosDisponiblesStats() {
+            try {
+                window.showLoading(true);
+                
+                const response = await fetch('/api/mi-grupo/proyectos');
+                if (!response.ok) {
+                    throw new Error('Error obteniendo proyectos del grupo');
+                }
+                
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.message || 'Error en la respuesta');
+                }
+                
+                statsState.proyectosDisponibles = data.data.proyectos.map(p => p.nombre);
+                
+                console.log('Proyectos disponibles para estadísticas:', statsState.proyectosDisponibles);
+                renderizarSelectorProyectosStats();
+                
+            } catch (error) {
+                console.error('Error cargando proyectos para stats:', error);
+                window.showToast('Error cargando proyectos: ' + error.message, 'error');
+                
+                // Fallback con proyectos por defecto
+                statsState.proyectosDisponibles = ['GenT', 'Proy'];
+                renderizarSelectorProyectosStats();
+            } finally {
+                window.showLoading(false);
+            }
+        }
+
+        function renderizarSelectorProyectosStats() {
+            const selector = document.getElementById('stats-proyecto-selector');
+            if (!selector) return;
+            
+            const proyectosHTML = statsState.proyectosDisponibles.map(proyecto => {
+                const nombre = proyecto === 'GenT' ? 'GenT' : 
+                            proyecto === 'Proy' ? 'Proyecto Principal' : 
+                            proyecto === 'Proy2' ? 'Proyecto 2' : proyecto;
+                const icono = proyecto === 'GenT' ? 
+                    'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' :
+                    'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4';
+                                
+                return `
+                    <button class="stats-proyecto-tab bg-white border-2 border-gray-200 rounded-xl p-4 transition-all duration-300 hover:border-purple-400 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50" data-proyecto="${proyecto}">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0 p-2 bg-gray-100 rounded-lg">
+                                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icono}"></path>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <div class="font-semibold text-gray-900">${nombre}</div>
+                                <div class="text-sm text-gray-500">Ver estadísticas</div>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+            
+            selector.innerHTML = proyectosHTML;
+        }
+
+        async function seleccionarProyectoStats(proyecto) {
+            try {
+                window.showLoading(true);
+                statsState.selectedProject = proyecto;
+                
+                console.log('Stats - Proyecto seleccionado:', proyecto);
+                
+                // Actualizar UI del selector
+                document.querySelectorAll('.stats-proyecto-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`[data-proyecto="${proyecto}"]`)?.classList.add('active');
+
+                // Cargar datos de estadísticas
+                await Promise.all([
+                    cargarEstadisticasProyecto(proyecto),
+                    cargarSprintsDisponibles(proyecto),
+                    cargarHeatmapUsuarios(),
+                    cargarEstadisticasIndividuales()
+                ]);
+                
+                document.getElementById('stats-proyecto-content').classList.remove('hidden');
+                document.getElementById('no-stats-proyecto-message').classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Error seleccionando proyecto en stats:', error);
+                window.showToast('Error cargando proyecto: ' + error.message, 'error');
+            } finally {
+                window.showLoading(false);
+            }
+        }
+
+        // ============================================
+        // ESTADÍSTICAS DEL PROYECTO
+        // ============================================
+        
+        async function cargarEstadisticasProyecto(proyecto) {
+            try {
+                const response = await fetch(`/api/estadisticas/proyecto/${proyecto}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.message || 'Error cargando estadísticas del proyecto');
+                }
+
+                const stats = data.data;
+                renderizarEstadisticasProyecto(stats, proyecto);
+                
+            } catch (error) {
+                console.error('Error cargando estadísticas del proyecto:', error);
+                window.showToast('Error cargando estadísticas: ' + error.message, 'error');
+            }
+        }
+
+        function renderizarEstadisticasProyecto(stats, proyecto) {
+            // Actualizar barras de progreso
+            const todasHuPorcentaje = stats.porcentajes ? stats.porcentajes.todasHistorias : 0;
+            const sprintActualPorcentaje = stats.porcentajes ? stats.porcentajes.sprintActual : 0;
+            
+            document.getElementById('stats-todas-hu-porcentaje').textContent = `${todasHuPorcentaje}%`;
+            document.getElementById('stats-todas-hu-barra').style.width = `${todasHuPorcentaje}%`;
+            
+            document.getElementById('stats-sprint-actual-porcentaje').textContent = `${sprintActualPorcentaje}%`;
+            document.getElementById('stats-sprint-actual-barra').style.width = `${sprintActualPorcentaje}%`;
+
+            // Actualizar Story Points
+            const hpTotal = stats.historyPoints ? stats.historyPoints.total : 0;
+            const hpCompletados = stats.historyPoints ? stats.historyPoints.completados : 0;
+            const hpPorcentaje = hpTotal > 0 ? Math.round((hpCompletados / hpTotal) * 100) : 0;
+            
+            document.getElementById('stats-hp-total').textContent = hpTotal;
+            document.getElementById('stats-hp-completados').textContent = hpCompletados;
+            document.getElementById('stats-hp-porcentaje').textContent = `${hpPorcentaje}%`;
+
+            // Mostrar promedio si hay datos suficientes
+            if (stats.promedioHistoryPoints && stats.promedioHistoryPoints.promedio > 0) {
+                const promedioContainer = document.getElementById('stats-promedio-container');
+                promedioContainer.classList.remove('hidden');
+                
+                const promedio = stats.promedioHistoryPoints.promedio;
+                const sprintActual = stats.promedioHistoryPoints.sprintActual || 0;
+                
+                document.getElementById('stats-promedio-hp').textContent = promedio.toFixed(1);
+                document.getElementById('stats-sprint-vs-promedio').textContent = sprintActual;
+                
+                // Calcular tendencia
+                const diferencia = sprintActual - promedio;
+                let icono = '📊';
+                let texto = 'Igual al promedio';
+                
+                if (diferencia > 0) {
+                    icono = '📈';
+                    texto = `${Math.abs(diferencia).toFixed(1)} por encima del promedio`;
+                } else if (diferencia < 0) {
+                    icono = '📉';
+                    texto = `${Math.abs(diferencia).toFixed(1)} por debajo del promedio`;
+                }
+                
+                document.getElementById('stats-tendencia-icon').textContent = icono;
+                document.getElementById('stats-tendencia-texto').textContent = texto;
+            }
+        }
+
+        // ============================================
+        // BURNDOWN CHART
+        // ============================================
+        
+        async function cargarSprintsDisponibles(proyecto) {
+            try {
+                const response = await fetch(`/api/proyecto/${proyecto}/info`);
+                if (!response.ok) {
+                    throw new Error('Error obteniendo información del proyecto');
+                }
+                
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.message || 'Error en la respuesta del proyecto');
+                }
+                
+                const proyectoInfo = data.data;
+                statsState.sprintsDisponibles = proyectoInfo.sprints || ['1'];
+                const sprintActual = proyectoInfo.sprintActual || '1';
+                
+                renderizarSelectorSprints(sprintActual);
+                await cargarBurndownChart(proyecto, sprintActual);
+                
+            } catch (error) {
+                console.error('Error cargando sprints disponibles:', error);
+                // Fallback
+                statsState.sprintsDisponibles = ['1'];
+                renderizarSelectorSprints('1');
+            }
+        }
+
+        function renderizarSelectorSprints(sprintActual) {
+            const selector = document.getElementById('stats-sprint-selector');
+            if (!selector) return;
+
+            const sprintsHTML = statsState.sprintsDisponibles.map(sprint => {
+                const esActual = sprint === sprintActual;
+                return `<option value="${sprint}" ${esActual ? 'selected' : ''}>Sprint ${sprint}${esActual ? ' (Actual)' : ''}</option>`;
+            }).join('');
+            
+            selector.innerHTML = '<option value="">Seleccionar sprint...</option>' + sprintsHTML;
+        }
+
+        async function cargarBurndownChart(proyecto, sprint) {
+            try {
+                const response = await fetch(`/api/estadisticas/burndown/${proyecto}/${sprint}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    console.warn('No se pudieron cargar datos de burndown');
+                    return;
+                }
+
+                const burndownData = data.data;
+                renderizarBurndownChart(burndownData);
+                
+            } catch (error) {
+                console.error('Error cargando burndown chart:', error);
+            }
+        }
+
+        function renderizarBurndownChart(burndownData) {
+            const canvas = document.getElementById('stats-burndown-chart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            
+            // Destruir chart anterior si existe
+            if (statsState.burndownChart) {
+                statsState.burndownChart.destroy();
+            }
+
+            // Crear nuevo chart
+            statsState.burndownChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: burndownData.labels || [],
+                    datasets: [
+                        {
+                            label: 'Trabajo Planificado',
+                            data: burndownData.plannedWork || [],
+                            borderColor: 'rgb(99, 102, 241)',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Trabajo Real',
+                            data: burndownData.actualWork || [],
+                            borderColor: 'rgb(34, 197, 94)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Horas de Trabajo'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Días del Sprint'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // HEATMAP DE USUARIOS
+        // ============================================
+        
+        async function cargarHeatmapUsuarios() {
+            try {
+                const response = await fetch('/api/estadisticas/heatmap');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    console.warn('No se pudo cargar heatmap de usuarios');
+                    return;
+                }
+
+                const heatmapData = data.data;
+                renderizarHeatmapUsuarios(heatmapData);
+                
+            } catch (error) {
+                console.error('Error cargando heatmap:', error);
+            }
+        }
+
+        function renderizarHeatmapUsuarios(heatmapData) {
+            const tbody = document.getElementById('stats-heatmap-body');
+            if (!tbody || !heatmapData) return;
+
+            const heatmapHTML = Object.entries(heatmapData).map(([usuario, datos]) => {
+                const tiempoReuniones = datos.tiempoReuniones || 0;
+                const trabajoCompletado = datos.trabajoCompletado || 0;
+                const tareasAsignadas = datos.tareasAsignadas || 0;
+                
+                return `
+                    <tr>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">${usuario}</td>
+                        <td class="px-4 py-3 text-center">
+                            <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getHeatmapColor(tiempoReuniones)}">
+                                ${tiempoReuniones}%
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getHeatmapColor(trabajoCompletado)}">
+                                ${trabajoCompletado}%
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getHeatmapColor(tareasAsignadas)}">
+                                ${tareasAsignadas}%
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = heatmapHTML;
+        }
+
+        function getHeatmapColor(porcentaje) {
+            if (porcentaje >= 90) return 'bg-green-600 text-white';
+            if (porcentaje >= 70) return 'bg-green-400 text-white';
+            if (porcentaje >= 50) return 'bg-yellow-500 text-white';
+            if (porcentaje >= 30) return 'bg-orange-500 text-white';
+            return 'bg-red-500 text-white';
+        }
+
+        // ============================================
+        // ESTADÍSTICAS INDIVIDUALES
+        // ============================================
+        
+        async function cargarEstadisticasIndividuales() {
+            try {
+                const response = await fetch('/api/estadisticas/grupo');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    console.warn('No se pudieron cargar estadísticas individuales');
+                    return;
+                }
+
+                const estadisticas = data.data;
+                renderizarEstadisticasIndividuales(estadisticas);
+                
+            } catch (error) {
+                console.error('Error cargando estadísticas individuales:', error);
+            }
+        }
+
+        function renderizarEstadisticasIndividuales(estadisticas) {
+            const container = document.getElementById('stats-individuales-container');
+            if (!container || !estadisticas || !estadisticas.usuarios) return;
+
+            const individualesHTML = Object.entries(estadisticas.usuarios).map(([usuario, datos]) => {
+                return `
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h5 class="font-medium text-gray-900 mb-3">${usuario}</h5>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-blue-600">${datos.tareasCompletadas || 0}</p>
+                                <p class="text-xs text-gray-500">Tareas Completadas</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-green-600">${datos.horasTrabajadas || 0}</p>
+                                <p class="text-xs text-gray-500">Horas Trabajadas</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-purple-600">${datos.historiasCreadas || 0}</p>
+                                <p class="text-xs text-gray-500">Historias Creadas</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-orange-600">${datos.eficiencia || 0}%</p>
+                                <p class="text-xs text-gray-500">Eficiencia</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = individualesHTML || '<p class="text-gray-500 text-center py-4">No hay estadísticas individuales disponibles</p>';
+        }
+
+        // ============================================
+        // EVENT LISTENERS DE ESTADÍSTICAS
+        // ============================================
+        
+        function configurarEventListenersStats() {
+            // Selección de proyectos
+            document.getElementById('stats-proyecto-selector')?.addEventListener('click', function(e) {
+                const boton = e.target.closest('.stats-proyecto-tab');
+                if (boton) {
+                    const proyecto = boton.dataset.proyecto;
+                    if (proyecto) {
+                        seleccionarProyectoStats(proyecto);
+                    }
+                }
+            });
+
+            // Selector de sprint para burndown
+            document.getElementById('stats-sprint-selector')?.addEventListener('change', function(e) {
+                const sprint = e.target.value;
+                if (sprint && statsState.selectedProject) {
+                    cargarBurndownChart(statsState.selectedProject, sprint);
+                }
+            });
+
+            // Atajos de teclado específicos de stats
+            document.addEventListener('keydown', function(e) {
+                // Solo actuar si estamos en la sección stats
+                if (window.miembroApp.currentSection !== 'stats') return;
+                
+                if (e.altKey && ['1', '2', '3'].includes(e.key)) {
+                    e.preventDefault();
+                    const proyectoIndex = parseInt(e.key) - 1;
+                    if (statsState.proyectosDisponibles[proyectoIndex]) {
+                        seleccionarProyectoStats(statsState.proyectosDisponibles[proyectoIndex]);
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // INICIALIZACIÓN DE ESTADÍSTICAS
+        // ============================================
+        
+        function inicializarStats() {
+            cargarProyectosDisponiblesStats();
+            configurarEventListenersStats();
+        }
+
+        // ============================================
+        // GESTIÓN DE EVENTOS GLOBALES
+        // ============================================
+        
+        // Escuchar cambios de sección
+        window.addEventListener('sectionChanged', function(e) {
+            if (e.detail.section === 'stats') {
+                // Reinicializar stats cuando se selecciona
+                statsState.selectedProject = null;
+                statsState.selectedSprint = null;
+                document.getElementById('stats-proyecto-content').classList.add('hidden');
+                document.getElementById('no-stats-proyecto-message').classList.remove('hidden');
+                
+                // Limpiar selecciones visuales
+                document.querySelectorAll('.stats-proyecto-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Destruir chart si existe
+                if (statsState.burndownChart) {
+                    statsState.burndownChart.destroy();
+                    statsState.burndownChart = null;
+                }
+            }
+        });
+
+        // Cleanup cuando se cierre la ventana
+        window.addEventListener('beforeunload', () => {
+            if (statsState.burndownChart) {
+                statsState.burndownChart.destroy();
+            }
+        });
+
+        // Inicializar
+        inicializarStats();
+        
+        console.log('✅ Estadísticas inicializadas correctamente');
+    }
+});
+</script>
+
+<style>
+    /* ============================================
+       ESTILOS ESPECÍFICOS DE ESTADÍSTICAS
+       ============================================ */
+
+    .stats-proyecto-tab {
+        @apply cursor-pointer transition-all duration-300;
+    }
+    
+    .stats-proyecto-tab.active {
+        @apply border-purple-500 bg-purple-100 shadow-lg;
+    }
+    
+    .stats-proyecto-tab.active .flex-shrink-0 {
+        @apply bg-purple-200;
+    }
+    
+    .stats-proyecto-tab.active svg {
+        @apply text-purple-600;
+    }
+
+    /* ============================================
+       BARRAS DE PROGRESO ANIMADAS
+       ============================================ */
+
+    #stats-todas-hu-barra,
+    #stats-sprint-actual-barra {
+        transition: width 1s ease-out;
+    }
+
+    /* ============================================
+       BURNDOWN CHART CONTAINER
+       ============================================ */
+
+    #stats-burndown-container {
+        @apply relative;
+    }
+
+    #stats-burndown-chart {
+        @apply w-full h-full;
+    }
+
+    /* ============================================
+       HEATMAP STYLES
+       ============================================ */
+
+    #stats-heatmap-container table {
+        @apply border-collapse;
+    }
+
+    #stats-heatmap-container th,
+    #stats-heatmap-container td {
+        @apply border-b border-gray-200;
+    }
+
+    /* ============================================
+       ESTADÍSTICAS INDIVIDUALES
+       ============================================ */
+
+    #stats-individuales-container > div {
+        @apply transition-all duration-300 hover:bg-gray-100;
+    }
+
+    /* ============================================
+       CARDS DE MÉTRICAS
+       ============================================ */
+
+    .stats-metric-card {
+        @apply bg-white rounded-lg p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md;
+    }
+
+    .stats-metric-card:hover {
+        transform: translateY(-2px);
+    }
+
+    /* ============================================
+       SELECTOR CONTAINERS
+       ============================================ */
+
+    #stats-proyecto-selector {
+        @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+    }
+
+    /* ============================================
+       LOADING STATES
+       ============================================ */
+
+    .stats-loading {
+        @apply animate-pulse;
+    }
+
+    .stats-skeleton {
+        @apply bg-gray-200 rounded h-4 w-full mb-2;
+    }
+
+    /* ============================================
+       RESPONSIVE MEJORAS ESPECÍFICAS
+       ============================================ */
+
+    @media (max-width: 768px) {
+        .stats-proyecto-tab {
+            @apply text-sm;
+        }
+        
+        #stats-heatmap-container {
+            @apply text-xs;
+        }
+        
+        #stats-individuales-container .grid {
+            @apply grid-cols-2;
+        }
+        
+        #stats-burndown-container {
+            @apply h-64;
+        }
+    }
+
+    @media (max-width: 640px) {
+        #stats-proyecto-selector {
+            @apply grid-cols-1 gap-3;
+        }
+        
+        .stats-metric-card .grid {
+            @apply grid-cols-1 gap-4;
+        }
+    }
+
+    /* ============================================
+       ANIMATIONS
+       ============================================ */
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stats-fade-in {
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    /* ============================================
+       ACCESSIBILITY IMPROVEMENTS
+       ============================================ */
+
+    .stats-proyecto-tab:focus {
+        @apply outline-none ring-2 ring-purple-500 ring-opacity-50;
+    }
+
+    #stats-sprint-selector:focus {
+        @apply ring-2 ring-indigo-500 ring-opacity-50;
+    }
+
+    /* ============================================
+       CHART CONTAINER IMPROVEMENTS
+       ============================================ */
+
+    .chart-container {
+        @apply relative bg-white rounded-lg p-4 border border-gray-200;
+    }
+
+    .chart-loading {
+        @apply absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg;
+    }
+</style>

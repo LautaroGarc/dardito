@@ -1,0 +1,421 @@
+<%- include('../partials/header.ejs') %>
+
+<%- include('../partials/navigation.ejs') %>
+
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Contenedor principal del dashboard -->
+    <div id="main-content" class="fade-in">
+        <!-- Dashboard content -->
+        <div id="dashboard-content">
+            <%- include('./src/dashboard.ejs') %>
+        </div>
+
+        <!-- Product Backlog content (oculto por defecto) -->
+        <div id="backlog-content" class="hidden">
+            <%- include('./src/productBacklog.ejs') %>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs') %>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 hidden">
+    <div class="text-center">
+        <div class="spinner mx-auto mb-4"></div>
+        <p class="text-gray-600">Cargando...</p>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ============================================
+    // VARIABLES GLOBALES COMPARTIDAS
+    // ============================================
+
+    let currentSection = 'dashboard';
+    let selectedProject = null;
+    let selectedSprint = null;
+    let proyectosDisponibles = [];
+    let sprintsDisponibles = [];
+    let currentUser = <%- typeof user !== 'undefined' ? JSON.stringify(user) : '{}' %>;
+    let dashboardData = <%- typeof proyectos !== 'undefined' ? JSON.stringify({ proyectos: proyectos }) : '{}' %>;
+    
+    // Parsear los datos
+    try {
+        currentUser = typeof currentUser === 'string' ? JSON.parse(currentUser) : currentUser;
+        dashboardData = typeof dashboardData === 'string' ? JSON.parse(dashboardData) : dashboardData;
+    } catch (e) {
+        console.error('Error parseando datos:', e);
+        currentUser = {};
+        dashboardData = {};
+    }
+
+    // Hacer variables globales accesibles
+    window.miembroApp = {
+        currentSection,
+        selectedProject,
+        selectedSprint,
+        proyectosDisponibles,
+        sprintsDisponibles,
+        currentUser,
+        dashboardData,
+        // Métodos compartidos
+        setCurrentSection: function(section) {
+            currentSection = section;
+            this.currentSection = section;
+        },
+        setSelectedProject: function(project) {
+            selectedProject = project;
+            this.selectedProject = project;
+        },
+        setSelectedSprint: function(sprint) {
+            selectedSprint = sprint;
+            this.selectedSprint = sprint;
+        },
+        setProyectosDisponibles: function(proyectos) {
+            proyectosDisponibles = proyectos;
+            this.proyectosDisponibles = proyectos;
+        },
+        setSprintsDisponibles: function(sprints) {
+            sprintsDisponibles = sprints;
+            this.sprintsDisponibles = sprints;
+        }
+    };
+
+    console.log('Usuario actual:', currentUser);
+    console.log('Dashboard data:', dashboardData);
+
+    // ============================================
+    // GESTIÓN DE SECCIONES PRINCIPAL
+    // ============================================
+    
+    function mostrarSeccionDashboard() {
+        window.miembroApp.setCurrentSection('dashboard');
+        document.getElementById('dashboard-content').classList.remove('hidden');
+        document.getElementById('backlog-content').classList.add('hidden');
+        
+        // Resetear selecciones
+        window.miembroApp.setSelectedProject(null);
+        window.miembroApp.setSelectedSprint(null);
+        
+        // Disparar evento para que dashboard se reinicialice
+        window.dispatchEvent(new CustomEvent('sectionChanged', { 
+            detail: { section: 'dashboard' } 
+        }));
+        
+        actualizarEstadoNavegacion();
+    }
+
+    function mostrarSeccionBacklog() {
+        window.miembroApp.setCurrentSection('backlog');
+        document.getElementById('dashboard-content').classList.add('hidden');
+        document.getElementById('backlog-content').classList.remove('hidden');
+        
+        // Resetear selecciones
+        window.miembroApp.setSelectedProject(null);
+        
+        // Disparar evento para que backlog se reinicialice
+        window.dispatchEvent(new CustomEvent('sectionChanged', { 
+            detail: { section: 'backlog' } 
+        }));
+        
+        actualizarEstadoNavegacion();
+    }
+
+    function actualizarEstadoNavegacion() {
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        if (window.miembroApp.currentSection === 'dashboard') {
+            document.querySelector('.dashboard-link')?.classList.add('active');
+        } else if (window.miembroApp.currentSection === 'backlog') {
+            document.querySelector('.backlog-link')?.classList.add('active');
+        }
+    }
+
+    // ============================================
+    // FUNCIONES DE UTILIDAD COMPARTIDAS
+    // ============================================
+    
+    function showLoading(show) {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.classList.toggle('hidden', !show);
+        }
+    }
+
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+
+        const toastId = 'toast-' + Date.now();
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = `toast toast-${type}`;
+        
+        const iconos = {
+            success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>',
+            error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>',
+            warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>',
+            info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+        };
+        
+        toast.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${iconos[type] || iconos.info}
+                    </svg>
+                    <span>${message}</span>
+                </div>
+                <button onclick="removeToast('${toastId}')" class="ml-4 text-white hover:text-gray-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            removeToast(toastId);
+        }, 5000);
+    }
+
+    function removeToast(toastId) {
+        const toast = document.getElementById(toastId);
+        if (toast) {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }
+    }
+
+    // Hacer funciones disponibles globalmente
+    window.showLoading = showLoading;
+    window.showToast = showToast;
+    window.removeToast = removeToast;
+
+    // ============================================
+    // EVENT LISTENERS PRINCIPALES
+    // ============================================
+    
+    function configurarEventListeners() {
+        // Navegación principal
+        document.querySelectorAll('.dashboard-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                mostrarSeccionDashboard();
+            });
+        });
+
+        document.querySelectorAll('.backlog-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                mostrarSeccionBacklog();
+            });
+        });
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey && e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                mostrarSeccionDashboard();
+            }
+            
+            if (e.altKey && e.key.toLowerCase() === 'b') {
+                e.preventDefault();
+                mostrarSeccionBacklog();
+            }
+        });
+    }
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    
+    function inicializar() {
+        configurarEventListeners();
+        mostrarSeccionDashboard();
+        
+        // Disparar evento de inicialización
+        window.dispatchEvent(new CustomEvent('miembroAppReady'));
+    }
+
+    inicializar();
+
+    console.log('✅ Aplicación principal de miembro inicializada correctamente');
+});
+</script>
+
+<style>
+    /* ============================================
+       ESTILOS GLOBALES COMPARTIDOS
+       ============================================ */
+    
+    .fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-hover {
+        transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Loading spinner */
+    .spinner {
+        border: 2px solid #f3f4f6;
+        border-top: 2px solid #3b82f6;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Toast notifications */
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 500px;
+        padding: 16px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .toast.show {
+        transform: translateX(0);
+    }
+    
+    .toast-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .toast-error {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    
+    .toast-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .toast-info {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    /* Loading overlay */
+    #loadingOverlay {
+        backdrop-filter: blur(4px);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* ============================================
+       BADGES - Sistema unificado
+       ============================================ */
+
+    .priority-badge {
+        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold;
+    }
+
+    .priority-alta {
+        @apply bg-red-100 text-red-800 ring-2 ring-red-200;
+    }
+
+    .priority-media {
+        @apply bg-yellow-100 text-yellow-800 ring-2 ring-yellow-200;
+    }
+
+    .priority-baja {
+        @apply bg-green-100 text-green-800 ring-2 ring-green-200;
+    }
+
+    .status-badge {
+        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+    }
+
+    .status-completado, .status-done {
+        @apply bg-green-100 text-green-800;
+    }
+
+    .status-en-proceso, .status-in-progress {
+        @apply bg-blue-100 text-blue-800;
+    }
+
+    .status-por-hacer, .status-todo {
+        @apply bg-gray-100 text-gray-800;
+    }
+
+    /* Custom scrollbar para contenedores largos */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* ============================================
+       RESPONSIVE IMPROVEMENTS
+       ============================================ */
+
+    @media (max-width: 768px) {
+        .proyecto-tab {
+            @apply text-sm;
+        }
+        
+        .sprint-tab {
+            @apply text-xs px-3 py-2;
+        }
+    }
+
+    /* ============================================
+       ACCESSIBILITY IMPROVEMENTS
+       ============================================ */
+
+    .proyecto-tab:focus {
+        @apply ring-2 ring-blue-500 ring-opacity-50 outline-none;
+    }
+
+    .sprint-tab:focus {
+        @apply ring-2 ring-green-500 ring-opacity-50 outline-none;
+    }
+</style>

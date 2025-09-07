@@ -893,6 +893,36 @@ async function obtenerScrumboardSprint(grupo, proyecto, sprint) {
 }
 
 /**
+ * Obtiene las fechas de inicio y fin de un sprint específico
+ * @param {string} grupo - Nombre del grupo
+ * @param {string} proyecto - Nombre del proyecto
+ * @param {string} sprint - Sprint específico
+ * @returns {Promise<Object>} - Fechas del sprint
+ */
+async function obtenerFechasSprint(grupo, proyecto, sprint) {
+  try {
+    const db = await leerDB();
+    
+    if (!db[grupo] || !db[grupo][proyecto] || !db[grupo][proyecto][sprint]) {
+      throw new Error('Sprint no encontrado');
+    }
+
+    const sprintData = db[grupo][proyecto][sprint];
+    
+    return {
+      fechaInicio: sprintData.fechaIni || null,
+      fechaFin: sprintData.fechaFin || null,
+      sprint: sprint,
+      proyecto: proyecto,
+      grupo: grupo
+    };
+  } catch (error) {
+    console.error('Error obteniendo fechas del sprint:', error);
+    throw error;
+  }
+}
+
+/**
  * Obtiene estadísticas del scrumboard de un sprint
  * @param {string} grupo - Nombre del grupo
  * @param {string} proyecto - Nombre del proyecto
@@ -1111,6 +1141,332 @@ async function obtenerDashboardMiembro(usuario) {
   }
 }
 
+/**
+ * Calcula porcentajes de completado para un proyecto
+ * @param {string} grupo - Nombre del grupo
+ * @param {string} proyecto - Nombre del proyecto
+ */
+async function calcularPorcentajesProyecto(grupo, proyecto) {
+  try {
+    const db = await leerDB();
+    
+    if (!db[grupo] || !db[grupo][proyecto]) {
+      throw new Error('Proyecto no encontrado');
+    }
+
+    const proyectoData = db[grupo][proyecto];
+    const backlog = proyectoData.productBacklog || [];
+    
+    // Calcular total de HUs
+    const totalHUs = backlog.length;
+    
+    // Calcular HUs en sprint actual
+    const sprintActual = proyectoData.sprintActual || '1';
+    const scrumBoard = proyectoData[`sprint${sprintActual}`]?.scrumBoard || [];
+    const HUsEnSprint = scrumBoard.length;
+    
+    // Calcular HUs completadas (estado COMPLETADO)
+    const HUsCompletadas = backlog.filter(historia => historia[7] === 'COMPLETADO').length;
+    
+    // Calcular History Points
+    const totalHistoryPoints = backlog.reduce((sum, historia) => sum + (historia[6] || 0), 0);
+    const completedHistoryPoints = backlog
+      .filter(historia => historia[7] === 'COMPLETADO')
+      .reduce((sum, historia) => sum + (historia[6] || 0), 0);
+    
+    // Calcular porcentajes
+    const porcentajeSprint = totalHUs > 0 ? Math.round((HUsEnSprint / totalHUs) * 100) : 0;
+    const porcentajeTotal = totalHUs > 0 ? Math.round((HUsCompletadas / totalHUs) * 100) : 0;
+    const porcentajeHistoryPoints = totalHistoryPoints > 0 ? 
+      Math.round((completedHistoryPoints / totalHistoryPoints) * 100) : 0;
+    
+    return {
+      totalHUs,
+      HUsEnSprint,
+      HUsCompletadas,
+      porcentajeSprint,
+      porcentajeTotal,
+      totalHistoryPoints,
+      completedHistoryPoints,
+      porcentajeHistoryPoints
+    };
+  } catch (error) {
+    console.error('Error calculando porcentajes del proyecto:', error);
+    throw error;
+  }
+}
+
+/**
+ * Calcula promedio de History Points entre sprints
+ * @param {string} grupo - Nombre del grupo
+ * @param {string} proyecto - Nombre del proyecto
+ */
+async function calcularPromedioHistoryPoints(grupo, proyecto) {
+  try {
+    const db = await leerDB();
+    
+    if (!db[grupo] || !db[grupo][proyecto]) {
+      throw new Error('Proyecto no encontrado');
+    }
+
+    const proyectoData = db[grupo][proyecto];
+    const sprintActual = parseInt(proyectoData.sprintActual || '1');
+    
+    // Si solo hay un sprint, no hay promedio
+    if (sprintActual <= 1) {
+      return {
+        promedio: 0,
+        sprintsAnteriores: 0,
+        comparacion: 'none'
+      };
+    }
+    
+    // Calcular History Points completados en sprints anteriores
+    let totalHistoryPointsAnteriores = 0;
+    let sprintsConDatos = 0;
+    
+    for (let i = 1; i < sprintActual; i++) {
+      const sprintKey = `sprint${i}`;
+      if (proyectoData[sprintKey] && proyectoData[sprintKey].tasks) {
+        const tasks = Object.values(proyectoData[sprintKey].tasks);
+        const historyPointsSprint = tasks
+          .filter(t => t.estado === 'COMPLETADO')
+          .reduce((sum, t) => sum + (t.estimacion || 0), 0);
+        
+        totalHistoryPointsAnteriores += historyPointsSprint;
+        sprintsConDatos++;
+      }
+    }
+    
+    // Calcular promedio
+    const promedio = sprintsConDatos > 0 ? 
+      Math.round(totalHistoryPointsAnteriores / sprintsConDatos) : 0;
+    
+    // Calcular History Points del sprint actual
+    const sprintActualKey = `sprint${sprintActual}`;
+    const tasksActual = proyectoData[sprintActualKey] ? 
+      Object.values(proyectoData[sprintActualKey].tasks) : [];
+    
+    const historyPointsActual = tasksActual
+      .filter(t => t.estado === 'COMPLETADO')
+      .reduce((sum, t) => sum + (t.estimacion || 0), 0);
+    
+    // Comparación con el promedio
+    let comparacion = 'equal';
+    if (sprintsConDatos > 0) {
+      if (historyPointsActual > promedio) {
+        comparacion = 'better';
+      } else if (historyPointsActual < promedio) {
+        comparacion = 'worse';
+      }
+    }
+    
+    return {
+      promedio,
+      historyPointsActual,
+      comparacion,
+      sprintsAnteriores: sprintsConDatos
+    };
+  } catch (error) {
+    console.error('Error calculando promedio de History Points:', error);
+    throw error;
+  }
+}
+
+/**
+ * Genera datos para el Burndown Chart
+ * @param {string} grupo - Nombre del grupo
+ * @param {string} proyecto - Nombre del proyecto
+ * @param {string} sprint - Sprint específico
+ */
+async function generarDatosBurndown(grupo, proyecto, sprint) {
+  try {
+    const db = await leerDB();
+    
+    if (!db[grupo] || !db[grupo][proyecto] || !db[grupo][proyecto][sprint]) {
+      throw new Error('Sprint no encontrado');
+    }
+
+    const sprintData = db[grupo][proyecto][sprint];
+    const burndownData = sprintData.burndownChart || { plannedWork: [], actualWork: [] };
+    
+    // Si no hay datos suficientes, generar datos de ejemplo
+    if (burndownData.actualWork.length <= 1) {
+      const fechaInicio = arrayAFecha(sprintData.fechaIni);
+      const fechaFin = arrayAFecha(sprintData.fechaFin);
+      const diasDuracion = calcularDiferenciaDias(sprintData.fechaIni, sprintData.fechaFin);
+      
+      // Calcular trabajo total
+      const tareas = Object.values(sprintData.tasks || {});
+      const trabajoTotal = tareas.reduce((sum, tarea) => sum + (tarea.estimacion || 0), 0);
+      
+      // Generar línea ideal
+      const plannedWork = [];
+      for (let i = 0; i <= diasDuracion; i++) {
+        const fecha = new Date(fechaInicio);
+        fecha.setDate(fecha.getDate() + i);
+        const trabajoRestanteIdeal = trabajoTotal - (trabajoTotal / diasDuracion) * i;
+        plannedWork.push({
+          fecha: fechaAArray(fecha),
+          trabajo: Math.max(0, trabajoRestanteIdeal)
+        });
+      }
+      
+      // Usar datos actuales si existen, o solo el punto final
+      const actualWork = burndownData.actualWork.length > 0 ? 
+        burndownData.actualWork : [
+        {
+          fecha: sprintData.fechaIni,
+          trabajo: trabajoTotal
+        },
+        {
+          fecha: sprintData.fechaFin,
+          trabajo: 0
+        }
+      ];
+      
+      return {
+        plannedWork,
+        actualWork,
+        trabajoTotal,
+        diasDuracion
+      };
+    }
+    
+    return {
+      plannedWork: burndownData.plannedWork,
+      actualWork: burndownData.actualWork,
+      trabajoTotal: burndownData.plannedWork[0]?.trabajo || 0,
+      diasDuracion: burndownData.plannedWork.length - 1
+    };
+  } catch (error) {
+    console.error('Error generando datos de burndown:', error);
+    throw error;
+  }
+}
+
+/**
+ * Genera datos para el HeatMap de usuarios
+ * @param {string} grupo - Nombre del grupo
+ */
+async function generarHeatMapUsuarios(grupo) {
+  try {
+    const db = await leerDB();
+    const usuarios = await leerUsuarios();
+    
+    if (!db[grupo]) {
+      throw new Error('Grupo no encontrado');
+    }
+
+    const miembros = Object.values(usuarios).filter(user => user.grupo === grupo);
+    const heatMapData = [];
+    
+    for (const usuario of miembros) {
+      // Obtener estadísticas del usuario
+      const stats = await obtenerEstadisticasMiembro(grupo, usuario);
+      
+      // Calcular porcentaje de tiempo en reunión (usando segundos_en_llamada)
+      const totalSegundosSemana = 7 * 24 * 60 * 60; // 7 días en segundos
+      const porcentajeTiempoReunion = totalSegundosSemana > 0 ?
+        Math.min(100, Math.round((usuario.stats[0] / totalSegundosSemana) * 100)) : 0;
+      
+      // Calcular porcentaje de trabajo completado
+      const porcentajeCompletado = stats.tareasAsignadas > 0 ?
+        Math.round((stats.tareasCompletadas / stats.tareasAsignadas) * 100) : 0;
+      
+      // Calcular porcentaje de tareas asignadas (relativo al miembro con más tareas)
+      const maxTareas = Math.max(...miembros.map(m => {
+        const userStats = usuarios[m.id]?.stats || [0, 0, 0];
+        return userStats[1] || 0; // tareas_asignadas
+      }));
+      
+      const porcentajeTareasAsignadas = maxTareas > 0 ?
+        Math.round((usuario.stats[1] / maxTareas) * 100) : 0;
+      
+      // Determinar color basado en los tres factores
+      const puntuacion = (porcentajeCompletado * 0.5) + (porcentajeTareasAsignadas * 0.3) + 
+                         ((100 - porcentajeTiempoReunion) * 0.2);
+      
+      let color = '';
+      if (puntuacion >= 80) color = 'verde-oscuro';
+      else if (puntuacion >= 60) color = 'verde';
+      else if (puntuacion >= 40) color = 'amarillo';
+      else if (puntuacion >= 20) color = 'naranja';
+      else color = 'rojo';
+      
+      heatMapData.push({
+        usuario: usuario.nickname,
+        porcentajeTiempoReunion,
+        porcentajeCompletado,
+        porcentajeTareasAsignadas,
+        puntuacion,
+        color
+      });
+    }
+    
+    return heatMapData;
+  } catch (error) {
+    console.error('Error generando heatmap de usuarios:', error);
+    throw error;
+  }
+}
+
+/**
+ * Obtiene estadísticas detalladas de todos los miembros del grupo
+ * @param {string} grupo - Nombre del grupo
+ */
+async function obtenerEstadisticasGrupoCompletas(grupo) {
+  try {
+    const usuarios = await leerUsuarios();
+    const miembros = Object.values(usuarios).filter(user => user.grupo === grupo);
+    
+    const estadisticas = [];
+    
+    for (const usuario of miembros) {
+      const stats = await obtenerEstadisticasMiembro(grupo, usuario);
+      estadisticas.push({
+        ...usuario,
+        statsDetalladas: stats
+      });
+    }
+    
+    return estadisticas;
+  } catch (error) {
+    console.error('Error obteniendo estadísticas completas del grupo:', error);
+    throw error;
+  }
+}
+
+/**
+ * Cuenta las tareas pendientes de un usuario
+ * @param {string} grupo - Nombre del grupo
+ * @param {Object} usuario - Datos del usuario
+ * @returns {Promise<number>} - Número de tareas pendientes
+ */
+async function contarTareasPendientes(grupo, usuario) {
+  try {
+    const todasLasTareas = await obtenerTareasUsuario(grupo, usuario);
+    let totalPendientes = 0;
+    
+    for (const [proyecto, sprints] of Object.entries(todasLasTareas)) {
+      for (const [sprint, tareas] of Object.entries(sprints)) {
+        const tareasPendientes = tareas.filter(tarea => 
+          tarea.personas_asignadas && 
+          tarea.personas_asignadas.includes(usuario.nickname) &&
+          tarea.estado !== 'COMPLETADO'
+        );
+        
+        totalPendientes += tareasPendientes.length;
+      }
+    }
+    
+    return totalPendientes;
+  } catch (error) {
+    console.error('Error contando tareas pendientes:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   autenticarUsuario,
   inicializarProyecto,
@@ -1118,6 +1474,14 @@ module.exports = {
   obtenerProductBacklog,
   crearTarea,
   actualizarEstadoTarea,
+  calcularPorcentajesProyecto,
+  calcularPromedioHistoryPoints,
+  generarDatosBurndown,
+  generarHeatMapUsuarios,
+  obtenerEstadisticasGrupoCompletas,
+  contarTareasPendientes,
+  obtenerScrumboardSprint,
+  obtenerEstadisticasScrumboard,
   obtenerTareasUsuario,
   calcularMetricasEquipo,
   obtenerDashboard,
@@ -1134,5 +1498,12 @@ module.exports = {
   obtenerEstadisticasMiembro,
   obtenerMisTareas,
   verificarProyectoExiste,
-  obtenerDashboardMiembro
+  obtenerDashboardMiembro,
+  obtenerFechasSprint,
+  calcularPorcentajesProyecto,
+  calcularPromedioHistoryPoints,
+  generarDatosBurndown,
+  generarHeatMapUsuarios,
+  obtenerEstadisticasGrupoCompletas,
+  contarTareasPendientes
 };

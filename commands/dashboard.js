@@ -23,7 +23,7 @@ module.exports = {
       .setFooter({ text: 'Dashboard Dardito - WEB' });
     
     await interaction.reply({
-      embeds: [embed],
+      embeds: [embed], 
       components: [row]
     });
   }

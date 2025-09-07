@@ -66,14 +66,21 @@
           9,
           2025
         ],
-        "scrumBoard": [["HU1756092819627"]],
+        "scrumBoard": [
+          [
+            "HU1756092819627"
+          ]
+        ],
         "tasks": {
           "TAR1756092912347": {
             "id": "TAR1756092912347",
             "nombre": "Configurar servidor backend",
             "descripcion": "Preparar el entorno del servidor Node.js",
             "estado": "COMPLETADO",
-            "personas_asignadas": ["Ana López", "Pedro Martínez"],
+            "personas_asignadas": [
+              "Ana López",
+              "Pedro Martínez"
+            ],
             "fechaCreacion": "2025-08-24T09:45:22.111Z",
             "fechaActualizacion": "2025-08-25T16:40:18.999Z",
             "historia_id": "HU1756092819627",
@@ -233,7 +240,19 @@
         "tasks": {}
       }
     },
-    "Proy2": null
+    "Proy2": null,
+    "estadisticas": {
+      "velocidadEquipo": [],
+      "satisfaccionCliente": [],
+      "metricas": {
+        "totalStoryPoints": 0,
+        "completedStoryPoints": 0,
+        "averageVelocity": 0,
+        "tareasTotal": 0,
+        "tareasCompletadas": 0,
+        "miembrosActivos": 7
+      }
+    }
   },
   "Grupo3": {
     "started": "y",
@@ -275,7 +294,19 @@
         "tasks": {}
       }
     },
-    "Proy2": null
+    "Proy2": null,
+    "estadisticas": {
+      "velocidadEquipo": [],
+      "satisfaccionCliente": [],
+      "metricas": {
+        "totalStoryPoints": 0,
+        "completedStoryPoints": 0,
+        "averageVelocity": 0,
+        "tareasTotal": 0,
+        "tareasCompletadas": 0,
+        "miembrosActivos": 7
+      }
+    }
   },
   "Grupo4": {
     "started": "y",
@@ -309,7 +340,9 @@
           2025
         ],
         "scrumBoard": [
-          ["HU1756092849666"]
+          [
+            "HU1756092849666"
+          ]
         ],
         "tasks": {},
         "burndownChart": {
@@ -395,7 +428,10 @@
       "metricas": {
         "totalStoryPoints": 34,
         "completedStoryPoints": 0,
-        "averageVelocity": 0
+        "averageVelocity": 0,
+        "tareasTotal": 0,
+        "tareasCompletadas": 0,
+        "miembrosActivos": 6
       }
     },
     "Proy2": null

@@ -21,11 +21,27 @@ const {
   obtenerTareasUsuario,
   calcularMetricasEquipo,
   obtenerDashboard,
+  actualizarEstadisticasUsuario,
   moverHistoriaASprint,
   obtenerTareasSprint,
   actualizarBurndownChart,
   cambiarRolUsuario,
-  obtenerEstadisticasGlobales
+  obtenerEstadisticasGlobales,
+  obtenerScrumboardSprint,
+  obtenerEstadisticasScrumboard,
+  obtenerInfoProyecto,
+  obtenerSprintsDisponibles,
+  obtenerEstadisticasMiembro,
+  obtenerMisTareas,
+  verificarProyectoExiste,
+  obtenerDashboardMiembro,
+  obtenerFechasSprint,
+  calcularPorcentajesProyecto,
+  calcularPromedioHistoryPoints,
+  generarDatosBurndown,
+  generarHeatMapUsuarios,
+  obtenerEstadisticasGrupoCompletas,
+  contarTareasPendientes
 } = require('./handlers');
 
 // ===============================
@@ -514,6 +530,149 @@ router.post('/api/tareas/:proyecto/:sprint', requireAuth, requirePermission('esc
     });
   } catch (error) {
     console.error('Error creando tarea:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/sprint/:proyecto/:sprint/fechas - Obtener fechas de inicio y fin de un sprint
+ */
+router.get('/api/sprint/:proyecto/:sprint/fechas', requireAuth, requirePermission('leer'), async (req, res) => {
+  try {
+    const { proyecto, sprint } = req.params;
+    const sprintKey = `sprint${sprint}`;
+    
+    const fechas = await obtenerFechasSprint(req.user.grupo, proyecto, sprintKey);
+    
+    res.json({
+      success: true,
+      data: fechas
+    });
+  } catch (error) {
+    console.error('Error obteniendo fechas del sprint:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/estadisticas/proyecto/:proyecto - Obtener estadísticas completas del proyecto
+ */
+router.get('/api/estadisticas/proyecto/:proyecto', requireAuth, requireGroupAccess, async (req, res) => {
+  try {
+    const { proyecto } = req.params;
+    
+    const porcentajes = await calcularPorcentajesProyecto(req.grupoObjetivo, proyecto);
+    const promedioHP = await calcularPromedioHistoryPoints(req.grupoObjetivo, proyecto);
+    
+    res.json({
+      success: true,
+      data: {
+        porcentajes,
+        promedioHistoryPoints: promedioHP
+      }
+    });
+  } catch (error) {
+    console.error('Error obteniendo estadísticas del proyecto:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/estadisticas/burndown/:proyecto/:sprint - Obtener datos completos para burndown chart
+ */
+router.get('/api/estadisticas/burndown/:proyecto/:sprint', requireAuth, requireGroupAccess, async (req, res) => {
+  try {
+    const { proyecto, sprint } = req.params;
+    const sprintKey = `sprint${sprint}`;
+    
+    const burndownData = await generarDatosBurndown(req.grupoObjetivo, proyecto, sprintKey);
+    
+    res.json({
+      success: true,
+      data: burndownData
+    });
+  } catch (error) {
+    console.error('Error obteniendo datos de burndown:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/estadisticas/heatmap - Obtener datos para heatmap de usuarios
+ */
+router.get('/api/estadisticas/heatmap', requireAuth, requireGroupAccess, async (req, res) => {
+  try {
+    const heatMapData = await generarHeatMapUsuarios(req.grupoObjetivo);
+    
+    res.json({
+      success: true,
+      data: heatMapData
+    });
+  } catch (error) {
+    console.error('Error obteniendo heatmap de usuarios:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/estadisticas/grupo - Obtener estadísticas completas del grupo
+ */
+router.get('/api/estadisticas/grupo', requireAuth, requireGroupAccess, async (req, res) => {
+  try {
+    const estadisticas = await obtenerEstadisticasGrupoCompletas(req.grupoObjetivo);
+    
+    res.json({
+      success: true,
+      data: estadisticas
+    });
+  } catch (error) {
+    console.error('Error obteniendo estadísticas del grupo:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/mis-tareas/pendientes - Obtener cantidad de tareas pendientes del usuario
+ */
+router.get('/api/mis-tareas/pendientes', requireAuth, async (req, res) => {
+  try {
+    // Solo permitir a miembros y scrum masters
+    if (req.user.rol !== 'miembro' && req.user.rol !== 'scrumMaster') {
+      return res.status(403).json({
+        success: false,
+        message: 'Acceso no autorizado para este rol'
+      });
+    }
+    
+    const totalPendientes = await contarTareasPendientes(req.user.grupo, req.user);
+    
+    res.json({
+      success: true,
+      data: {
+        totalPendientes: totalPendientes,
+        usuario: req.user.nickname
+      }
+    });
+  } catch (error) {
+    console.error('Error obteniendo tareas pendientes:', error);
     res.status(500).json({
       success: false,
       message: error.message
