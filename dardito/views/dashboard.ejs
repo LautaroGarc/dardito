@@ -1,0 +1,209 @@
+<!-- Scrumboard -->
+<div id="dashboard-scrumboard-container" class="mb-8">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">Scrumboard</h3>
+        <% if (user.rol === 'lider' && sprint === sprintActual) { %>
+            <button id="seleccionar-historias-btn" class="btn-primary flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span>Seleccionar Historias de Usuario</span>
+            </button>
+        <% } %>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Por Hacer -->
+        <div class="scrumboard-column border-gray-400">
+            <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                <div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                Por Hacer
+                <span id="dashboard-count-por-hacer" class="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">0</span>
+            </h4>
+            <div id="dashboard-historias-por-hacer" class="space-y-3 scrumboard-column-content">
+                <!-- Historias se cargarán aquí -->
+            </div>
+        </div>
+
+        <!-- En Proceso -->
+        <div class="scrumboard-column border-blue-400">
+            <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                <div class="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
+                En Proceso
+                <span id="dashboard-count-en-proceso" class="ml-2 bg-blue-200 text-blue-700 text-xs px-2 py-1 rounded-full">0</span>
+            </h4>
+            <div id="dashboard-historias-en-proceso" class="space-y-3 scrumboard-column-content">
+                <!-- Historias se cargarán aquí -->
+            </div>
+        </div>
+
+        <!-- Completado -->
+        <div class="scrumboard-column border-green-400">
+            <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                <div class="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
+                Completado
+                <span id="dashboard-count-completado" class="ml-2 bg-green-200 text-green-700 text-xs px-2 py-1 rounded-full">0</span>
+            </h4>
+            <div id="dashboard-historias-completado" class="space-y-3 scrumboard-column-content">
+                <!-- Historias se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de tareas -->
+<div id="dashboard-tareas-container">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">Tareas del Sprint</h3>
+        <% if (user.rol === 'lider' && sprint === sprintActual) { %>
+            <button id="crear-tarea-btn" class="btn-primary flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span>Crear Tarea</span>
+            </button>
+        <% } %>
+    </div>
+    <div id="dashboard-tareas-list" class="space-y-3">
+        <!-- Las tareas se cargarán aquí -->
+    </div>
+</div>
+
+<style>
+    /* ============================================
+       SCRUMBOARD STYLES
+       ============================================ */
+    
+    .scrumboard-column {
+        @apply bg-white rounded-xl p-5 border-2 shadow-sm;
+        height: 600px; /* Altura fija */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .scrumboard-column-content {
+        @apply overflow-y-auto;
+        flex-grow: 1;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    }
+
+    .scrumboard-column-content::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .scrumboard-column-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrumboard-column-content::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+    }
+
+    /* Estilos específicos para cada columna */
+    .scrumboard-column:nth-child(1) {
+        border-color: rgb(156, 163, 175); /* gray-400 */
+    }
+
+    .scrumboard-column:nth-child(2) {
+        border-color: rgb(96, 165, 250); /* blue-400 */
+    }
+
+    .scrumboard-column:nth-child(3) {
+        border-color: rgb(74, 222, 128); /* green-400 */
+    }
+
+    /* Estilos para las historias de usuario */
+    .scrumboard-story-card {
+        @apply bg-white rounded-lg p-4 border border-gray-200 shadow-sm transition-all duration-300;
+    }
+
+    .scrumboard-story-card:hover {
+        @apply border-gray-300 shadow-md;
+        transform: translateY(-2px);
+    }
+
+    /* Estilos para las tareas */
+    .dashboard-tarea-card {
+        @apply bg-white rounded-lg p-4 border border-gray-200 shadow-sm transition-all duration-300;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .dashboard-tarea-card:hover {
+        @apply border-gray-300;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-tarea-card.asignada {
+        @apply bg-yellow-50 border-yellow-200;
+        box-shadow: 0 2px 4px rgba(234, 179, 8, 0.1);
+    }
+
+    .dashboard-tarea-card.asignada:hover {
+        @apply bg-yellow-100;
+        box-shadow: 0 4px 6px rgba(234, 179, 8, 0.15);
+    }
+
+    /* Estilos para los botones */
+    .btn-primary {
+        @apply inline-flex px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .scrumboard-column {
+            height: 400px;
+        }
+    }
+</style>
+
+<script>
+// Add to your existing JavaScript after the renderizarHistoriasScrumboard function
+
+function checkSprintActual() {
+    const sprintActual = window.miembroApp.currentSprint;
+    const selectedSprint = dashboardState.selectedSprint;
+    const isLider = window.miembroApp.currentUser.rol === 'lider';
+    
+    // Mostrar/ocultar botones según el rol y sprint
+    const seleccionarHistoriasBtn = document.getElementById('seleccionar-historias-btn');
+    const crearTareaBtn = document.getElementById('crear-tarea-btn');
+    
+    if (seleccionarHistoriasBtn) {
+        seleccionarHistoriasBtn.style.display = (isLider && sprintActual === selectedSprint) ? 'flex' : 'none';
+    }
+    
+    if (crearTareaBtn) {
+        crearTareaBtn.style.display = (isLider && sprintActual === selectedSprint) ? 'flex' : 'none';
+    }
+}
+
+// Agregar event listeners para los nuevos botones
+document.getElementById('seleccionar-historias-btn')?.addEventListener('click', function() {
+    console.log('Implementar selección de historias de usuario');
+    // Aquí irá la funcionalidad cuando esté implementada
+});
+
+document.getElementById('crear-tarea-btn')?.addEventListener('click', function() {
+    console.log('Implementar creación de tarea');
+    // Aquí irá la funcionalidad cuando esté implementada
+});
+
+// Modificar la función seleccionarSprint para incluir la verificación
+async function seleccionarSprint(sprint) {
+    try {
+        // ... código existente ...
+        
+        await Promise.all([
+            cargarScrumboard(dashboardState.selectedProject, sprint),
+            cargarTareasSprint(dashboardState.selectedProject, sprint)
+        ]);
+        
+        checkSprintActual(); // Verificar si es sprint actual después de cargar datos
+        
+    } catch (error) {
+        console.error('Error seleccionando sprint en dashboard:', error);
+        window.showToast('Error cargando sprint: ' + error.message, 'error');
+    }
+}
+</script>
