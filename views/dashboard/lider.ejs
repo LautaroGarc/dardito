@@ -3,152 +3,46 @@
 <%- include('../partials/navigation.ejs') %>
 
 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-    <!-- Contenedor principal del dashboard -->
-    <div id="main-content" class="fade-in">
-        <!-- Dashboard content -->
-        <div id="dashboard-content">
-            <%- include('./src/dashboard.ejs') %>
-        </div>
-
-        <!-- Product Backlog content (oculto por defecto) -->
-        <div id="backlog-content" class="hidden">
-            <%- include('./src/productBacklog.ejs') %>
+    <!-- Contenedor principal dinámico -->
+    <div id="main-content" class="transition-all duration-300">
+        <!-- El contenido se carga dinámicamente aquí -->
+        <div class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+            <p class="text-gray-600">Cargando dashboard...</p>
         </div>
     </div>
 </div>
 
 <%- include('../partials/footer.ejs') %>
 
-<!-- Loading overlay -->
-<div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 hidden">
-    <div class="text-center">
-        <div class="spinner mx-auto mb-4"></div>
-        <p class="text-gray-600">Cargando...</p>
-    </div>
-</div>
-
-<!-- Toast container -->
+<!-- Toast container para notificaciones -->
 <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ============================================
-    // VARIABLES GLOBALES COMPARTIDAS
-    // ============================================
-
-    let currentSection = 'dashboard';
-    let selectedProject = null;
-    let selectedSprint = null;
-    let proyectosDisponibles = [];
-    let sprintsDisponibles = [];
-    let currentUser = <%- typeof user !== 'undefined' ? JSON.stringify(user) : '{}' %>;
-    let dashboardData = <%- typeof proyectos !== 'undefined' ? JSON.stringify({ proyectos: proyectos }) : '{}' %>;
+    console.log('👤 Inicializando dashboard de miembro...');
     
-    // Parsear los datos
-    try {
-        currentUser = typeof currentUser === 'string' ? JSON.parse(currentUser) : currentUser;
-        dashboardData = typeof dashboardData === 'string' ? JSON.parse(dashboardData) : dashboardData;
-    } catch (e) {
-        console.error('Error parseando datos:', e);
-        currentUser = {};
-        dashboardData = {};
-    }
-
-    // Hacer variables globales accesibles
-    window.miembroApp = {
-        currentSection,
-        selectedProject,
-        selectedSprint,
-        proyectosDisponibles,
-        sprintsDisponibles,
-        currentUser,
-        dashboardData,
-        // Métodos compartidos
-        setCurrentSection: function(section) {
-            currentSection = section;
-            this.currentSection = section;
-        },
-        setSelectedProject: function(project) {
-            selectedProject = project;
-            this.selectedProject = project;
-        },
-        setSelectedSprint: function(sprint) {
-            selectedSprint = sprint;
-            this.selectedSprint = sprint;
-        },
-        setProyectosDisponibles: function(proyectos) {
-            proyectosDisponibles = proyectos;
-            this.proyectosDisponibles = proyectos;
-        },
-        setSprintsDisponibles: function(sprints) {
-            sprintsDisponibles = sprints;
-            this.sprintsDisponibles = sprints;
-        }
+    // ============================================
+    // CONFIGURACIÓN ESPECÍFICA DE MIEMBRO
+    // ============================================
+    
+    const miembroConfig = {
+        user: <%- typeof user !== 'undefined' ? JSON.stringify(user) : '{}' %>,
+        dashboardData: <%- typeof proyectos !== 'undefined' ? JSON.stringify({ proyectos: proyectos }) : '{}' %>,
+        defaultSection: 'dashboard',
+        availableSections: ['dashboard', 'backlog']
     };
-
-    console.log('Usuario actual:', currentUser);
-    console.log('Dashboard data:', dashboardData);
+    
+    // Hacer datos globalmente accesibles
+    window.miembroData = miembroConfig;
+    
+    console.log('Usuario miembro:', miembroConfig.user);
+    console.log('Proyectos disponibles:', miembroConfig.dashboardData);
 
     // ============================================
-    // GESTIÓN DE SECCIONES PRINCIPAL
+    // FUNCIONES DE UTILIDAD PARA MIEMBRO
     // ============================================
     
-    function mostrarSeccionDashboard() {
-        window.miembroApp.setCurrentSection('dashboard');
-        document.getElementById('dashboard-content').classList.remove('hidden');
-        document.getElementById('backlog-content').classList.add('hidden');
-        
-        // Resetear selecciones
-        window.miembroApp.setSelectedProject(null);
-        window.miembroApp.setSelectedSprint(null);
-        
-        // Disparar evento para que dashboard se reinicialice
-        window.dispatchEvent(new CustomEvent('sectionChanged', { 
-            detail: { section: 'dashboard' } 
-        }));
-        
-        actualizarEstadoNavegacion();
-    }
-
-    function mostrarSeccionBacklog() {
-        window.miembroApp.setCurrentSection('backlog');
-        document.getElementById('dashboard-content').classList.add('hidden');
-        document.getElementById('backlog-content').classList.remove('hidden');
-        
-        // Resetear selecciones
-        window.miembroApp.setSelectedProject(null);
-        
-        // Disparar evento para que backlog se reinicialice
-        window.dispatchEvent(new CustomEvent('sectionChanged', { 
-            detail: { section: 'backlog' } 
-        }));
-        
-        actualizarEstadoNavegacion();
-    }
-
-    function actualizarEstadoNavegacion() {
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-
-        if (window.miembroApp.currentSection === 'dashboard') {
-            document.querySelector('.dashboard-link')?.classList.add('active');
-        } else if (window.miembroApp.currentSection === 'backlog') {
-            document.querySelector('.backlog-link')?.classList.add('active');
-        }
-    }
-
-    // ============================================
-    // FUNCIONES DE UTILIDAD COMPARTIDAS
-    // ============================================
-    
-    function showLoading(show) {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.classList.toggle('hidden', !show);
-        }
-    }
-
     function showToast(message, type = 'info') {
         const container = document.getElementById('toastContainer');
         if (!container) return;
@@ -156,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const toastId = 'toast-' + Date.now();
         const toast = document.createElement('div');
         toast.id = toastId;
-        toast.className = `toast toast-${type}`;
+        toast.className = `toast toast-${type} transform translate-x-full transition-transform duration-300`;
         
         const iconos = {
             success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>',
@@ -166,14 +60,14 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         toast.innerHTML = `
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between min-w-[300px] max-w-[500px] p-4 rounded-lg shadow-lg text-white font-medium">
                 <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         ${iconos[type] || iconos.info}
                     </svg>
                     <span>${message}</span>
                 </div>
-                <button onclick="removeToast('${toastId}')" class="ml-4 text-white hover:text-gray-200">
+                <button onclick="removeToast('${toastId}')" class="ml-4 hover:text-gray-200 focus:outline-none">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -183,10 +77,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         container.appendChild(toast);
         
+        // Animar entrada
         setTimeout(() => {
-            toast.classList.add('show');
+            toast.classList.remove('translate-x-full');
+            toast.classList.add('translate-x-0');
         }, 100);
 
+        // Auto-remover después de 5 segundos
         setTimeout(() => {
             removeToast(toastId);
         }, 5000);
@@ -195,7 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function removeToast(toastId) {
         const toast = document.getElementById(toastId);
         if (toast) {
-            toast.classList.remove('show');
+            toast.classList.remove('translate-x-0');
+            toast.classList.add('translate-x-full');
             setTimeout(() => {
                 toast.remove();
             }, 300);
@@ -203,118 +101,282 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Hacer funciones disponibles globalmente
-    window.showLoading = showLoading;
     window.showToast = showToast;
     window.removeToast = removeToast;
 
     // ============================================
-    // EVENT LISTENERS PRINCIPALES
+    // INTEGRACIÓN CON SISTEMA DE NAVEGACIÓN
     // ============================================
     
-    function configurarEventListeners() {
-        // Navegación principal
-        document.querySelectorAll('.dashboard-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                mostrarSeccionDashboard();
-            });
-        });
+    // Esperar a que el sistema de navegación esté listo
+    window.addEventListener('navigationReady', function(e) {
+        console.log('🧭 Sistema de navegación listo para miembro');
+        
+        // Cargar dashboard por defecto
+        setTimeout(() => {
+            e.detail.manager.loadDashboard();
+        }, 100);
+    });
 
-        document.querySelectorAll('.backlog-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                mostrarSeccionBacklog();
-            });
-        });
+    // Escuchar cambios de contenido para inicializar componentes específicos
+    window.addEventListener('navigationContentLoaded', function(e) {
+        const section = e.detail.section;
+        const container = e.detail.container;
+        
+        console.log(`📄 Contenido cargado para sección: ${section}`);
+        
+        // Inicializar componentes específicos según la sección
+        switch(section) {
+            case 'dashboard':
+                initializeDashboardComponents(container);
+                break;
+            case 'backlog':
+                initializeBacklogComponents(container);
+                break;
+            default:
+                console.warn(`Sección no reconocida para miembro: ${section}`);
+        }
+        
+        // Mostrar notificación de carga exitosa
+        showToast(`${section.charAt(0).toUpperCase() + section.slice(1)} cargado correctamente`, 'success');
+    });
 
-        // Atajos de teclado
-        document.addEventListener('keydown', function(e) {
-            if (e.altKey && e.key.toLowerCase() === 'd') {
-                e.preventDefault();
-                mostrarSeccionDashboard();
+    // ============================================
+    // INICIALIZACIÓN DE COMPONENTES ESPECÍFICOS
+    // ============================================
+    
+    function initializeDashboardComponents(container) {
+        console.log('🎯 Inicializando componentes del dashboard...');
+        
+        // Buscar y configurar selectores de proyecto
+        const proyectoSelector = container.querySelector('#dashboard-proyecto-selector');
+        if (proyectoSelector) {
+            setupProjectSelector(proyectoSelector);
+        }
+        
+        // Configurar actualizaciones de estado de tareas
+        const estadoSelects = container.querySelectorAll('.dashboard-estado-select');
+        estadoSelects.forEach(select => {
+            setupTaskStatusHandler(select);
+        });
+        
+        // Configurar auto-refresh del scrumboard
+        setupDashboardAutoRefresh();
+        
+        console.log('✅ Componentes del dashboard inicializados');
+    }
+    
+    function initializeBacklogComponents(container) {
+        console.log('📋 Inicializando componentes del backlog...');
+        
+        // Configurar filtros del backlog
+        const filtros = container.querySelectorAll('.backlog-filter');
+        filtros.forEach(filtro => {
+            setupBacklogFilter(filtro);
+        });
+        
+        // Configurar drag & drop si está disponible
+        if (container.querySelector('.backlog-story-list')) {
+            setupBacklogDragDrop(container);
+        }
+        
+        console.log('✅ Componentes del backlog inicializados');
+    }
+
+    // ============================================
+    // HANDLERS ESPECÍFICOS
+    // ============================================
+    
+    function setupProjectSelector(selector) {
+        selector.addEventListener('click', function(e) {
+            const projectTab = e.target.closest('.dashboard-proyecto-tab');
+            if (projectTab) {
+                const proyecto = projectTab.dataset.proyecto;
+                console.log(`🏷️ Proyecto seleccionado: ${proyecto}`);
+                
+                // Actualizar estado visual
+                selector.querySelectorAll('.dashboard-proyecto-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                projectTab.classList.add('active');
+                
+                // Disparar evento personalizado
+                window.dispatchEvent(new CustomEvent('projectSelected', {
+                    detail: { proyecto: proyecto }
+                }));
+            }
+        });
+    }
+    
+    function setupTaskStatusHandler(select) {
+        select.addEventListener('change', async function(e) {
+            const tareaId = this.dataset.tareaId;
+            const nuevoEstado = this.value;
+            const estadoAnterior = this.dataset.originalValue;
+            
+            console.log(`🔄 Actualizando tarea ${tareaId}: ${estadoAnterior} → ${nuevoEstado}`);
+            
+            // Confirmación para completar tareas
+            if (nuevoEstado === 'COMPLETADO' && estadoAnterior !== 'COMPLETADO') {
+                if (!confirm('¿Marcar esta tarea como completada?')) {
+                    this.value = estadoAnterior;
+                    return;
+                }
             }
             
-            if (e.altKey && e.key.toLowerCase() === 'b') {
-                e.preventDefault();
-                mostrarSeccionBacklog();
+            try {
+                // Deshabilitar selector mientras se actualiza
+                this.disabled = true;
+                
+                // Simular llamada API (reemplazar con la real)
+                await updateTaskStatus(tareaId, nuevoEstado);
+                
+                // Actualizar valor original
+                this.dataset.originalValue = nuevoEstado;
+                
+                showToast('Estado de tarea actualizado', 'success');
+                
+            } catch (error) {
+                console.error('Error actualizando tarea:', error);
+                showToast('Error actualizando tarea: ' + error.message, 'error');
+                
+                // Revertir cambio
+                this.value = estadoAnterior;
+            } finally {
+                this.disabled = false;
             }
+        });
+    }
+    
+    function setupBacklogFilter(filtro) {
+        filtro.addEventListener('change', function(e) {
+            const filterValue = this.value;
+            console.log(`🔍 Aplicando filtro de backlog: ${filterValue}`);
+            
+            // Aplicar filtro a las historias
+            const historias = document.querySelectorAll('.backlog-story-card');
+            historias.forEach(historia => {
+                const shouldShow = filterValue === 'all' || 
+                                  historia.dataset.estado === filterValue ||
+                                  historia.dataset.prioridad === filterValue;
+                
+                historia.style.display = shouldShow ? 'block' : 'none';
+            });
+        });
+    }
+    
+    function setupBacklogDragDrop(container) {
+        // Implementar drag & drop básico
+        console.log('🎭 Configurando drag & drop del backlog');
+        // Implementación específica según necesidades
+    }
+    
+    function setupDashboardAutoRefresh() {
+        // Auto-refresh cada 30 segundos cuando se está en dashboard
+        const refreshInterval = setInterval(() => {
+            if (window.navigationManager && 
+                window.navigationManager.getCurrentSection() === 'dashboard' &&
+                !window.navigationManager.isLoading()) {
+                
+                console.log('🔄 Auto-refresh del dashboard');
+                // Actualizar solo datos específicos sin recargar toda la página
+                refreshDashboardData();
+            }
+        }, 30000);
+        
+        // Limpiar interval cuando se cambie de página
+        window.addEventListener('beforeunload', () => {
+            clearInterval(refreshInterval);
         });
     }
 
     // ============================================
-    // INICIALIZACIÓN
+    // FUNCIONES API (Simuladas - reemplazar con reales)
     // ============================================
     
-    function inicializar() {
-        configurarEventListeners();
-        mostrarSeccionDashboard();
+    async function updateTaskStatus(tareaId, estado) {
+        // Simular delay de red
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Disparar evento de inicialización
-        window.dispatchEvent(new CustomEvent('miembroAppReady'));
+        // Aquí iría la llamada real a la API
+        console.log(`API Call: Updating task ${tareaId} to ${estado}`);
+        
+        // Simular posible error (descomenta para probar)
+        // if (Math.random() < 0.1) throw new Error('Error de red simulado');
+        
+        return { success: true };
+    }
+    
+    async function refreshDashboardData() {
+        try {
+            // Simular llamada para obtener datos actualizados
+            console.log('📊 Actualizando datos del dashboard...');
+            
+            // Aquí irían las llamadas reales a la API para obtener datos frescos
+            
+        } catch (error) {
+            console.error('Error en auto-refresh:', error);
+        }
     }
 
-    inicializar();
+    // ============================================
+    // ATAJOS DE TECLADO ESPECÍFICOS DE MIEMBRO
+    // ============================================
+    
+    document.addEventListener('keydown', function(e) {
+        // Solo actuar si no se está escribiendo en un input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        if (e.ctrlKey || e.metaKey) {
+            switch(e.key.toLowerCase()) {
+                case '1':
+                    e.preventDefault();
+                    window.navigationManager?.loadDashboard();
+                    break;
+                case '2':
+                    e.preventDefault();
+                    window.navigationManager?.loadBacklog();
+                    break;
+                case 'r':
+                    e.preventDefault();
+                    window.navigationManager?.reloadCurrentSection();
+                    showToast('Recargando contenido...', 'info');
+                    break;
+            }
+        }
+    });
 
-    console.log('✅ Aplicación principal de miembro inicializada correctamente');
+    // ============================================
+    // INICIALIZACIÓN FINAL
+    // ============================================
+    
+    // Notificar que el dashboard de miembro está listo
+    window.dispatchEvent(new CustomEvent('miembroDashboardReady', {
+        detail: { 
+            user: miembroConfig.user,
+            availableSections: miembroConfig.availableSections
+        }
+    }));
+    
+    console.log('✅ Dashboard de miembro inicializado correctamente');
 });
 </script>
 
 <style>
     /* ============================================
-       ESTILOS GLOBALES COMPARTIDOS
+       ESTILOS ESPECÍFICOS DEL MIEMBRO
        ============================================ */
     
-    .fade-in {
-        animation: fadeIn 0.3s ease-out;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .card-hover {
+    /* Transiciones suaves para el contenido principal */
+    #main-content {
+        min-height: 400px;
         transition: all 0.3s ease;
     }
     
-    .card-hover:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Loading spinner */
-    .spinner {
-        border: 2px solid #f3f4f6;
-        border-top: 2px solid #3b82f6;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    /* Toast notifications */
+    /* Toast notifications específicos */
     .toast {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        max-width: 500px;
-        padding: 16px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 500;
         transform: translateX(100%);
-        transition: transform 0.3s ease;
-    }
-    
-    .toast.show {
-        transform: translateX(0);
+        transition: transform 0.3s ease-in-out;
     }
     
     .toast-success {
@@ -332,90 +394,113 @@ document.addEventListener('DOMContentLoaded', function() {
     .toast-info {
         background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     }
-
-    /* Loading overlay */
-    #loadingOverlay {
-        backdrop-filter: blur(4px);
-        background: rgba(255, 255, 255, 0.9);
-    }
-
-    /* ============================================
-       BADGES - Sistema unificado
-       ============================================ */
-
-    .priority-badge {
-        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold;
-    }
-
-    .priority-alta {
-        @apply bg-red-100 text-red-800 ring-2 ring-red-200;
-    }
-
-    .priority-media {
-        @apply bg-yellow-100 text-yellow-800 ring-2 ring-yellow-200;
-    }
-
-    .priority-baja {
-        @apply bg-green-100 text-green-800 ring-2 ring-green-200;
-    }
-
-    .status-badge {
-        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
-    }
-
-    .status-completado, .status-done {
-        @apply bg-green-100 text-green-800;
-    }
-
-    .status-en-proceso, .status-in-progress {
-        @apply bg-blue-100 text-blue-800;
-    }
-
-    .status-por-hacer, .status-todo {
-        @apply bg-gray-100 text-gray-800;
-    }
-
-    /* Custom scrollbar para contenedores largos */
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
+    
+    /* Indicadores de estado para tareas */
+    .dashboard-tarea-card.asignada {
+        border-left: 4px solid #3b82f6;
+        background: linear-gradient(to right, #eff6ff, #ffffff);
     }
     
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f5f9;
+    .dashboard-tarea-card:not(.asignada) {
+        opacity: 0.7;
     }
     
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
+    /* Estados de carga específicos */
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading-shimmer 1.5s infinite;
     }
     
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+    @keyframes loading-shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
     }
-
-    /* ============================================
-       RESPONSIVE IMPROVEMENTS
-       ============================================ */
-
+    
+    /* Mejoras visuales para el contenido dinámico */
+    .fade-in-content {
+        animation: fadeInContent 0.5s ease-out;
+    }
+    
+    @keyframes fadeInContent {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Personalización del scrumboard para miembro */
+    .scrumboard-story-card.assigned-to-me {
+        border: 2px solid #3b82f6;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+    
+    .scrumboard-story-card.assigned-to-me::before {
+        content: "Asignada a ti";
+        position: absolute;
+        top: -8px;
+        right: 8px;
+        background: #3b82f6;
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+    
+    /* Mejoras de accesibilidad */
+    .nav-link:focus-visible {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+    }
+    
+    /* Atajos de teclado visibles */
+    .keyboard-shortcut-hint {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .keyboard-shortcut-hint.visible {
+        opacity: 1;
+    }
+    
+    /* Responsivo específico para miembro */
     @media (max-width: 768px) {
-        .proyecto-tab {
-            @apply text-sm;
+        #main-content {
+            min-height: 300px;
         }
         
-        .sprint-tab {
-            @apply text-xs px-3 py-2;
+        .dashboard-tarea-card {
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .toast {
+            min-width: 280px;
+            max-width: calc(100vw - 2rem);
         }
     }
-
-    /* ============================================
-       ACCESSIBILITY IMPROVEMENTS
-       ============================================ */
-
-    .proyecto-tab:focus {
-        @apply ring-2 ring-blue-500 ring-opacity-50 outline-none;
-    }
-
-    .sprint-tab:focus {
-        @apply ring-2 ring-green-500 ring-opacity-50 outline-none;
-    }
 </style>
+
+<!-- Indicador de atajos de teclado (oculto por defecto) -->
+<div id="keyboardHint" class="keyboard-shortcut-hint">
+    <div class="text-xs font-medium mb-1">Atajos disponibles:</div>
+    <div class="text-xs space-y-1">
+        <div><kbd class="bg-gray-700 px-1 rounded">Ctrl+1</kbd> Dashboard</div>
+        <div><kbd class="bg-gray-700 px-1 rounded">Ctrl+2</kbd> Product Backlog</div>
+        <div><kbd class="bg-gray-700 px-1 rounded">Ctrl+R</kbd> Recargar</div>
+    </div>
+</div>
